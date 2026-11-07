@@ -1,6 +1,6 @@
 # Self-hosted Bend compiler
 
-An independent engineering report explaining a compiler written in Bend, its checked program boundary and shared lowering into a structured backend representation, and the work still done by its C and JavaScript backends. It includes a fresh matched checking comparison with the official TypeScript implementation and separately labeled historical self-compilation evidence.
+An independent engineering report explaining a compiler written in Bend through a real closure program, its unchanged emitted JavaScript, and concrete semantic and storage boundaries. It includes a matched checking comparison with the official TypeScript implementation, one native run’s phase costs, and separately labeled historical self-compilation evidence.
 
 - Website: https://bend-selfhost-lab.netlify.app
 - Website source: https://github.com/IlyaGulya/bend-selfhost-lab
@@ -17,7 +17,25 @@ No dependency installation or build is required:
 python3 -m http.server 4173 --bind 127.0.0.1 --directory public
 ```
 
-Open http://127.0.0.1:4173. The HTML contains the complete report and comparison table. JavaScript enhances pipeline-stage inspection and checksum copying; it does not fetch or populate the measurement data. Fonts are served locally. There are no analytics or remote runtime dependencies.
+Open http://127.0.0.1:4173. The HTML contains the complete report, source example, diagrams, phase labels and comparison table. JavaScript enhances stage inspection, checksum copying and an optional precompiled-example run; it does not fetch or populate primary report results. Fonts are served locally. There are no analytics or remote runtime dependencies.
+
+## Real closure example
+
+The first viewport pairs the literal title with [`public/examples/closure.bend`](public/examples/closure.bend): `adder(k)` returns a function that captures `k`, and `compute(k, x)` calls that function once. “Run emitted JavaScript” dynamically imports the unchanged [`closure.generated.mjs`](public/examples/closure.generated.mjs), then calls its real synchronous `default.compute(5, 3)` export. Both arguments and the returned U32 use ordinary JavaScript numbers; there is no adapter or replacement arithmetic.
+
+- Initial state: explicitly not run in this browser, with a labelled expected result of `8`. The control is disabled until enhancement is ready.
+- Loading: the button is disabled and the polite status region names the module load and exact arguments. Keyboard activation restores focus if disabling the button left focus on the document body; it does not replace another focused control.
+- Success: the actual returned value is shown beside `compute(5, 3)`.
+- Failure: separate load/call messages explain reloading and preserve the download links. No fabricated fallback result.
+- Without JavaScript: source, expected result, exact emitted excerpt, all report data, native disclosures and downloads remain usable.
+
+The example executor observed Node results `(2, 1) → 3`, `(5, 3) → 8`, `(7, 0) → 7`, `(0, 0) → 0` and U32 wraparound `(4294967295, 1) → 0`; the same five cases were then verified in Chromium. These are verification results, not pre-populated visitor output. The UI deliberately runs only the fixed `(5, 3)` case, so asynchronous loading cannot associate a result with changed inputs.
+
+Source: **130 bytes**, SHA-256 `1d0332a17a014d9f59137e5e67f6849423bd760510b005d8749eebb04681849e`. Emitted module: **384,999 bytes**, SHA-256 `3c99c414483ed5fe82f1f8006655d6ee07f1fd9c0b9ecea35e00f856f2c5b566`. The module includes Base/runtime code, including unused I/O bodies; the compute path does not invoke Node/Bun APIs. See [`public/examples/provenance.json`](public/examples/provenance.json) for the emission and execution record.
+
+The unchanged generated module includes Bend code under Apache-2.0. Its [runtime license](public/examples/BEND-LICENSE.txt) and [attribution notice](public/examples/NOTICE.txt) ship alongside it.
+
+This is precompiled output from the cached native compiler, not a browser compiler, a new compiler build qualification or a timing measurement. Its tiny input is different from the 17-module benchmark below. The explanatory closure flow is lexical semantics, not an IR dump or proof of heap allocation. The ownership diagram likewise describes pool/handle/slice and scratch lifetimes, not a heap profile or a promise that rewind reduces RSS.
 
 ## Fresh checking comparison
 
@@ -30,6 +48,8 @@ On 7 November 2026, three fresh serial processes per implementation checked the 
 
 The native artifact took **10.705 times as long on this checking workload**. This is a ratio of the two medians, not an end-to-end compilation or build slowdown. The selected workload and single host are not universal performance proxies.
 
+The native runs processed 1,690,863 bytes of Bend source and 78,415 bytes of foreign JavaScript. A separate [retained-source structural audit](https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/checkpoints/local2039g56-summary.json) records interfaces with up to 50 arguments and a complete 66,793-byte resume dispatcher, preserving namespaces and foreign alternatives without stubbed bodies/dependencies or AST replay. These source-shape facts explain “compiler-shaped,” not CPU representativeness: CPU-coverage analysis was inconclusive, and this is not an accepted universal performance proxy. The report keeps this detail in a native disclosure rather than conflating it with the tiny closure demo.
+
 ### Timing and memory boundaries
 
 - Headline wall time sums official load/parse/expand + check and native parse + expand + check. Native eager parser-fuel setup is included. Startup, emission and external C compilation are excluded.
@@ -39,6 +59,12 @@ The native artifact took **10.705 times as long on this checking workload**. Thi
 - Process order: official/native, native/official, official/native. Filesystem/OS caches were not flushed; no discarded warmups, forced GC, profiler or warm-process reuse.
 - Guards: 8,192 MiB each for RSS and physical footprint, 600-second timeout, 10 ms sampling, 1-second termination grace. These are sampled stop guards, not hard allocation quotas.
 - Node 23.11.0 uses `--experimental-strip-types --max-old-space-size=6144 --max-semi-space-size=128`; worker old/young/stack limits are 6,144/128/256 MiB. Native uses one compute thread with GPU off. The guardian launcher is Bun 1.4.3.
+
+### Native phase-cost view
+
+The proportional ribbon uses **one actual native run, sample 3**, whose total is the middle observed total: **27.706625 s**. Parse is 6.198936 s (22.37%), expansion 1.834936 s (6.62%), and checking 19.672753 s (71.00%). Widths use the unrounded shares; visible labels are rounded. This is not a sum of per-phase medians.
+
+Parser-fuel setup is **1.318933 s inside parse** (4.76% of the total), not a fourth segment. The 136,000,000 fuel cells over 17 modules and 1,975,761 checking chunk advances are workload/protocol counts, not machine instructions or evidence of causality. The chart locates recorded native cost; it does not explain the entire 10.705× gap, predict optimization savings or support official/native checker-only ratios.
 
 ### Artifact identity and completion
 
@@ -53,6 +79,7 @@ All six samples passed the measurement admission conditions. Official runs cover
 - [`public/data/evidence.json`](public/data/evidence.json): schema-version-2 public evidence with actual samples, aggregates, host/runtime configuration, source tuples, hashes, admission results and separate historical validation.
 - [`measurement/run-matched.mjs`](measurement/run-matched.mjs): retained cohort protocol.
 - [`measurement/official-check.mjs`](measurement/official-check.mjs): official check-only adapter.
+- [`measurement/compile-example.mjs`](measurement/compile-example.mjs): separately exercised end-to-end example emission and five-case runtime check; reproduces the exact published module without rebuilding the compiler.
 - Architecture sources: [checked program](https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checked_frontend.bend), [shared lowering](https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend), [backend IR](https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_ir.bend), [C](https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/c_backend.bend) and [JavaScript](https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/js_backend.bend).
 
 The recorded invocation uses environment-supplied paths rather than private machine paths:
@@ -74,9 +101,9 @@ This historical evidence belongs to its recorded artifact, not automatically to 
 
 Keep the authored HTML table and public JSON synchronized from the same fresh, admitted measurements. Preserve operation boundaries, denominators, sample counts and artifact limitations. Do not restore the old backend toggle, historical timing substitutes, experiment-led navigation or slogan heading. The title naturally wraps at a maximum of about 52px desktop and 32–38px mobile.
 
-Files: `public/index.html` (report), `public/styles.css` (quiet Instrument run sheet styling), `public/app.js` (pipeline and copy controls). Product intent is in `PRODUCT.md`; the surface brief is `.impeccable/surfaces/public-index-html.md`; `DESIGN.md` and `.impeccable/design.json` describe the integrated design.
+Files: `public/index.html` (authored report and diagrams), `public/styles.css` (Instrument run sheet styling), `public/app.js` (stage, copy and genuine emitted-module execution controls), `public/examples/` (source, unchanged generated module and provenance). Product intent is in `PRODUCT.md`; the surface brief is `.impeccable/surfaces/public-index-html.md`; `DESIGN.md` and `.impeccable/design.json` describe the integrated design.
 
-Before publication, inspect the real page at desktop, compact desktop and 390px mobile, including keyboard controls, reduced motion, readable table overflow and the no-JavaScript report. Verify visible numbers against JSON and retain source links. Do not run browser or heavy verification work concurrently with a timing cohort.
+Before publication, inspect the real page at desktop, compact desktop and 390px mobile, including keyboard controls, reduced motion, readable table overflow, disclosure expansion and the no-JavaScript report. Exercise genuine module-load success, loading and failure states; initial text must never claim execution. Verify visible values against JSON and the source/excerpt against the actual artifacts. No eval, dynamic Function constructor or CSP relaxation is needed. Parent integration owns these checks; this editorial slice does not run browser or heavy verification.
 
 ## Deploy
 

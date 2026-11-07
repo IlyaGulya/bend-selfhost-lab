@@ -1647,5 +1647,69 @@
       "https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/evals/receipts/root2039g24r12_native_fixedpoint.json",
       "https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/evals/receipts/root2039g24r12_emitted_suites.json"
     ]
+  },
+  "explanations": {
+    "nativeCostBreakdown": {
+      "scope": "One actual native sample whose total is the middle of three observed source-processing totals; not a sum of per-phase medians or a phase-by-phase comparison to the official checker.",
+      "sampleOrdinal": 3,
+      "elapsedMs": 27706.625,
+      "phases": [
+        {
+          "phase": "parse",
+          "elapsedMs": 6198.936,
+          "sharePercent": 22.373479267142784
+        },
+        {
+          "phase": "expand",
+          "elapsedMs": 1834.936,
+          "sharePercent": 6.622733732455686
+        },
+        {
+          "phase": "check",
+          "elapsedMs": 19672.753,
+          "sharePercent": 71.00378700040153
+        }
+      ],
+      "parserFuelSetup": {
+        "elapsedMs": 1318.933,
+        "includedIn": "parse",
+        "shareOfTotalPercent": 4.760352442782186,
+        "cells": 136000000,
+        "modules": 17
+      },
+      "notEstablished": "This locates recorded time, not the cause of the slowdown or the savings from any proposed optimization."
+    },
+    "workloadShape": {
+      "sourceUrl": "https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/checkpoints/local2039g56-summary.json",
+      "inputPlanSha256": "9390ec6d6d352293009a6a161bcf9daaef770eea593174835047de6bf43e8fdb",
+      "scope": "Structural audit of the retained compiler-source workload. The live closure demonstration is a different, small educational input.",
+      "bendSourceBytesObservedInFreshNativeRuns": 1690863,
+      "foreignSourceBytesObservedInFreshNativeRuns": 78415,
+      "retainedSourceShapes": {
+        "maximumObservedArity": 50,
+        "wideContinuationArguments": [44, 47, 50],
+        "completeEmitterMatchBytes": 29153,
+        "feedbackFrameBytes": 25064,
+        "completeFeedbackResumeFrameBytes": 66793
+      },
+      "namespacesAndForeignAlternativesPreserved": true,
+      "astReplay": false,
+      "stubbedBodiesOrDependencies": false,
+      "limitations": [
+        "Retaining large source structures does not establish matching CPU cost or predict end-to-end compiler performance.",
+        "Historical CPU-coverage analysis was inconclusive because more than 20 percent of ownership remained unclassified.",
+        "Source-shape observations are separate from fresh checking counters and are not runtime allocation measurements."
+      ]
+    },
+    "compiledExample": {
+      "scope": "Separate educational closure program; its execution is not the compiler-source performance benchmark.",
+      "sourceURL": "/examples/closure.bend",
+      "moduleURL": "/examples/closure.generated.mjs",
+      "provenanceURL": "/examples/provenance.json",
+      "sourceSha256": "1d0332a17a014d9f59137e5e67f6849423bd760510b005d8749eebb04681849e",
+      "moduleSha256": "3c99c414483ed5fe82f1f8006655d6ee07f1fd9c0b9ecea35e00f856f2c5b566",
+      "actualBrowserExecution": true,
+      "browserCompiler": false
+    }
   }
 }

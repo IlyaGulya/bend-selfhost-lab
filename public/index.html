@@ -28,28 +28,49 @@
     </header>
     <main id="main" class="wrap">
       <section class="introduction" aria-labelledby="report-title">
-        <h1 id="report-title">Self-hosted Bend compiler</h1>
-        <p class="lead">A compiler written in Bend that emits C and JavaScript. Self-hosted means it can compile its own source; it does not mean it is faster than the official TypeScript implementation.</p>
-        <p>This report explains the checked program boundary, the shared lowering used by both backends, and the storage they own. It separates the current source architecture, a fresh check-only performance comparison, and historical self-compilation evidence.</p>
-        <div class="report-actions">
-          <a class="action-link primary" href="#performance">Read the comparison <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 4v16m-6-6 6 6 6-6" /></svg></a>
-          <a class="action-link secondary" href="https://github.com/IlyaGulya/bend/tree/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost">Read the compiler source</a>
+        <div class="introduction-copy">
+          <h1 id="report-title">Self-hosted Bend compiler</h1>
+          <p class="lead">A compiler written in Bend that emits C and JavaScript. Self-hosted means it can compile its own source—not that it is faster.</p>
+          <p>Start with a function that remembers a value. Follow it through checking, shared lowering and target code, then examine the measured costs.</p>
+          <div class="report-actions">
+            <a class="action-link secondary" href="#performance">Read the comparison <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 4v16m-6-6 6 6 6-6" /></svg></a>
+            <a class="action-link secondary" href="https://github.com/IlyaGulya/bend/tree/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost">Compiler source</a>
+          </div>
         </div>
+        <figure class="example-artifact" aria-labelledby="example-title">
+          <div class="artifact-heading"><h2 id="example-title">A closure, compiled</h2><span>closure.bend · 130 bytes</span></div>
+          <pre class="source-code"><code>import Base
+
+def adder(k: U32) -&gt; U32 -&gt; U32:
+  x =&gt; (x + <mark>k</mark> : U32)
+
+def compute(k: U32, x: U32) -&gt; U32:
+  add = adder(k)
+  add(x)
+</code></pre>
+          <p class="note"><code>adder(5)</code> captures <code>k = 5</code>. Calling that closure with <code>x = 3</code> should return <code>8</code>.</p>
+          <div class="demo-controls"><button class="action-link primary" id="run-example" type="button" aria-controls="example-result" aria-describedby="example-scope" disabled>Run emitted JavaScript</button></div>
+          <p class="demo-status" id="example-result" role="status" aria-live="polite" aria-atomic="true" data-state="idle">Not run in this browser. Expected: compute(5, 3) → 8.</p>
+          <figcaption id="example-scope">Runs a precompiled local module, not the Bend compiler. Emitted by the cached native artifact; the unchanged 384,999-byte module includes Base and runtime helpers.</figcaption>
+          <noscript><p class="note">Enable JavaScript to run the example here. The source, expected result and emitted module remain available below.</p></noscript>
+          <div class="source-links"><a class="source-link" href="/examples/closure.bend" download>Source</a><a class="source-link" href="/examples/closure.generated.mjs" download>Emitted JavaScript</a><a class="source-link" href="/examples/provenance.json" download>Provenance and observed cases</a><a class="source-link" href="/examples/BEND-LICENSE.txt">Runtime license</a></div>
+          <details class="source-details emitted-detail"><summary>Inside the actual emitted module</summary><p class="note">Exact excerpt, not pseudocode. The captured value is passed as <code>$c0</code> into the addition body. The surrounding runtime manages calls and continuations.</p><pre class="source-code"><code>function $b488($c0,$v3540,$td=0){const $v3542=$p_u32_add($v3540,$c0);return $v3542;}
+function $b436($v0,$td=0){const $v3543=(($c0)=&gt;run_clo(($v3540,$raw=undefined)=&gt;{const $base0=$ksp,$sp0=$sp;return run_force(($td&lt;64?$b488($c0,$v3540,$td+1):run_named2($b488,$c0,$v3540,$td)),$raw,$base0,$sp0);}))($v0);return $v3543;}</code></pre><p class="note">The module exports <code>default.compute(k, x)</code> with ordinary JavaScript numbers for U32 values. No handwritten arithmetic adapter is used. Unused Base I/O bodies remain in the full output; this export does not invoke them.</p></details>
+        </figure>
       </section>
 
       <section class="chapter" id="architecture" aria-labelledby="architecture-title">
-        <h2 id="architecture-title">Compiler pipeline</h2>
+        <h2 id="architecture-title">Follow the captured value</h2>
         <div class="pipeline-layout">
           <div class="reading-column">
-            <p>An <strong>intermediate representation (IR)</strong> is the compiler’s internal description of a program. This implementation separates a checked front-end IR (FIR) from a structured backend IR (BIR). <strong>Lowering</strong> translates the checked description into explicit executable operations.</p>
-            <h3>Check the source and retain the decisions</h3>
-            <p>The front end parses modules, expands templates and checks types, names and permitted uses of values. Its contract also requires structural termination checks, subject to explicit <code>unsafe</code> exceptions. An affine binding may be used <strong>at most once</strong>; an erased binding is not a runtime value.</p>
-            <p>A successful check returns an owned <code>CheckedProgram</code>: the source arena, checked modules, signatures and scope metadata. Checked occurrences retain resolved declarations, types, quantities and children. Failure returns a diagnostic, not a partially checked program.</p>
-            <div class="source-links"><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checked_frontend.bend#L16-L34">Checked program</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/FIR_LAWS.md">Front-end contract</a></div>
-            <h3>Lower once, then select a target</h3>
-            <p>Shared lowering decides erasure, operand evaluation order, closure captures, direct or indirect calls, and pattern control flow. A closure pairs code with values captured from its enclosing scope. Local references keep their lexical identity rather than repeating a computation substituted during type checking.</p>
-            <p>The resulting backend IR contains operands, operations, declarations and code bodies. Its structured blocks express bindings, branches, returns and tail calls—calls with no remaining work in the caller. Lexical regions share the continuation after a failed pattern case instead of duplicating the remaining cases. Separate type descriptors provide layout, display and host-interface metadata.</p>
-            <div class="source-links"><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L1970-L1992">Shared lowering</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_ir.bend#L188-L244">Backend representation</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/driver.bend#L155-L177">Target dispatch</a></div>
+            <p>A <strong>closure</strong> pairs code with values from its enclosing scope. In <code>adder</code>, <code>x</code> arrives later; <code>k</code> must travel with the returned function. Follow that same program across the compiler’s boundaries.</p>
+            <ol class="program-steps">
+              <li><h3>Check: what does this program mean?</h3><p><code>k : U32</code> and <code>x : U32</code>; <code>adder(k) : U32 → U32</code>. Names resolve to their declarations and bindings. The resulting function is invoked once, respecting at-most-once (affine) use.</p><p class="operation-shape"><code>resolved names + types + permitted uses</code></p></li>
+              <li><h3>Lower: what must execute?</h3><p>Make the captured <code>k</code>, the function body and the call explicit. Preserve lexical identity and evaluation order instead of rerunning an expression substituted during checking.</p><p class="operation-shape"><code>capture k → bind closure → apply to x → return</code></p></li>
+              <li><h3>Emit: how does this target execute it?</h3><p>The JavaScript backend chooses functions, runtime calls and host-value adaptation. The C backend instead chooses physical layouts and its runtime calling convention. Both consume the same structured backend program.</p></li>
+            </ol>
+            <p class="note">Explanatory facts and operations, not a compiler IR dump or proof of heap allocation: a backend may specialize calls. An intermediate representation (IR) describes the program inside the compiler; lowering translates checked meaning into executable operations.</p>
+            <div class="source-links"><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checked_frontend.bend#L16-L34">Checked owner</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L1970-L1992">Shared lowering</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_ir.bend#L188-L244">Backend representation</a></div>
           </div>
           <figure class="trace" aria-label="Compiler pipeline: source, checked program, shared lowering, executable program, then C or JavaScript">
             <div class="trace-main" role="group" aria-label="Choose a compiler stage to inspect">
@@ -68,22 +89,28 @@
             </div>
             <div class="trace-detail" id="trace-detail" aria-live="polite" aria-atomic="true">
               <h3 id="trace-title">Checked program</h3>
-              <p id="trace-description">One owned source arena travels with checked modules, signatures and scope metadata. Checked occurrences retain the facts consumed by lowering.</p>
+              <p id="trace-description">For adder, checking retains the U32 types, the resolved k and x bindings, and permitted uses. These facts travel with one owned source arena into lowering.</p>
               <a id="trace-source" class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checked_frontend.bend"><span>Inspect the checked program</span></a>
             </div>
-            <figcaption>Each stage has an explanation and source link. The full pipeline is described in the report.</figcaption>
+            <figcaption>Select a boundary to relate it to the closure. Explanations are schematic; the source links show the implementation.</figcaption>
           </figure>
         </div>
 
         <div class="subsection">
           <h3>How this differs from the official compiler</h3>
-          <p>The official TypeScript compiler already has core terms, checked annotations and intermediate forms. Its backend reads checked bodies; its C analysis repeats until ownership and sharing facts settle. That is a backend fixed point, <strong>not repeated source type checking</strong>.</p>
-          <p>The distinction here is an explicit handoff from an owned checked program through one shared lowering into a separate structured backend program. It reorganizes semantic decisions and storage ownership; it does not establish that the official compiler lacks an IR or that the new design must be faster.</p>
+          <div class="structure-comparison">
+            <article><h4>Official · TypeScript</h4><ol class="boundary-flow"><li>Surface syntax and core terms</li><li>Checked bodies with annotations</li><li>Shared preparation and reachability</li><li>Target analysis and C / JavaScript emission</li></ol><p class="note">C ownership and sharing analysis repeats until its facts settle. This is a backend fixed point, <strong>not repeated source type checking</strong>.</p></article>
+            <article><h4>Self-hosted · Bend</h4><ol class="boundary-flow"><li>Source arena and checked occurrences</li><li><strong>Owned CheckedProgram handoff</strong></li><li><strong>One shared lowering → backend IR</strong></li><li>Target analysis and C / JavaScript emission</li></ol><p class="note">The executable backend program is independent of the checker and its source arena. Semantic decisions have an explicit shared boundary.</p></article>
+          </div>
+          <p class="note">Structural summary, not an exhaustive call graph. Both implementations already use intermediate representations. Different boundaries do not by themselves establish a speed advantage.</p>
           <div class="source-links"><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/bend.ts#L277-L319">Official term representations</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/comp.ts#L1973-L2011">Official checked-body input</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/comp.ts#L3754-L3823">Official C analysis</a></div>
         </div>
 
-        <div class="subsection">
-          <h3>Both backends still do target-specific work</h3>
+        <details class="source-details">
+          <summary>What checking guarantees, and what the targets still do</summary>
+          <p>Checking parses modules, expands templates and checks types, resolved names and permitted value uses. Its contract requires structural termination checks subject to explicit <code>unsafe</code> exceptions. Erased bindings are not runtime values. Failure returns a diagnostic, not a partially checked program.</p>
+          <p>The successful <code>CheckedProgram</code> retains modules, signatures, scope metadata and checked occurrences. Shared lowering handles erasure, captures, direct or indirect calls and pattern flow. Backend blocks express bindings, branches, returns and tail calls; lexical regions share the continuation after a failed pattern case. Separate descriptors retain layout, display and host-interface metadata.</p>
+          <div class="source-links"><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/FIR_LAWS.md">Front-end contract</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/driver.bend#L155-L177">Lowering before target dispatch</a></div>
           <div class="backend-notes">
             <article>
               <h4>C</h4>
@@ -98,23 +125,27 @@
           </div>
           <p>These are not just text printers. Both retain their own primitive operations and foreign-code integration. The compiler’s chunked <code>Run</code>/<code>Stack</code> execution protocol and the emitted JavaScript trampoline are execution machinery, not additional semantic IRs. A trampoline dispatches pending work instead of growing an unbounded chain of host calls.</p>
           <a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/BIR_LAWS.md">Backend and execution contracts</a>
-        </div>
+        </details>
 
         <div class="subsection">
           <h3>Data-oriented storage and ownership</h3>
-          <dl class="storage-list">
-            <div><dt>Typed-array pools</dt><dd>The source arena owns separate array-backed pools for nodes, patterns, binders, names and metadata. Numeric handles refer into this storage; start/count slices identify ranges in tapes.</dd></div>
-            <div><dt>Explicit ownership</dt><dd>Checking hands one source owner to lowering. Moving an affine owning record transfers it rather than copying its arena. The backend receives an executable program, not the checker or its source arena.</dd></div>
-            <div><dt>Reusable scratch</dt><dd>Declaration-local temporary storage is rewound and reused. Epochs invalidate transient substitution-memo entries; reusable analysis plans avoid rescanning the same continuation suffix at every use.</dd></div>
-          </dl>
-          <p>This is not an all-flat or zero-allocation compiler: checked occurrences and backend blocks remain recursive, and growing a pool can copy its storage. These mechanisms describe the design, not a measured garbage-collection benefit or an explanation of the timing difference.</p>
+          <figure class="ownership-diagram">
+            <div class="ownership-path">
+              <div class="storage-owner"><h4>Source owner</h4><p>Array-backed pools</p><div class="pool-row"><span>nodes</span><span>patterns</span><span>names</span></div><p><code>handle → pool entry</code><br /><code>slice { start, count } → tape range</code></p></div>
+              <div class="ownership-handoff"><span>CheckedProgram</span><span class="flow-arrow" aria-hidden="true">→</span><strong>shared lowering</strong><small>consumes the checked owner</small></div>
+              <div class="storage-owner"><h4>Backend program</h4><p>Operands · operations · code bodies</p><p>Independent executable representation</p><p class="note">No checker or source arena passed to the target backend.</p></div>
+            </div>
+            <div class="scratch-lifetime"><h4>Declaration-local scratch</h4><ol><li><strong>Mark</strong><span>save used lengths</span></li><li><strong>Work</strong><span>temporary terms and memo entries</span></li><li><strong>Rewind</strong><span>reuse storage; advance epoch</span></li></ol><p class="note">The next declaration reuses the scratch capacity. Epochs invalidate transient substitution-memo entries. Reuse does not mean process RSS shrinks or pages return to the operating system.</p></div>
+            <figcaption>Conceptual storage and lifetime diagram, not a heap profile. Numeric handles and start/count slices are symbolic; no memory sizes are implied.</figcaption>
+          </figure>
+          <p class="note">Moving an affine owner transfers it rather than copying its arena. This is not all-flat or zero-allocation storage: checked occurrences and backend blocks remain recursive, and pool growth can copy storage. No measured GC benefit follows from this diagram.</p>
           <div class="source-links"><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checker_arena.bend#L47-L106">Arena storage</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checker_ir.bend#L4-L58">Handles and slices</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checker_arena.bend#L1286-L1344">Scratch and memo reuse</a></div>
         </div>
       </section>
 
       <section class="chapter" id="performance" aria-labelledby="performance-title">
         <h2 id="performance-title">Performance against the official compiler</h2>
-        <p>This comparison is limited to <strong>loading, parsing, template expansion and checking</strong> the same selected compiler-source closure: 17 Bend modules and 35 foreign JavaScript files. It does not measure code emission, a C toolchain build or a complete self-compilation cycle.</p>
+        <p>This comparison is limited to <strong>loading, parsing, template expansion and checking</strong> the same selected compiler-source closure: 17 Bend modules and 35 foreign JavaScript files. This is a different input from the tiny closure demo; running that emitted JavaScript is not a compilation benchmark. Code emission, a C toolchain build and a complete self-compilation cycle are not measured here.</p>
         <div class="comparison-summary">
           <p>The cached native self-hosted compiler took <strong>10.705× as long</strong> as the official TypeScript implementation on this checking workload: <strong>27.707 s versus 2.588 s</strong> median source-processing time. Its sampled peak resident memory was lower in this cohort.</p>
         </div>
@@ -132,6 +163,23 @@
         <p>The official implementation interleaves template work differently from the self-hosted implementation. Combined source-processing time is the comparable boundary; isolated checker-phase times are not equivalent operations.</p>
         <p>These are single-host results from an Apple M1 Max, not a universal slowdown factor. The selected source workload does not establish code-generation speed or end-to-end compiler performance, and this experiment does not isolate why the implementations differ.</p>
         <div class="source-links"><a class="source-link" href="/data/evidence.json" download>Download all six samples and provenance</a><a class="source-link" href="#method">Read the measurement method</a></div>
+        <details class="source-details">
+          <summary>What makes this a compiler-shaped workload?</summary>
+          <p>The admitted native runs processed <strong>1,690,863 bytes of Bend source</strong> and <strong>78,415 bytes of foreign JavaScript</strong>. A separate retained-source audit identifies interfaces with up to <strong>50 arguments</strong> and a complete <strong>66,793-byte resume dispatcher</strong>, with namespaces and foreign alternatives preserved: no stubbed bodies or dependencies, and no AST replay.</p>
+          <p class="note">Those are source-shape observations, not runtime allocation measurements. CPU-coverage analysis was inconclusive; preserving large compiler structures does not establish matching CPU cost or make this an accepted universal performance proxy.</p>
+          <a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/checkpoints/local2039g56-summary.json">Retained workload structural audit</a>
+        </details>
+        <div class="subsection native-cost">
+          <h3>Where the native run spent its time</h3>
+          <p>Checking accounts for <strong>71.00%</strong> of this native run’s source-processing time. This locates recorded work; it does not establish the cause of the official/native gap.</p>
+          <figure class="phase-figure">
+            <div class="phase-ribbon" role="img" aria-label="Native sample 3: parse 22.37 percent, expand 6.62 percent, check 71.00 percent"><span class="phase-parse"></span><span class="phase-expand"></span><span class="phase-check"></span></div>
+            <dl class="phase-key"><div><dt><span class="phase-swatch phase-parse" aria-hidden="true"></span>Parse</dt><dd>6.199 s <span>22.37%</span></dd></div><div><dt><span class="phase-swatch phase-expand" aria-hidden="true"></span>Expand</dt><dd>1.835 s <span>6.62%</span></dd></div><div><dt><span class="phase-swatch phase-check" aria-hidden="true"></span>Check</dt><dd>19.673 s <span>71.00%</span></dd></div></dl>
+            <figcaption>Native sample 3 · 27.706625 s total. The actual run with the middle total, not a sum of phase medians. Rounded percentages may not sum to exactly 100%.</figcaption>
+          </figure>
+          <details class="source-details"><summary>Inside parse: fuel setup and workload counts</summary><p>Eager parser-fuel setup took <strong>1.319 s inside parse</strong> (4.76% of the total), not an additional phase: 136,000,000 cells over 17 modules.</p><p>The recorded 1,975,761 checking chunk advances count chunk resumptions in the execution protocol, not individual source operations or machine instructions. These counts do not measure wasted work or predict optimization savings. Fuel setup alone does not explain the 10.705× comparison.</p></details>
+          <p class="note">Native-only phase boundaries. Official template work is interleaved differently, so this chart must not be used for checker-only cross-compiler ratios. The table above is the matched timing comparison.</p>
+        </div>
       </section>
 
       <section class="chapter" id="validation" aria-labelledby="validation-title">
@@ -162,7 +210,9 @@
         <h2 id="method-title">Measurement method and source</h2>
         <p>The architecture above describes the linked source snapshot. The performance comparison instead uses a digest-bound, previously validated native executable, built with diagnostic <code>-O1</code> optimization—not a freshly built current-source compiler or the official default C optimization.</p>
         <p>The current-source authentication wrapper cannot authenticate that old build because lexer and driver inputs have changed. The measurement uses the artifact’s documented raw check-only interface and identifies its bytes explicitly; it does not claim new build qualification. The official checker’s source bytes match the retained kernel used for this workload.</p>
-        <dl class="method-list">
+        <details class="source-details">
+          <summary>Full protocol: host, runtimes, guards and completion</summary>
+          <dl class="method-list">
           <div><dt>Host and date</dt><dd>7 November 2026, 07:42–07:43 UTC. Apple M1 Max, 10 logical CPUs, 64 GiB RAM; arm64 MacBookPro18,4. macOS 26.6.2 (25G83), Darwin 25.6.0.</dd></div>
           <div><dt>Sampling order</dt><dd>Three fresh process pairs, all serial: official/native, native/official, official/native. No process reuse, profiler, forced garbage collection or discarded warmups. Filesystem and operating-system caches were not flushed.</dd></div>
           <div><dt>Timed operation</dt><dd>Official: load/parse/expand + check. Native: parse + expand + check, including eager parser-fuel setup. Startup, emission and external C compilation are excluded. The ratio divides the two source-processing medians, not individual phase medians or old timing receipts.</dd></div>
@@ -172,7 +222,8 @@
           <div><dt>Completion checks</dt><dd>All six samples completed with their guards satisfied. Official runs covered the 52-file input map, 2,420 definition bodies and 2,954 validation events, with no holes or unchecked bodies. Native runs returned <code>CheckSuccess</code> for all 17 modules. No checks were excluded and no outputs were patched. The 35 foreign JavaScript files belong to the retained closure; no JavaScript emission or execution is timed.</dd></div>
           <div><dt>Input identity</dt><dd>Source files, compiler/runtime artifacts, manifests, receipts and protocol helpers were rehashed before and after every sample and after the cohort. Hashing used bounded 64 KiB buffers in the unmeasured parent. The selected closure’s sorted source-tuple SHA-256 is <code>2555918b9caf261ab6a85fad8ef8fb132a87d9c835b77ee3a86cdefaed1dca01</code>.</dd></div>
           <div><dt>Whole-command time</dt><dd>Separately, guardian elapsed-time medians were 3.082 s official (2.551–3.660 s range) and 28.154 s native (25.960–34.264 s). These include startup, source processing and teardown; they are not the headline timing boundary.</dd></div>
-        </dl>
+          </dl>
+        </details>
         <div class="source-links"><a class="source-link" href="/data/evidence.json" download>Download measurement and evidence JSON</a><a class="source-link" href="https://github.com/IlyaGulya/bend-selfhost-lab/tree/main/measurement">Measurement adapters and protocol</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/evals/heavy_gate.ts">Resource guardian source</a></div>
         <details class="source-details">
           <summary>Source revision and historical artifact provenance</summary>

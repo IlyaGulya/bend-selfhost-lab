@@ -7,50 +7,53 @@ related_targets: ["public/styles.css","public/app.js"]
 
 # Engineering report surface brief
 
-Mode: Read. Audience: engineers reading English, without prior knowledge of the experiment history. Job: understand the self-hosted compiler’s architecture, compare a correctly scoped fresh measurement with the official implementation, and inspect primary evidence. Primary action: read the comparison; secondary action: inspect compiler source.
+Mode: Read. Audience: engineers reading English, without prior knowledge of the experiment history. Job: understand closure capture across the compiler’s semantic and target boundaries, inspect an actual emitted artifact, and interpret a correctly scoped official/native comparison. The browser action runs precompiled JavaScript, not a compiler.
 
 ## User intent
 
-Title and h1: **Self-hosted Bend compiler**. The user rejected slogan-led copy, a forced huge heading, generation-led history and unrelated historical numbers used as an official slowdown denominator. Replace the entire reading path, not just the opening. Preserve the existing quiet visual identity, useful pipeline interaction and evidence access.
+Title and h1: **Self-hosted Bend compiler**. Preserve the literal title, the established identity and valid evidence. Replace repeated explanatory prose with real source, structural diagrams and a measured native cost view. No slogans, generation timeline, giant title or hidden script-populated primary results.
 
 ## Direction contract
 
-**World:** Instrument run sheet. Cool off-white paper, green-black ink, restrained sage annotations, hairline rules and square controls. Self-hosted Archivo carries prose; Fragment Mono carries recorded numeric values, hashes and code. No images, decorative illustrations, shadows, gradients, cards or new dependencies.
+**World:** Instrument run sheet. Cool off-white paper, green-black ink, sage annotations, hairline rules and square controls. Self-hosted Archivo carries prose; Fragment Mono carries code, hashes and measured values. No raster artwork, decorative illustrations, shadows, gradients, cards or dependencies. Borders enclose actual source/storage artifacts, not arbitrary prose groups.
 
-**Typography:** Natural-wrapping h1, no forced spans or line breaks, maximum 52px desktop and 32–38px mobile. Body remains 17px/1.65 with a 68-character reading measure; headings are modest chapter labels rather than slogans. No eyebrow labels or numbered decorative sections.
+**Typography:** Natural-wrapping h1 capped at 52px desktop and 32–38px mobile. Body remains 17px/1.65 with a 68-character measure. No eyebrow labels or decorative numbered sections.
 
 **Reading order:**
 
-1. Explain that the compiler is written in Bend, emits C/JavaScript, and can compile its own source. Self-hosting is not a speed claim.
-2. Explain the checked front-end boundary, one lowering, structured backend IR, official implementation’s existing checked terms/IR, target-specific work and storage ownership.
-3. Present the fresh matched official/native check-only comparison, absolute medians, sample ranges, ratio of medians and sampled peak memory. Scope and caveats remain adjacent.
-4. Explain historical self-compilation validation: byte-identical successive JavaScript images and 95 fixtures across three compiler images, not 285 distinct tests.
-5. Give measurement method, provenance, source revision and downloadable evidence. Disclose that the native executable is a previously validated historical artifact, not a fresh build of the described current source.
+1. Literal subject and short purpose alongside real Bend closure source. Highlight the captured `k` in the source; distinguish expected output from an actual browser execution. Source, unchanged emitted module and provenance are downloadable.
+2. Follow the same closure through checked types/resolved names/permitted uses, capture-and-call lowering, and target representation. The stage selector supplements static explanations rather than hiding them.
+3. Side-by-side structural views of official TypeScript and self-hosted Bend: both have checked terms/IR; the explicit owned handoff and shared backend lowering are the distinction. Official C fixed-point analysis is not repeated source checking.
+4. Conceptual storage/lifetime diagram: array-backed pools, numeric handles, start/count slices, checked owner into lowering, independent backend program and declaration-local mark/work/rewind. It is not a heap profile or a zero-allocation claim.
+5. Unchanged matched official/native table, with absolute medians, ranges, ratio and sampled RSS. A separate native-only proportional ribbon shows the actual sample-3 parse/expand/check split, not phase medians or an official checker-phase comparison.
+6. Historical fixed point and fixture evidence, followed by measurement scope and native disclosures for protocol and provenance.
 
-**First viewport:** Compact report navigation, plain title, concise purpose and source/comparison actions. No forced display thesis, historical acceptance banner or prominent unexplained experiment identifiers.
+**First viewport:** Two-column introduction and source/run artifact on desktop, stacked on mobile. The run action is the only filled primary control here; comparison and source links remain simple navigation. No automatic execution or fabricated terminal output.
 
-**Architecture:** The desktop reading column sits beside an authored source-to-two-target pipeline. Each square stage button updates a plain explanation and immutable source link. The six selectable stages are source, checked program, shared lowering, executable program, C and JavaScript. The article supplies all of those explanations without JavaScript. On mobile, the diagram follows the main pipeline explanation at a readable width; controls never shrink into a miniature desktop composition.
+**Example interaction:** Initial HTML says the example has not run and disables its button. JavaScript enables it; a user action loads a local precompiled ES module with dynamic import and calls its real exported API. Loading, successful result and error feedback use a polite live region. During loading, disable the control. On failure leave downloads available and explain retry/reload. No eval, dynamic Function constructor, compiler download or CSP change. Static expected results must be labelled as expectations, never browser execution receipts.
 
-**Measurement:** A static semantic table shows both roles at once. No backend toggle, duration animation or old baseline/candidate data. Yellow is limited to the selected pipeline stage, compact measured-result summary and control states. The headline is source-processing wall time, not whole-command duration or compiler construction. Full-command timing and process-tree RSS scope are explicitly distinguished in the method.
+**Architecture:** Six square stage buttons select source, checked program, shared lowering, executable program, C or JavaScript. Each changes an explanation and pinned source link. Code-shape illustrations and conceptual operations are labelled explanatory, not compiler dumps. Actual emitted excerpts must match the downloaded module. Detailed checking guarantees, target responsibilities and execution machinery remain in native disclosures.
 
-**Supporting detail:** Open ruled subsections explain storage mechanisms and target work. A native disclosure retains hashes and historical receipt provenance without turning experiment names into primary navigation, headings, captions or ARIA labels. The copy control has an accessible name and polite feedback; it is hidden until JavaScript enables it.
+**Measurement:** A static semantic table is the sole official/native timing comparison. The native sample-3 ribbon uses exact proportional widths and text labels: parse 6.199 s / 22.37%, expand 1.835 s / 6.62%, check 19.673 s / 71.00%, total 27.706625 s. Percent labels are rounded. Fuel setup 1.319 s is inside parse, not an additional phase. Counts and phase shares do not establish why the native compiler is slower. No timing animation or backend toggle.
+
+**Supporting detail:** Historical validation retains 95 distinct fixtures across three images (285 executions), exact bytes and SHA-256. Protocol disclosure retains host, flags, runtime versions, guard scope and admission facts. Current-source architecture, cached artifact measurements and historical validation are visibly distinct.
 
 ## Accessibility and runtime constraints
 
-- Static content remains readable without JavaScript; no render-blocking fetch or client-side table population.
-- Semantic headings, row/column headers, table captions and named keyboard-focusable scrolling regions.
-- 44px minimum action, copy and stage controls; 24px source links; 2px visible focus outline.
-- Reduced-motion support, no load-hidden content and no perpetual animation.
-- No color-only meaning; a ratio and scope must be understandable in plain text.
-- Local licensed fonts only. No analytics, remote runtime dependencies or private machine paths.
+- All primary claims, code, diagrams, values and expected-output descriptions are authored HTML; no runtime fetch populates the report.
+- Without JavaScript, the disabled run button, explanatory fallback and downloads remain meaningful. Native disclosures work independently.
+- Semantic headings, captions and table headers; wide data only inside labelled keyboard-focusable scrolling regions. Source code wraps without horizontal page overflow.
+- 44px minimum action/copy/stage targets, 24px source links, shared 2px visible focus.
+- Reduced motion; no load-hidden content or perpetual animation.
+- Diagrams and phase categories have textual labels; color is not their only meaning.
+- Licensed local fonts; no analytics, remote runtime dependencies or private machine paths.
 
 ## Source and maintenance
 
-- Content: `public/index.html`; style: `public/styles.css`; enhancements: `public/app.js`.
-- Data download: `public/data/evidence.json` (schema version 2).
-- Measurement sources: `measurement/` in the website repository.
-- Architecture research: `.impeccable/review/engineering-architecture-research.md`.
-- Comparison protocol research: `.impeccable/review/official-comparison-research.md`.
+- Report: `public/index.html`; style: `public/styles.css`; enhancements: `public/app.js`.
+- Actual example artifacts and sanitized provenance: `public/examples/`.
+- Public measurement evidence: `public/data/evidence.json`; protocol: `measurement/`.
+- Source research: `.impeccable/review/engineering-architecture-research.md` and `.impeccable/review/official-comparison-research.md`.
 - Primary compiler links use snapshot `f63679c31e3219b9fbd119625d35ec03cb2ad224`.
 
-Keep HTML and JSON values synchronized from the same admitted fresh result. Do not substitute archived throughput for the official denominator. Current-source architecture, measured artifact identity and historical validation remain visibly separate. Parent integration owns final browser/accessibility checks, design-document synchronization and publication; no checks or deployment run during the serial timing cohort.
+Keep authored HTML values synchronized with the admitted measurements and the actual example contract. Never hand-edit emitted compiler output or silently replace its ABI with arithmetic. Parent integration owns browser/accessibility verification, design-document synchronization and publication; this slice runs no browser, compiler build, lint, suite or formatter.

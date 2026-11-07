@@ -16,7 +16,7 @@ Engineers reading in English who may know nothing about the compiler experiments
 
 ## Product Purpose
 
-Publish a plain, factual engineering report titled **Self-hosted Bend compiler**. Explain self-hosting, the checked front-end program, one shared lowering into structured backend IR, target-specific work and concrete storage ownership. Quantify the observed checking-time difference using a fresh matched official/native comparison, with absolute values and limitations visible together.
+Publish a plain, factual engineering report titled **Self-hosted Bend compiler**. Teach closure capture through actual Bend source and precompiled JavaScript, then follow that program across the checked front-end boundary, shared lowering and target-specific work. Show concrete ownership/lifetime mechanisms and one native run’s phase costs alongside the correctly scoped matched comparison.
 
 The user explicitly rejected the slogan-led presentation and oversized forced-line title. This is a full editorial revision, not a hero restyle. Historical experiment identifiers, acceptance timelines and rejected optimization stories are not the primary reading path.
 
@@ -40,22 +40,25 @@ Publish only `public/`, not development notes or private timing outputs. Keep co
 
 ## Capabilities and Constraints
 
-1. Explain source → checked program → one lowering → executable program → C or JavaScript. Define IR, affine use, erasure, captures and continuations where introduced.
-2. Preserve keyboard-operable stage inspection, checksum copying and evidence downloads. All essential claims and numbers remain readable without JavaScript.
+1. Lead with a real closure source artifact and an optional “Run emitted JavaScript” action. It executes a local precompiled module, not a browser compiler; the initial state must say it has not run. Do not replace emitted arithmetic with a handwritten implementation.
+2. Explain source → checked program → one lowering → executable program → C or JavaScript through that closure. Preserve stage inspection, checksum copying and downloads. All primary results and explanations are authored in HTML and remain available without JavaScript.
 3. Compare the same retained 52-file closure: 17 Bend modules and 35 foreign JavaScript files. Headline timing combines source-processing phases and excludes startup, emission and external C compilation. Do not divide unrelated historical receipts.
 4. Show both implementations in a static table: median, three-sample range, ratio to the official median and sampled peak RSS. Describe host, runtime, guards and guardian process-tree scope.
 5. Distinguish current source architecture from the digest-bound historical native executable. Its current-source authentication mismatch is disclosed, not patched away or treated as a newly qualified build.
 6. Historical self-compilation validation is separate: two successive JavaScript images were byte-identical; 95 distinct fixtures across three images means 285 executions, not 285 tests.
 7. Do not claim universal corpus representativeness, a semantic-preservation proof, all-flat/zero-allocation storage, measured GC causality, pure-C self-hosting or complete target parity.
 8. No private absolute paths, usernames, machine hostnames, credentials, raw logs, telemetry or contact forms in the public site.
+9. Present official/selfhost responsibilities side by side, and source pools, numeric handles, start/count slices, owner transfer and scratch reuse as conceptual diagrams—not compiler dumps or heap profiles.
+10. Plot native sample 3 only: parse 6.198936 s, expand 1.834936 s, check 19.672753 s; total 27.706625 s. The 71.00% check share identifies recorded cost, not causality. Parser-fuel setup is 1.318933 s inside parse, not another phase. No isolated official/native phase comparisons.
+11. Use native disclosures for detailed contracts, protocol and provenance. Loading, actual runtime success and failure are distinct demo states; source and module downloads remain available without running anything. No eval, dynamic Function construction or weakened CSP.
 
 ## Brand Commitments
 
-Preserve the quiet Instrument run sheet palette, self-hosted Archivo and Fragment Mono, open ruled sections and square controls. Use a natural-wrapping title capped near 52px on desktop and 32–38px on mobile. No marketing slogan, forced display lines, experiment-status banner or backend comparison toggle.
+Preserve the quiet Instrument run sheet palette, self-hosted Archivo and Fragment Mono, open ruled sections and square controls. Use a natural-wrapping title capped near 52px on desktop and 32–38px on mobile beside the real source artifact. No marketing slogan, forced display lines, experiment-status banner or backend comparison toggle.
 
 ## Product Principles
 
-- Explain the mechanism before asking readers to interpret evidence.
+- Let a small real program teach the mechanism before asking readers to interpret evidence.
 - Put a result’s operation, denominator and limitations beside its numbers.
 - Keep current-source analysis, fresh artifact-bound measurements and historical validation distinct.
 - Link primary source adjacent to factual claims.

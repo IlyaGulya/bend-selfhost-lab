@@ -1,0 +1,213 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": {
+    "operation": "Selfhost native JavaScript library emission and execution of one closure example",
+    "artifactBound": true,
+    "freshCompilerBuild": false,
+    "currentSourceAuthentication": false,
+    "performanceBenchmark": false,
+    "inBrowserCompiler": false,
+    "checksExcluded": 0,
+    "outputPatches": 0,
+    "generatedBytesUnchanged": true
+  },
+  "source": {
+    "url": "/examples/closure.bend",
+    "sha256": "1d0332a17a014d9f59137e5e67f6849423bd760510b005d8749eebb04681849e",
+    "bytes": 130,
+    "origin": "Derived from guide/GUIDE.md lines 67–85; added monomorphic compute(k, x) that creates and invokes one closure.",
+    "reference": "https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/guide/GUIDE.md#L67-L85"
+  },
+  "module": {
+    "url": "/examples/closure.generated.mjs",
+    "sha256": "3c99c414483ed5fe82f1f8006655d6ee07f1fd9c0b9ecea35e00f856f2c5b566",
+    "bytes": 384999,
+    "exportShape": "default object with compute(k, x)",
+    "inputABI": "Two JavaScript numbers representing U32 integers (0..4294967295)",
+    "outputABI": "JavaScript number representing U32; addition wraps modulo 2^32",
+    "adapter": false,
+    "contents": "Full unmodified generated library, including Base/runtime definitions; not a minimal handwritten arithmetic snippet."
+  },
+  "compiler": {
+    "sha256": "b3459184f37d3159f44e9b7f67642ad6c3850dc806ae5f7837f348fc842b3f71",
+    "bytes": 18808824,
+    "description": "Cached historically validated -O1 split-LLVM selfhost native executable",
+    "nativeOptions": [
+      "+RTS",
+      "--threads",
+      "1",
+      "--gpu",
+      "off",
+      "--RTS"
+    ],
+    "phase": "compile",
+    "limitation": "Historical native artifact no longer authenticates against current lexer/driver sources. The known wrapper failure was not rerun. This example is artifact-bound, not fresh current-source qualification."
+  },
+  "inputs": {
+    "bendModules": 2,
+    "foreignJSFiles": 35,
+    "base": {
+      "path": "bend2/base.bend",
+      "sha256": "21baec76caf1a6cfd4a544340b291f7bb55bf30cc841f9f5f29e3b12a1a4d614"
+    },
+    "retainedSourceUniverse": "checkpoints/local2039g56-tail-complete-input",
+    "hashesVerifiedBeforeAndAfter": true
+  },
+  "emission": {
+    "result": {
+      "result": "EmitSuccess",
+      "bytes": 384999,
+      "modules": 2
+    },
+    "begin": {
+      "computeThreads": 1,
+      "parserFuel": 8000000,
+      "phase": "compile",
+      "phaseTraceVersion": 3
+    },
+    "orderedPhases": [
+      "parse",
+      "expand",
+      "check",
+      "emit"
+    ],
+    "eagerFuelRows": 2,
+    "eagerFuelCellsPerModule": 8000000
+  },
+  "limits": {
+    "memoryMiB": 8192,
+    "rssMiB": 8192,
+    "pollMs": 10,
+    "timeoutMs": 600000,
+    "termGraceMs": 1000,
+    "note": "Sampled process-tree stop guards, not hard allocation quotas."
+  },
+  "guardian": {
+    "status": "PASS",
+    "reason": "command_exit",
+    "commandExitCode": 0,
+    "commandSignal": 0,
+    "peakRssBytes": 167936000,
+    "peakFootprintBytes": 153436856,
+    "elapsedMs": 1603,
+    "timeoutMs": 600000,
+    "reportPhase": "complete",
+    "ownedTreeStopped": true,
+    "supervisorExitCode": 0,
+    "label": "heavy command",
+    "exitCode": 0,
+    "memoryLimitBytes": 8589934592,
+    "rssLimitBytes": 8589934592
+  },
+  "runtime": {
+    "node": "v23.11.0",
+    "bun": "1.4.3",
+    "cases": [
+      {
+        "k": 2,
+        "x": 1,
+        "expected": 3,
+        "actual": 3,
+        "resultType": "number"
+      },
+      {
+        "k": 5,
+        "x": 3,
+        "expected": 8,
+        "actual": 8,
+        "resultType": "number"
+      },
+      {
+        "k": 7,
+        "x": 0,
+        "expected": 7,
+        "actual": 7,
+        "resultType": "number"
+      },
+      {
+        "k": 0,
+        "x": 0,
+        "expected": 0,
+        "actual": 0,
+        "resultType": "number"
+      },
+      {
+        "k": 4294967295,
+        "x": 1,
+        "expected": 0,
+        "actual": 0,
+        "resultType": "number"
+      }
+    ],
+    "browserCompatibilityProbe": {
+      "status": "PASS",
+      "forbiddenGlobals": [
+        "process",
+        "Buffer",
+        "require",
+        "Bun",
+        "eval",
+        "Function"
+      ],
+      "scope": "Node import and compute execution with getters that throw on Node/Bun/dynamic-code globals; not a browser run."
+    },
+    "browserVerification": {
+      "status": "PASS",
+      "engine": "Chromium",
+      "scope": "Actual ES-module import and compute calls for five cases; integrated page button, loading and load-failure recovery also exercised. No in-browser compiler.",
+      "cases": [
+        {"k": 2, "x": 1, "actual": 3},
+        {"k": 5, "x": 3, "actual": 8},
+        {"k": 7, "x": 0, "actual": 7},
+        {"k": 0, "x": 0, "actual": 0},
+        {"k": 4294967295, "x": 1, "actual": 0}
+      ]
+    }
+  },
+  "reproducibility": {
+    "helper": "measurement/compile-example.mjs",
+    "command": "REPO=\"$COMPILER_CHECKOUT\" NODE=\"$NODE_23_11_0\" BUN=\"$BUN_1_4_3\" \"$BUN_1_4_3\" measurement/compile-example.mjs",
+    "prerequisites": "Pinned cached native executable, frozen Base and declared foreign JS inputs, receipts, pinned runtimes, and already-built guardian cache; helper refuses missing or changed identities and never builds them.",
+    "nativeArguments": [
+      "+RTS",
+      "--threads",
+      "1",
+      "--gpu",
+      "off",
+      "--RTS",
+      "$OUT/closure.bend",
+      "$FROZEN/bend2/base.bend",
+      "$OUT/runtime.tsv",
+      "$OUT/exports.txt",
+      "compile",
+      "$OUT/closure.generated.mjs"
+    ],
+    "manifest": "B<TAB><empty namespace><TAB>absolute source path, plus all Base/foreign rows from native_seed_runtime.mjs runtimeManifest; exports.txt contains compute followed by a newline.",
+    "helperExecution": "Executed end-to-end after assembly. Native emission returned EmitSuccess for two modules; output bytes matched the published module SHA-256, and all five generated-module cases passed with Node/Bun/dynamic-code globals forbidden."
+  },
+  "browserScope": "Module import and default.compute work without Node/Bun globals or dynamic code generation in the Node probe. Unused emitted Base IO bodies mention Node/Bun APIs; this export never calls them. No generated code was removed or patched.",
+  "rawEvidence": {
+    "preservedPrivately": true,
+    "emissionCommandSha256": "5fb41193dcb25948dba059b1b044cc1488caaa26cb21eddb6677aa62a9c2353a",
+    "emissionReportSha256": "8d4e9424fca034331120fed702324b38cd02e8bf517ce058e70e04e6b7210648",
+    "stdoutSha256": "a17dff4a13a1f23d5c6dfbbcaf71b44768d3ad28bfbb09553cedc68fbd3b0df2",
+    "stderrSha256": "aacabc508656fe4877e95eaf9193b5aee4d1a5a5a79679cb6e3edae585670dea",
+    "runtimeCommandsSha256": "9aa5db661b037324426571ecda3d3223375157f66dfecc730475377ea6724546",
+    "runtimeReportSha256": "a23f88004d47e426acd5d7f0b6362796e69efc86a26c0a3da3723c736c73d9c4",
+    "browserABIReportSha256": "237152f3a7ee354fa3b42c52e73767293ce29c3b907db0443836413c119ab377"
+  },
+  "sourceReferences": [
+    "evals/native_seed_runtime.mjs:103-109,184-229",
+    "evals/native_compiler_host.c:384-484",
+    "evals/native_compiler_experiment.ts:598-633",
+    "measurement/run-matched.mjs:50-70,100-135"
+  ],
+  "runtimeLicense": {
+    "spdx": "Apache-2.0",
+    "licenseURL": "/examples/BEND-LICENSE.txt",
+    "noticeURL": "/examples/NOTICE.txt",
+    "copyright": "Copyright 2026 HigherOrderCO",
+    "generatedModuleUnchanged": true
+  }
+}

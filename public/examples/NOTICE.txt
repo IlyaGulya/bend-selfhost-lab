@@ -1,0 +1,9 @@
+closure.generated.mjs is byte-preserved compiler output for closure.bend.
+It includes the Bend Base library and generated JavaScript runtime.
+
+Bend: Copyright 2026 HigherOrderCO. Licensed under Apache License 2.0.
+The complete license is distributed in BEND-LICENSE.txt in this directory.
+Upstream source: https://github.com/IlyaGulya/bend/tree/f63679c31e3219b9fbd119625d35ec03cb2ad224
+
+Generated module SHA-256: 3c99c414483ed5fe82f1f8006655d6ee07f1fd9c0b9ecea35e00f856f2c5b566
+The generated module has not been patched or hand-edited.
