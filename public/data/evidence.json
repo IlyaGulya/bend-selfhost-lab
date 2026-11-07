@@ -1,169 +1,1651 @@
 {
-  "schemaVersion": 1,
-  "title": "Bend Compiler Lab",
-  "officialRelease": false,
-  "sourceRepository": "https://github.com/IlyaGulya/bend",
-  "sourceSnapshotCommit": "f63679c3",
-  "publicationNotes": [
-    "Historical G24 R12 acceptance is not acceptance of later experiments.",
-    "Diagnostics are not shipped speedups. CPU, wall time, RSS, and whole-tree physical footprint are different measurements.",
-    "No claim of universal corpus representativeness, full semantic proof, GPU or WASM parity."
-  ],
-  "historicalAccepted": {
-    "id": "G24 R12",
-    "accepted": true,
-    "acceptedCompilerSourceCommit": "5916d410",
-    "comparison": "Three interleaved same-host pairs on the frozen G22 source closure; G23 04e0b600 versus R12 5916d410; compiler-execution pipeline, not C toolchain build time.",
-    "nativeBuildFlags": "-O1 diagnostic, not the official default",
-    "orchestratorNote": "Original summary-wrapper FAIL retained. Twelve timed commands and runtime gates passed; authenticated reports were summarized offline with zero measurement reruns for separate parent acceptance.",
-    "native": {
-      "baselineMedianSeconds": 94.619261667,
-      "candidateMedianSeconds": 81.992515625,
-      "elapsedReductionPercent": 13.3447945159815,
-      "medianRssChangePercent": 2.99
-    },
-    "javascript": {
-      "baselineMedianSeconds": 305.989907584,
-      "candidateMedianSeconds": 266.464503208,
-      "elapsedReductionPercent": 12.91722484838802,
-      "medianRssChangePercent": -14.7,
-      "warning": "Baseline and candidate RSS ranges overlap; this is a memory caveat, not an elapsed-time interval."
-    },
-    "fixedpoint": {
-      "bytes": 31758507,
-      "sha256": "85aff9e534c18b4a1d6acac5f3237571dabc58f2c1a75a7ea2040f1c477ab60e",
-      "scope": "Native seed to JavaScript stage1 to JavaScript stage2 at R12 only; not pure-C self-hosting and not a new fixedpoint for G79."
-    },
-    "sourceUrls": [
-      "https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/SELFHOST_IR_ARCHITECTURE.md",
-      "https://github.com/IlyaGulya/bend/blob/f63679c3/evals/receipts/producer2039g24r12_throughput.json",
-      "https://github.com/IlyaGulya/bend/blob/f63679c3/evals/receipts/producer2039g24r12_summary_repair.json",
-      "https://github.com/IlyaGulya/bend/blob/f63679c3/evals/receipts/root2039g24r12_native_fixedpoint.json"
-    ]
-  },
-  "architecture": {
-    "pipeline": [
-      "Bend source",
-      "Checked FIR",
-      "Shared lowering",
-      "Backend IR",
-      "C or JavaScript emission"
+  "schemaVersion": 2,
+  "status": "PASS",
+  "startedAt": "2026-11-07T07:42:03.589Z",
+  "completedAt": "2026-11-07T07:43:44.399Z",
+  "scope": {
+    "operation": "front-end/check-only",
+    "description": "Parse, template expansion and complete checking of the same retained 52-file source closure; no emission.",
+    "headline": "Sum of source-processing phase wall times, excluding startup and process launch.",
+    "officialPhases": [
+      "load-parse-expand",
+      "check"
     ],
-    "sourceUrls": [
-      "https://github.com/IlyaGulya/bend/blob/f63679c3/bend2/selfhost/FIR_LAWS.md",
-      "https://github.com/IlyaGulya/bend/blob/f63679c3/bend2/selfhost/BIR_LAWS.md",
-      "https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/SELFHOST_IR_ARCHITECTURE.md"
-    ]
+    "selfhostNativePhases": [
+      "parse",
+      "expand",
+      "check"
+    ],
+    "artifactBound": true,
+    "freshBuild": false,
+    "currentSourceAuthentication": false,
+    "emission": false
   },
-  "diagnostics": [
+  "workload": {
+    "root": "checkpoints/local2039g49-compiler-root.bend",
+    "inputFiles": 52,
+    "bendModules": 17,
+    "foreignJSFiles": 35,
+    "sourceUniverseFilesVerified": 54,
+    "sourceDeclarations": null,
+    "sourceDeclarationsNote": "Not independently counted in this check-only cohort; no historical declaration count is substituted.",
+    "sourceTupleSha256": "2555918b9caf261ab6a85fad8ef8fb132a87d9c835b77ee3a86cdefaed1dca01",
+    "sourceTupleEncoding": "SHA-256 of UTF-8 JSON.stringify(sorted [relativePath, sha256, namespaceOrNull, externalBoolean] tuples); path order is Unicode code-point order.",
+    "sourceTuples": [
+      [
+        "bend2/base.bend",
+        "21baec76caf1a6cfd4a544340b291f7bb55bf30cc841f9f5f29e3b12a1a4d614",
+        "",
+        false
+      ],
+      [
+        "bend2/effs/args.js",
+        "4fa9772d438257793425d4f9516e1411ce58455fdaec402ab836e6a6cf8a7a82",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/audio_close.js",
+        "c700e2fc0eda1f9a67afd317184999d9283912817aaec00637af41b135b84c62",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/audio_open.js",
+        "ed792cb29df28497c60fb6bfcebaa72d9f4bb0a9d8b22063567aa40ac4803fc9",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/audio_write.js",
+        "ca3731d6da39355c0b924007dfe4f3ea25ed1a9d7b06b7bf19cacf49fdcc0de6",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/chan.js",
+        "c8e4f3cdaea81cfd35dc22e07c29a86b8f08272d284bf3506dd5148dff8d168f",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/file_close.js",
+        "2b83f900113776ab875fa3afd29f31000a191fe48645abe78b1d7b34cb12a7fe",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/file_open.js",
+        "e6cbf6455aeae0768f1e8e7cabbafb8d0999eb27660cbaa23885757322b8c694",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/file_read.js",
+        "7aa8a95a0b02f3c8db1167da5a936958a90c64e7df3e327ba5c66766d5e57da7",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/file_size.js",
+        "508a931334016f725f0446d9c63f91d7e9de79b9fb347d0e148777dba834ef0b",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/file_write.js",
+        "fbb706714fe6724e12658ad638d8b7aa2228f6297791bf74bd4894af361776f0",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/get_env.js",
+        "4bbb377d73898055bd06b498bef605e81bc2a0885e7ac664bc77591fd7e3dfa4",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/listener_close.js",
+        "1b87fb43c373b1a8a54b5afaf0cf8e3ec2f8d39bdfde131e49527caa19ac0cb8",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/now.js",
+        "f41624aba3f07d56b671f41691b5cb833b4d018266668f5f48329290fc41b2d9",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/print.js",
+        "814ceba4efbaa291b7b6a9ff29aa20e3a23c06eb4fa165c69ee0bd22878adaa9",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/print_err.js",
+        "a7a00612edfe98af1a351e8f7b912af4ee33f4bb888c36f119f7712d72a9394e",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/process_run.js",
+        "26868538280a1df9570ed2fba234d2a329f1e1d9e86c6fe9353de417adaee729",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/random_u32.js",
+        "ab0b37cb6055ad08573d1263aa380c339c3fe7417530cfa63264629dce7744c2",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/sleep.js",
+        "6711ccd804dcaede381da9ff0283b4640feb440e1d413381101f22bfed65a934",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/socket_close.js",
+        "dc4bf1fa95692c91528d4eb855506dde8dfc9164a90de2c43cd1bd6916e0c380",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/spawn.js",
+        "8a14c7a7a5ff80b049f0659f9e58d43bf0f3b1a6724d35a199c3f864b3242e4b",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/tcp_accept.js",
+        "26406cce42c497994e597a7a032629fab65f43ec14f06ee69aace2b353afe28d",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/tcp_connect.js",
+        "c51c4b55ffbc4a520f01082a1307498801a17e5123bdffbd01077fb42730f1cb",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/tcp_listen.js",
+        "0da4cfafaa24ba5e17d9fda5e6a5b207b2b36031b2c888944f67b85842d76399",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/tcp_recv.js",
+        "e8c54490445cb71a4328c07be8c40a49cee3e643cbf74f42dc73d31ab95890d7",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/tcp_send.js",
+        "350bc6ac8f957d6a154cc9437b4ad871bd11ec65babbbd7c3b0d2c77590ec5c6",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/thread_count.js",
+        "f4ef6d8ded95fe3114e50b7d2b6eb873e693419b85150f681b4a54a5043c2de9",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/udp_bind.js",
+        "e3afae5bf246184e76703efbcf41cb35bf5289e746cc40dc0300eef98753dfb5",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/udp_recv_from.js",
+        "66435d23dd12f30aa47bf618c925a42250920768d5ae28c7c52c35d4e04fa5ad",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/udp_send_to.js",
+        "40c835c4d73eb15d089a41b425968d04931d02820cb901aadb8eb3dd4905f247",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/window_close.js",
+        "be4ef11e9ac57c59aa4aee847f15ece18034ca9fe1c4a68c6e0b0d7bbd7c3590",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/window_frame.js",
+        "78baa53aa46e02165c0c94da68d1f6362386ebcfb97dbb36fffb82792a03d34f",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/window_grab.js",
+        "55cfc1925114f2d1f177137fad24d6252fe28707d26a1aae18a98ad97060a668",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/window_open.js",
+        "cd716864b8dfb27ca955c8aa58643c7d693ce76eb56472bd8255ff7ac0656e8d",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/window_set_title.js",
+        "eee0bf26b7f381f8800364e22e8c735e47dd6db3f58e23ff3dda8478a8411513",
+        null,
+        true
+      ],
+      [
+        "bend2/effs/write.js",
+        "e3495066a5d8c53fe1c46cfd2bb32577e3bd7dcae9797808801599073504dacb",
+        null,
+        true
+      ],
+      [
+        "bend2/selfhost/ast.bend",
+        "544623e07794459430f47630cb2c0a35725308247e2fdba80d23f23952051c83",
+        "../bend2/selfhost/ast",
+        false
+      ],
+      [
+        "bend2/selfhost/backend_ir.bend",
+        "c0286db6b192bf5cc917774b7ea5e393d4416263432eb130fb8393b1dffc1cb3",
+        "../bend2/selfhost/backend_ir",
+        false
+      ],
+      [
+        "bend2/selfhost/c_backend_sharing.bend",
+        "05adf4ac68b0658425f7fce430709f67bd29c3f1f8a43727412661084c4dbe2c",
+        "../bend2/selfhost/c_backend_sharing",
+        false
+      ],
+      [
+        "bend2/selfhost/checked_frontend.bend",
+        "8287a44c524b001933cdba9d036b44ade13c34e549f5c926fd2cab45894e288e",
+        "../bend2/selfhost/checked_frontend",
+        false
+      ],
+      [
+        "bend2/selfhost/checker_arena.bend",
+        "d74873488827c5a8568b1238f05356ef43ec7c8a285ca0e25ab7b052f070ebdf",
+        "../bend2/selfhost/checker_arena",
+        false
+      ],
+      [
+        "bend2/selfhost/checker_ir.bend",
+        "41db13db11d63102d3ea5c8ca14916e5f688685bba96c332abcb7a3533f1f17b",
+        "../bend2/selfhost/checker_ir",
+        false
+      ],
+      [
+        "bend2/selfhost/core.bend",
+        "33823e56b9c70306970ccb0e3b5fb3b995806d3a1907dd97d45c5c9634d13511",
+        "../bend2/selfhost/core",
+        false
+      ],
+      [
+        "bend2/selfhost/index_lookup.bend",
+        "7b7b45946be711d0ba384e15f6823fded5ff97d6a526a6fb74a0448c13d61f84",
+        "../bend2/selfhost/index_lookup",
+        false
+      ],
+      [
+        "bend2/selfhost/lexer.bend",
+        "342901897b30afc8ec7587718b1eb0b30150d46b01c1ea498ce369af26d1394d",
+        "../bend2/selfhost/lexer",
+        false
+      ],
+      [
+        "bend2/selfhost/loaded_module.bend",
+        "e41f5d5f99c7a81b68603561c48699445e8670c385f160acb21a06d597bd9d7e",
+        "../bend2/selfhost/loaded_module",
+        false
+      ],
+      [
+        "bend2/selfhost/path.bend",
+        "b7c8deb47f853b9c2e6bd2424d497aa0de551abe86cff95d4bbd80d777c365a8",
+        "../bend2/selfhost/path",
+        false
+      ],
+      [
+        "bend2/selfhost/scope_lookup.bend",
+        "e75dc874de6026e2104a7545a19f42fd6995aefecbb1d315c6ae3e097697e590",
+        "../bend2/selfhost/scope_lookup",
+        false
+      ],
+      [
+        "bend2/selfhost/sha256.bend",
+        "2fe6b6fc50c90db1b4730a384724bc989398b0ce41752cc510aa2478a3e845d6",
+        "../bend2/selfhost/sha256",
+        false
+      ],
+      [
+        "checkpoints/emitter_steps_v1.bend",
+        "314c8b4cb2b97263dc148cb0a0b1cf0bda7d32dc67614ce5207da709570566f3",
+        "emitter_steps_v1",
+        false
+      ],
+      [
+        "checkpoints/local2039g49-compiler-root.bend",
+        "b8610312159cad7621ad5b9713bcb171fba9b32d4feaa4061e9664a7f8dae2e4",
+        "",
+        false
+      ],
+      [
+        "checkpoints/template_steps_v1.bend",
+        "b9f4d860de0c58a274e1f23e90558191e23d7ac0de18d1fd452914160b9a5ae5",
+        "template_steps_v1",
+        false
+      ]
+    ],
+    "retainedSourceOriginCheckpoint": "d1a2fd48",
+    "privateManifestSha256": "1a269e15bf70257b019ab572c003b6eb130b4e3f63ad507783525e28d307b0e4",
+    "privateRequestSha256": "5775e47f1f2db3e117d19bc899695cc28720c2016f76fc9a526c2bbd4c8716d2"
+  },
+  "host": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "25.6.0",
+    "osBuild": "25G83",
+    "macOSVersion": "26.6.2",
+    "hardwareModel": "MacBookPro18,4",
+    "cpu": "Apple M1 Max",
+    "logicalCpus": 10,
+    "memoryBytes": 68719476736
+  },
+  "runtime": {
+    "node": "v23.11.0",
+    "bun": "1.4.3",
+    "nodeOptions": [
+      "--experimental-strip-types",
+      "--max-old-space-size=6144",
+      "--max-semi-space-size=128"
+    ],
+    "workerLimits": {
+      "stackSizeMb": 256,
+      "maxOldGenerationSizeMb": 6144,
+      "maxYoungGenerationSizeMb": 128
+    },
+    "nativeOptions": [
+      "+RTS",
+      "--threads",
+      "1",
+      "--gpu",
+      "off",
+      "--RTS"
+    ],
+    "nativeBuild": "Cached historically validated -O1 split-LLVM artifact; not rebuilt."
+  },
+  "limits": {
+    "memoryMiB": 8192,
+    "rssMiB": 8192,
+    "pollMs": 10,
+    "timeoutMs": 600000,
+    "termGraceMs": 1000
+  },
+  "methodology": {
+    "samplesPerRole": 3,
+    "order": [
+      "official",
+      "selfhostNative",
+      "selfhostNative",
+      "official",
+      "official",
+      "selfhostNative"
+    ],
+    "serial": true,
+    "freshProcesses": true,
+    "forcedGC": false,
+    "profiling": false,
+    "inputValidation": "Every source-universe file, selected input, kernel, runtime, compiler artifact, receipt, manifest and protocol helper rehashed before and after every sample and after the cohort. Bounded 64 KiB hashing occurs only in the unmeasured parent.",
+    "rssScope": "10 ms guardian sampling of the entire owned compiler-command process tree from launch through exit. Includes Node main and worker for official; native process for selfhostNative. Excludes the Bun launcher, guardian supervisor and cohort parent in both roles.",
+    "footprintScope": "Same owned process tree and sampling interval; Darwin physical-footprint ledger, including compressed pages.",
+    "fullCommandScope": "Guardian elapsedMs, including process startup, source processing and command teardown. Separate from source-processing phase sums.",
+    "cpuScope": "Official CPU is process-wide Node CPU including helper threads; native CPU is RUSAGE_SELF across compute threads. Not equivalent to wall time.",
+    "ratio": "Ratio of source-processing medians; no historical timing denominator.",
+    "guards": "Sampled stop guards, not hard allocation quotas."
+  },
+  "samples": [
     {
-      "id": "G79",
-      "accepted": false,
-      "sourceCommit": "c3d3cf9c",
-      "reportCommit": "f63679c3",
-      "comparison": "Emitted-image candidate C / matched-byte neutral N; two counter-free pairs, not production candidate versus original baseline.",
-      "eligibleCallees": 255,
-      "eligibleCallSites": 9096,
-      "genericRegistrationsBypassed": 75565159,
-      "registrationWarning": "Scheduler registration/pop bookkeeping, not a count of heap allocations.",
-      "checkerCpuGeometricRatio": 0.9118002219179218,
-      "checkerCpuRatio95CI": [
-        0.5045182662,
-        1.6478682744
+      "role": "official",
+      "ordinal": 1,
+      "sequence": 1,
+      "startedAt": "2026-11-07T07:42:03.738Z",
+      "completedAt": "2026-11-07T07:42:07.718Z",
+      "sourceProcessingElapsedMs": 3306.987,
+      "fullCommandElapsedMs": 3660,
+      "fullLauncherElapsedMs": 3830.0303329999997,
+      "phases": [
+        {
+          "phase": "startup",
+          "elapsedMs": 142.548542,
+          "userCpuMs": 299.725,
+          "systemCpuMs": 21.705,
+          "memoryEnd": {
+            "rss": 127188992,
+            "heapTotal": 17383424,
+            "heapUsed": 12199816,
+            "external": 17069364,
+            "arrayBuffers": 148783
+          }
+        },
+        {
+          "phase": "load-parse-expand",
+          "elapsedMs": 1731.4205419999998,
+          "userCpuMs": 1513.193,
+          "systemCpuMs": 162.794,
+          "memoryEnd": {
+            "rss": 495828992,
+            "heapTotal": 377585664,
+            "heapUsed": 121385216,
+            "external": 16931152,
+            "arrayBuffers": 10531
+          }
+        },
+        {
+          "phase": "check",
+          "elapsedMs": 1575.5664580000002,
+          "userCpuMs": 1487.876,
+          "systemCpuMs": 87.879,
+          "memoryEnd": {
+            "rss": 752582656,
+            "heapTotal": 626130944,
+            "heapUsed": 403144752,
+            "external": 16931152,
+            "arrayBuffers": 10531
+          }
+        }
       ],
-      "elapsedGeometricRatio": 0.9135854557,
-      "ratioOfMedianWholeTreePhysicalFootprints": 1.0149794479,
-      "pairedWholeTreePhysicalRatios": [
-        1.2190165828,
-        0.8483335771
-      ],
-      "memoryGate": {
-        "requiredRatioOfMediansMax": 1,
-        "requiredEveryPairedRatioMax": 1.05,
-        "passed": false
+      "guardian": {
+        "status": "PASS",
+        "reason": "command_exit",
+        "commandExitCode": 0,
+        "commandSignal": 0,
+        "peakRssBytes": 754270208,
+        "peakFootprintBytes": 784856560,
+        "elapsedMs": 3660,
+        "timeoutMs": 600000,
+        "reportPhase": "complete",
+        "ownedTreeStopped": true,
+        "supervisorExitCode": 0,
+        "label": "heavy command",
+        "exitCode": 0,
+        "memoryLimitBytes": 8589934592,
+        "rssLimitBytes": 8589934592
       },
-      "sourceUrls": [
-        "https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/local2039g79d1-results.json",
-        "https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/local2039g79d1-decision.json",
-        "https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/local2039g79d1-protocol.json"
-      ]
+      "coverage": {
+        "inputFiles": 52,
+        "checkedDefinitions": 2420,
+        "validationEvents": 2954,
+        "holes": 0,
+        "uncheckedBodies": 0,
+        "checksExcluded": 0,
+        "outputPatches": 0,
+        "runtime": {
+          "versions": {
+            "node": "23.11.0",
+            "acorn": "8.14.1",
+            "ada": "3.2.1",
+            "amaro": "0.4.1",
+            "ares": "1.34.4",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.1.0",
+            "cldr": "46.0",
+            "icu": "76.1",
+            "llhttp": "9.2.1",
+            "modules": "131",
+            "napi": "10",
+            "nbytes": "0.1.1",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.64.0",
+            "openssl": "3.0.16",
+            "simdjson": "3.12.2",
+            "simdutf": "6.0.3",
+            "sqlite": "3.49.1",
+            "tz": "2025a",
+            "undici": "6.21.2",
+            "unicode": "16.0",
+            "uv": "1.50.0",
+            "uvwasi": "0.0.21",
+            "v8": "12.9.202.28-node.14",
+            "zlib": "1.3.0.1-motley-788cb3c",
+            "zstd": "1.5.6"
+          },
+          "execArgv": [
+            "--experimental-strip-types",
+            "--max-old-space-size=6144",
+            "--max-semi-space-size=128"
+          ]
+        }
+      },
+      "rawEvidence": {
+        "stdoutSha256": "f36e64833aaf74dbceb86df4c2ec78f2cf8016d72d3f0282307ab07e08abc2ac",
+        "stderrSha256": "0519bf224b094966247ec6eb758290e6f6e9d0c367e0dc44be631e774c02b115",
+        "reportSha256": "af28cf71a6212618e019aef29d3e0b103ead7e16537a382c6ca4af8a990669c4",
+        "commandSha256": "2179c898a021b3394006e4fa81ad22e21616d18517f0b84365f0c7496d1c2d49"
+      }
     },
     {
-      "id": "G78",
-      "accepted": false,
-      "sourceCommit": "62ddcd40",
-      "experimentCommit": "fc79ba40",
-      "reportCommit": "36cfb7b9",
-      "pairs": 4,
-      "postVerificationNodeCpuIntervalRatio": 0.1941831835,
-      "postVerificationWarning": "Not exclusive hashing CPU, not elapsed time, not end-to-end build speedup.",
-      "ratioOfMedianWholeTreePhysicalFootprints": 0.7331138706,
-      "checkerCpuGeometricRatio": 1.0353714152,
-      "sourceUrls": [
-        "https://github.com/IlyaGulya/bend/commit/36cfb7b9"
-      ]
+      "role": "selfhostNative",
+      "ordinal": 1,
+      "sequence": 2,
+      "startedAt": "2026-11-07T07:42:07.929Z",
+      "completedAt": "2026-11-07T07:42:34.144Z",
+      "sourceProcessingElapsedMs": 25611.239999999998,
+      "fullCommandElapsedMs": 25960,
+      "fullLauncherElapsedMs": 26063.359541,
+      "phases": [
+        {
+          "phase": "parse",
+          "elapsedMs": 6063.5,
+          "userCpuMs": 4496.005,
+          "systemCpuMs": 87.376,
+          "modules": 17,
+          "sourceBytes": 1690863,
+          "foreignBytes": 78415,
+          "eagerFuelCells": 136000000,
+          "fuelBuildMs": 1076.543
+        },
+        {
+          "phase": "expand",
+          "elapsedMs": 1908.981,
+          "userCpuMs": 1440.22,
+          "systemCpuMs": 16.205,
+          "chunkAdvances": 263032,
+          "chunkQuantum": 64
+        },
+        {
+          "phase": "check",
+          "elapsedMs": 17638.759,
+          "userCpuMs": 15394.721,
+          "systemCpuMs": 150.053,
+          "chunkAdvances": 1975761,
+          "chunkQuantum": 64
+        }
+      ],
+      "guardian": {
+        "status": "PASS",
+        "reason": "command_exit",
+        "commandExitCode": 0,
+        "commandSignal": 0,
+        "peakRssBytes": 338264064,
+        "peakFootprintBytes": 334037808,
+        "elapsedMs": 25960,
+        "timeoutMs": 600000,
+        "reportPhase": "complete",
+        "ownedTreeStopped": true,
+        "supervisorExitCode": 0,
+        "label": "heavy command",
+        "exitCode": 0,
+        "memoryLimitBytes": 8589934592,
+        "rssLimitBytes": 8589934592
+      },
+      "coverage": {
+        "inputFiles": 52,
+        "modules": 17,
+        "result": "CheckSuccess",
+        "eagerFuelRows": 17,
+        "eagerFuelCellsPerModule": 8000000,
+        "checksExcluded": 0,
+        "outputPatches": 0,
+        "emittedOutput": false
+      },
+      "nativeEvidence": {
+        "begin": {
+          "computeThreads": 1,
+          "parserFuel": 8000000,
+          "phase": "check",
+          "phaseTraceVersion": 3
+        },
+        "phaseStarts": [
+          {
+            "phase": "parse"
+          },
+          {
+            "phase": "expand"
+          },
+          {
+            "phase": "check"
+          }
+        ],
+        "fuel": [
+          {
+            "sourceOrdinal": 1,
+            "cells": 8000000,
+            "elapsedMs": 108.654,
+            "processPeakRssBeforeBytes": 5570560,
+            "processPeakRssAfterBytes": 133595136
+          },
+          {
+            "sourceOrdinal": 2,
+            "cells": 8000000,
+            "elapsedMs": 61.975,
+            "processPeakRssBeforeBytes": 162627584,
+            "processPeakRssAfterBytes": 162627584
+          },
+          {
+            "sourceOrdinal": 3,
+            "cells": 8000000,
+            "elapsedMs": 63.086,
+            "processPeakRssBeforeBytes": 163446784,
+            "processPeakRssAfterBytes": 163479552
+          },
+          {
+            "sourceOrdinal": 4,
+            "cells": 8000000,
+            "elapsedMs": 56.781,
+            "processPeakRssBeforeBytes": 163659776,
+            "processPeakRssAfterBytes": 163659776
+          },
+          {
+            "sourceOrdinal": 5,
+            "cells": 8000000,
+            "elapsedMs": 63.62,
+            "processPeakRssBeforeBytes": 164069376,
+            "processPeakRssAfterBytes": 164069376
+          },
+          {
+            "sourceOrdinal": 6,
+            "cells": 8000000,
+            "elapsedMs": 75.028,
+            "processPeakRssBeforeBytes": 164265984,
+            "processPeakRssAfterBytes": 164265984
+          },
+          {
+            "sourceOrdinal": 7,
+            "cells": 8000000,
+            "elapsedMs": 62.679,
+            "processPeakRssBeforeBytes": 164265984,
+            "processPeakRssAfterBytes": 164265984
+          },
+          {
+            "sourceOrdinal": 8,
+            "cells": 8000000,
+            "elapsedMs": 52.349,
+            "processPeakRssBeforeBytes": 164364288,
+            "processPeakRssAfterBytes": 164364288
+          },
+          {
+            "sourceOrdinal": 9,
+            "cells": 8000000,
+            "elapsedMs": 55.982,
+            "processPeakRssBeforeBytes": 164413440,
+            "processPeakRssAfterBytes": 164413440
+          },
+          {
+            "sourceOrdinal": 10,
+            "cells": 8000000,
+            "elapsedMs": 66.981,
+            "processPeakRssBeforeBytes": 167854080,
+            "processPeakRssAfterBytes": 167854080
+          },
+          {
+            "sourceOrdinal": 11,
+            "cells": 8000000,
+            "elapsedMs": 56.011,
+            "processPeakRssBeforeBytes": 167854080,
+            "processPeakRssAfterBytes": 167854080
+          },
+          {
+            "sourceOrdinal": 12,
+            "cells": 8000000,
+            "elapsedMs": 56.012,
+            "processPeakRssBeforeBytes": 167854080,
+            "processPeakRssAfterBytes": 167854080
+          },
+          {
+            "sourceOrdinal": 13,
+            "cells": 8000000,
+            "elapsedMs": 52.538,
+            "processPeakRssBeforeBytes": 168083456,
+            "processPeakRssAfterBytes": 168083456
+          },
+          {
+            "sourceOrdinal": 14,
+            "cells": 8000000,
+            "elapsedMs": 70.135,
+            "processPeakRssBeforeBytes": 181796864,
+            "processPeakRssAfterBytes": 181796864
+          },
+          {
+            "sourceOrdinal": 15,
+            "cells": 8000000,
+            "elapsedMs": 64.609,
+            "processPeakRssBeforeBytes": 181846016,
+            "processPeakRssAfterBytes": 181846016
+          },
+          {
+            "sourceOrdinal": 16,
+            "cells": 8000000,
+            "elapsedMs": 56.224,
+            "processPeakRssBeforeBytes": 182075392,
+            "processPeakRssAfterBytes": 182075392
+          },
+          {
+            "sourceOrdinal": 17,
+            "cells": 8000000,
+            "elapsedMs": 53.879,
+            "processPeakRssBeforeBytes": 202522624,
+            "processPeakRssAfterBytes": 202522624
+          }
+        ],
+        "result": {
+          "result": "CheckSuccess",
+          "modules": 17
+        }
+      },
+      "rawEvidence": {
+        "stdoutSha256": "167f8feccc97e26e232b8bcf59cac226443c7441ed00faacdae167a8b93c5b65",
+        "stderrSha256": "5485e3f9d7a3da3c22e8f23ee16642f6cdb6666b2a58b91eab661b25d8123838",
+        "reportSha256": "3a2a5a806f69005606eec9b341bc6f340f8c12082fcfccc75d5c868458d22c42",
+        "commandSha256": "1835fd0102084282b9954ce7b29d3856ef2febbe40532dd0405c27ae450182c0"
+      }
     },
     {
-      "id": "G77",
-      "accepted": false,
-      "reportCommit": "51c3336b",
-      "finding": "Observer-on/off runs and physical sampling located instrumented high-water rises after checking; observer passivity and GC/JIT/OS causality were not established.",
-      "sourceUrls": [
-        "https://github.com/IlyaGulya/bend/commit/51c3336b"
-      ]
+      "role": "selfhostNative",
+      "ordinal": 2,
+      "sequence": 3,
+      "startedAt": "2026-11-07T07:42:34.275Z",
+      "completedAt": "2026-11-07T07:43:08.807Z",
+      "sourceProcessingElapsedMs": 33691.837,
+      "fullCommandElapsedMs": 34264,
+      "fullLauncherElapsedMs": 34358.026167,
+      "phases": [
+        {
+          "phase": "parse",
+          "elapsedMs": 7081.923,
+          "userCpuMs": 4464.133,
+          "systemCpuMs": 99.205,
+          "modules": 17,
+          "sourceBytes": 1690863,
+          "foreignBytes": 78415,
+          "eagerFuelCells": 136000000,
+          "fuelBuildMs": 1400.728
+        },
+        {
+          "phase": "expand",
+          "elapsedMs": 1730.966,
+          "userCpuMs": 1451.931,
+          "systemCpuMs": 13.371,
+          "chunkAdvances": 263032,
+          "chunkQuantum": 64
+        },
+        {
+          "phase": "check",
+          "elapsedMs": 24878.948,
+          "userCpuMs": 16579.038,
+          "systemCpuMs": 238.412,
+          "chunkAdvances": 1975761,
+          "chunkQuantum": 64
+        }
+      ],
+      "guardian": {
+        "status": "PASS",
+        "reason": "command_exit",
+        "commandExitCode": 0,
+        "commandSignal": 0,
+        "peakRssBytes": 269287424,
+        "peakFootprintBytes": 333693744,
+        "elapsedMs": 34264,
+        "timeoutMs": 600000,
+        "reportPhase": "complete",
+        "ownedTreeStopped": true,
+        "supervisorExitCode": 0,
+        "label": "heavy command",
+        "exitCode": 0,
+        "memoryLimitBytes": 8589934592,
+        "rssLimitBytes": 8589934592
+      },
+      "coverage": {
+        "inputFiles": 52,
+        "modules": 17,
+        "result": "CheckSuccess",
+        "eagerFuelRows": 17,
+        "eagerFuelCellsPerModule": 8000000,
+        "checksExcluded": 0,
+        "outputPatches": 0,
+        "emittedOutput": false
+      },
+      "nativeEvidence": {
+        "begin": {
+          "computeThreads": 1,
+          "parserFuel": 8000000,
+          "phase": "check",
+          "phaseTraceVersion": 3
+        },
+        "phaseStarts": [
+          {
+            "phase": "parse"
+          },
+          {
+            "phase": "expand"
+          },
+          {
+            "phase": "check"
+          }
+        ],
+        "fuel": [
+          {
+            "sourceOrdinal": 1,
+            "cells": 8000000,
+            "elapsedMs": 84.052,
+            "processPeakRssBeforeBytes": 5554176,
+            "processPeakRssAfterBytes": 133578752
+          },
+          {
+            "sourceOrdinal": 2,
+            "cells": 8000000,
+            "elapsedMs": 68.34,
+            "processPeakRssBeforeBytes": 162529280,
+            "processPeakRssAfterBytes": 162529280
+          },
+          {
+            "sourceOrdinal": 3,
+            "cells": 8000000,
+            "elapsedMs": 83.071,
+            "processPeakRssBeforeBytes": 163332096,
+            "processPeakRssAfterBytes": 163364864
+          },
+          {
+            "sourceOrdinal": 4,
+            "cells": 8000000,
+            "elapsedMs": 58.24,
+            "processPeakRssBeforeBytes": 163545088,
+            "processPeakRssAfterBytes": 163545088
+          },
+          {
+            "sourceOrdinal": 5,
+            "cells": 8000000,
+            "elapsedMs": 59.056,
+            "processPeakRssBeforeBytes": 163954688,
+            "processPeakRssAfterBytes": 163954688
+          },
+          {
+            "sourceOrdinal": 6,
+            "cells": 8000000,
+            "elapsedMs": 102.4,
+            "processPeakRssBeforeBytes": 164151296,
+            "processPeakRssAfterBytes": 164151296
+          },
+          {
+            "sourceOrdinal": 7,
+            "cells": 8000000,
+            "elapsedMs": 79.614,
+            "processPeakRssBeforeBytes": 164151296,
+            "processPeakRssAfterBytes": 164151296
+          },
+          {
+            "sourceOrdinal": 8,
+            "cells": 8000000,
+            "elapsedMs": 67.093,
+            "processPeakRssBeforeBytes": 164249600,
+            "processPeakRssAfterBytes": 164249600
+          },
+          {
+            "sourceOrdinal": 9,
+            "cells": 8000000,
+            "elapsedMs": 132.54,
+            "processPeakRssBeforeBytes": 164380672,
+            "processPeakRssAfterBytes": 164380672
+          },
+          {
+            "sourceOrdinal": 10,
+            "cells": 8000000,
+            "elapsedMs": 90.376,
+            "processPeakRssBeforeBytes": 164380672,
+            "processPeakRssAfterBytes": 164380672
+          },
+          {
+            "sourceOrdinal": 11,
+            "cells": 8000000,
+            "elapsedMs": 84.521,
+            "processPeakRssBeforeBytes": 164380672,
+            "processPeakRssAfterBytes": 164380672
+          },
+          {
+            "sourceOrdinal": 12,
+            "cells": 8000000,
+            "elapsedMs": 91.771,
+            "processPeakRssBeforeBytes": 164380672,
+            "processPeakRssAfterBytes": 164380672
+          },
+          {
+            "sourceOrdinal": 13,
+            "cells": 8000000,
+            "elapsedMs": 84.263,
+            "processPeakRssBeforeBytes": 164380672,
+            "processPeakRssAfterBytes": 164380672
+          },
+          {
+            "sourceOrdinal": 14,
+            "cells": 8000000,
+            "elapsedMs": 55.182,
+            "processPeakRssBeforeBytes": 177963008,
+            "processPeakRssAfterBytes": 177963008
+          },
+          {
+            "sourceOrdinal": 15,
+            "cells": 8000000,
+            "elapsedMs": 97.29,
+            "processPeakRssBeforeBytes": 178012160,
+            "processPeakRssAfterBytes": 178012160
+          },
+          {
+            "sourceOrdinal": 16,
+            "cells": 8000000,
+            "elapsedMs": 99.877,
+            "processPeakRssBeforeBytes": 178241536,
+            "processPeakRssAfterBytes": 178241536
+          },
+          {
+            "sourceOrdinal": 17,
+            "cells": 8000000,
+            "elapsedMs": 63.042,
+            "processPeakRssBeforeBytes": 200310784,
+            "processPeakRssAfterBytes": 200310784
+          }
+        ],
+        "result": {
+          "result": "CheckSuccess",
+          "modules": 17
+        }
+      },
+      "rawEvidence": {
+        "stdoutSha256": "167f8feccc97e26e232b8bcf59cac226443c7441ed00faacdae167a8b93c5b65",
+        "stderrSha256": "4d270d46f0fd39235dd290e0dd037e2eef861687d24cd74e6c02e9e49f48f626",
+        "reportSha256": "3bdf78cbe43ed07cb9119d119eaf6fee921a5e92962f56d26eef6bd56a9d9381",
+        "commandSha256": "42db249e510eeee8f4a5bc22f3a862103e9e8888c882afabf70fc34647b8adc3"
+      }
+    },
+    {
+      "role": "official",
+      "ordinal": 2,
+      "sequence": 4,
+      "startedAt": "2026-11-07T07:43:08.957Z",
+      "completedAt": "2026-11-07T07:43:12.374Z",
+      "sourceProcessingElapsedMs": 2588.2169169999997,
+      "fullCommandElapsedMs": 3082,
+      "fullLauncherElapsedMs": 3263.3220830000064,
+      "phases": [
+        {
+          "phase": "startup",
+          "elapsedMs": 236.18429200000003,
+          "userCpuMs": 291.928,
+          "systemCpuMs": 25.288,
+          "memoryEnd": {
+            "rss": 134266880,
+            "heapTotal": 17645568,
+            "heapUsed": 12204408,
+            "external": 17069364,
+            "arrayBuffers": 148783
+          }
+        },
+        {
+          "phase": "load-parse-expand",
+          "elapsedMs": 1349.006083,
+          "userCpuMs": 1448.158,
+          "systemCpuMs": 112.36,
+          "memoryEnd": {
+            "rss": 533610496,
+            "heapTotal": 375226368,
+            "heapUsed": 131265800,
+            "external": 16931152,
+            "arrayBuffers": 10531
+          }
+        },
+        {
+          "phase": "check",
+          "elapsedMs": 1239.2108339999997,
+          "userCpuMs": 1483.935,
+          "systemCpuMs": 97.372,
+          "memoryEnd": {
+            "rss": 783826944,
+            "heapTotal": 619053056,
+            "heapUsed": 416286200,
+            "external": 16931152,
+            "arrayBuffers": 10531
+          }
+        }
+      ],
+      "guardian": {
+        "status": "PASS",
+        "reason": "command_exit",
+        "commandExitCode": 0,
+        "commandSignal": 0,
+        "peakRssBytes": 783974400,
+        "peakFootprintBytes": 789574528,
+        "elapsedMs": 3082,
+        "timeoutMs": 600000,
+        "reportPhase": "complete",
+        "ownedTreeStopped": true,
+        "supervisorExitCode": 0,
+        "label": "heavy command",
+        "exitCode": 0,
+        "memoryLimitBytes": 8589934592,
+        "rssLimitBytes": 8589934592
+      },
+      "coverage": {
+        "inputFiles": 52,
+        "checkedDefinitions": 2420,
+        "validationEvents": 2954,
+        "holes": 0,
+        "uncheckedBodies": 0,
+        "checksExcluded": 0,
+        "outputPatches": 0,
+        "runtime": {
+          "versions": {
+            "node": "23.11.0",
+            "acorn": "8.14.1",
+            "ada": "3.2.1",
+            "amaro": "0.4.1",
+            "ares": "1.34.4",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.1.0",
+            "cldr": "46.0",
+            "icu": "76.1",
+            "llhttp": "9.2.1",
+            "modules": "131",
+            "napi": "10",
+            "nbytes": "0.1.1",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.64.0",
+            "openssl": "3.0.16",
+            "simdjson": "3.12.2",
+            "simdutf": "6.0.3",
+            "sqlite": "3.49.1",
+            "tz": "2025a",
+            "undici": "6.21.2",
+            "unicode": "16.0",
+            "uv": "1.50.0",
+            "uvwasi": "0.0.21",
+            "v8": "12.9.202.28-node.14",
+            "zlib": "1.3.0.1-motley-788cb3c",
+            "zstd": "1.5.6"
+          },
+          "execArgv": [
+            "--experimental-strip-types",
+            "--max-old-space-size=6144",
+            "--max-semi-space-size=128"
+          ]
+        }
+      },
+      "rawEvidence": {
+        "stdoutSha256": "46027cefb29781c856306ca1ac062c510561f758430387b9e41517383a002740",
+        "stderrSha256": "36357c54142dbe09e1818ff56f583833fee9f29d54d9f2bdde2e1833e1f31d06",
+        "reportSha256": "9ee4e65c7a671fea4b69eb6ef2ddb5dc3818ab2a897ddd5af34d6655e110dd99",
+        "commandSha256": "4f1085d580382319ade2da5c4e050296dc613a1ceaefbba23b73e900a66d7092"
+      }
+    },
+    {
+      "role": "official",
+      "ordinal": 3,
+      "sequence": 5,
+      "startedAt": "2026-11-07T07:43:12.511Z",
+      "completedAt": "2026-11-07T07:43:15.325Z",
+      "sourceProcessingElapsedMs": 2106.6779579999998,
+      "fullCommandElapsedMs": 2551,
+      "fullLauncherElapsedMs": 2599.3925000000017,
+      "phases": [
+        {
+          "phase": "startup",
+          "elapsedMs": 191.843208,
+          "userCpuMs": 296.169,
+          "systemCpuMs": 14.734,
+          "memoryEnd": {
+            "rss": 131678208,
+            "heapTotal": 17645568,
+            "heapUsed": 12206856,
+            "external": 17069364,
+            "arrayBuffers": 148783
+          }
+        },
+        {
+          "phase": "load-parse-expand",
+          "elapsedMs": 1085.14125,
+          "userCpuMs": 1408.857,
+          "systemCpuMs": 93.012,
+          "memoryEnd": {
+            "rss": 523927552,
+            "heapTotal": 377880576,
+            "heapUsed": 127536872,
+            "external": 16931152,
+            "arrayBuffers": 10531
+          }
+        },
+        {
+          "phase": "check",
+          "elapsedMs": 1021.5367079999999,
+          "userCpuMs": 1516.059,
+          "systemCpuMs": 93.541,
+          "memoryEnd": {
+            "rss": 780910592,
+            "heapTotal": 626917376,
+            "heapUsed": 399293720,
+            "external": 16931152,
+            "arrayBuffers": 10531
+          }
+        }
+      ],
+      "guardian": {
+        "status": "PASS",
+        "reason": "command_exit",
+        "commandExitCode": 0,
+        "commandSignal": 0,
+        "peakRssBytes": 781025280,
+        "peakFootprintBytes": 787298088,
+        "elapsedMs": 2551,
+        "timeoutMs": 600000,
+        "reportPhase": "complete",
+        "ownedTreeStopped": true,
+        "supervisorExitCode": 0,
+        "label": "heavy command",
+        "exitCode": 0,
+        "memoryLimitBytes": 8589934592,
+        "rssLimitBytes": 8589934592
+      },
+      "coverage": {
+        "inputFiles": 52,
+        "checkedDefinitions": 2420,
+        "validationEvents": 2954,
+        "holes": 0,
+        "uncheckedBodies": 0,
+        "checksExcluded": 0,
+        "outputPatches": 0,
+        "runtime": {
+          "versions": {
+            "node": "23.11.0",
+            "acorn": "8.14.1",
+            "ada": "3.2.1",
+            "amaro": "0.4.1",
+            "ares": "1.34.4",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.1.0",
+            "cldr": "46.0",
+            "icu": "76.1",
+            "llhttp": "9.2.1",
+            "modules": "131",
+            "napi": "10",
+            "nbytes": "0.1.1",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.64.0",
+            "openssl": "3.0.16",
+            "simdjson": "3.12.2",
+            "simdutf": "6.0.3",
+            "sqlite": "3.49.1",
+            "tz": "2025a",
+            "undici": "6.21.2",
+            "unicode": "16.0",
+            "uv": "1.50.0",
+            "uvwasi": "0.0.21",
+            "v8": "12.9.202.28-node.14",
+            "zlib": "1.3.0.1-motley-788cb3c",
+            "zstd": "1.5.6"
+          },
+          "execArgv": [
+            "--experimental-strip-types",
+            "--max-old-space-size=6144",
+            "--max-semi-space-size=128"
+          ]
+        }
+      },
+      "rawEvidence": {
+        "stdoutSha256": "c46f807b4335cb1fa306013d5a14055c1d09a9957c86782795fa2498d596b5fc",
+        "stderrSha256": "b57563a6cbbe57bac77536036a1cb2320d6b23bf007f819fe47f680f399eee7a",
+        "reportSha256": "87bcb0e9a82004d1710563fee1325bb1f1ffc4665045eb6d5c7f5c004d6ed7bc",
+        "commandSha256": "f3768cf32d6901ea3ec6fecef5ccf436a814839ba8b4c2642d49d2eadcaef52f"
+      }
+    },
+    {
+      "role": "selfhostNative",
+      "ordinal": 3,
+      "sequence": 6,
+      "startedAt": "2026-11-07T07:43:15.623Z",
+      "completedAt": "2026-11-07T07:43:44.219Z",
+      "sourceProcessingElapsedMs": 27706.625,
+      "fullCommandElapsedMs": 28154,
+      "fullLauncherElapsedMs": 28347.558084000004,
+      "phases": [
+        {
+          "phase": "parse",
+          "elapsedMs": 6198.936,
+          "userCpuMs": 4568.024,
+          "systemCpuMs": 88.191,
+          "modules": 17,
+          "sourceBytes": 1690863,
+          "foreignBytes": 78415,
+          "eagerFuelCells": 136000000,
+          "fuelBuildMs": 1318.933
+        },
+        {
+          "phase": "expand",
+          "elapsedMs": 1834.936,
+          "userCpuMs": 1518.486,
+          "systemCpuMs": 19.562,
+          "chunkAdvances": 263032,
+          "chunkQuantum": 64
+        },
+        {
+          "phase": "check",
+          "elapsedMs": 19672.753,
+          "userCpuMs": 16068.145,
+          "systemCpuMs": 168.907,
+          "chunkAdvances": 1975761,
+          "chunkQuantum": 64
+        }
+      ],
+      "guardian": {
+        "status": "PASS",
+        "reason": "command_exit",
+        "commandExitCode": 0,
+        "commandSignal": 0,
+        "peakRssBytes": 310607872,
+        "peakFootprintBytes": 333939504,
+        "elapsedMs": 28154,
+        "timeoutMs": 600000,
+        "reportPhase": "complete",
+        "ownedTreeStopped": true,
+        "supervisorExitCode": 0,
+        "label": "heavy command",
+        "exitCode": 0,
+        "memoryLimitBytes": 8589934592,
+        "rssLimitBytes": 8589934592
+      },
+      "coverage": {
+        "inputFiles": 52,
+        "modules": 17,
+        "result": "CheckSuccess",
+        "eagerFuelRows": 17,
+        "eagerFuelCellsPerModule": 8000000,
+        "checksExcluded": 0,
+        "outputPatches": 0,
+        "emittedOutput": false
+      },
+      "nativeEvidence": {
+        "begin": {
+          "computeThreads": 1,
+          "parserFuel": 8000000,
+          "phase": "check",
+          "phaseTraceVersion": 3
+        },
+        "phaseStarts": [
+          {
+            "phase": "parse"
+          },
+          {
+            "phase": "expand"
+          },
+          {
+            "phase": "check"
+          }
+        ],
+        "fuel": [
+          {
+            "sourceOrdinal": 1,
+            "cells": 8000000,
+            "elapsedMs": 228.419,
+            "processPeakRssBeforeBytes": 5570560,
+            "processPeakRssAfterBytes": 133595136
+          },
+          {
+            "sourceOrdinal": 2,
+            "cells": 8000000,
+            "elapsedMs": 82.503,
+            "processPeakRssBeforeBytes": 162627584,
+            "processPeakRssAfterBytes": 162627584
+          },
+          {
+            "sourceOrdinal": 3,
+            "cells": 8000000,
+            "elapsedMs": 61.112,
+            "processPeakRssBeforeBytes": 163430400,
+            "processPeakRssAfterBytes": 163463168
+          },
+          {
+            "sourceOrdinal": 4,
+            "cells": 8000000,
+            "elapsedMs": 53.097,
+            "processPeakRssBeforeBytes": 163643392,
+            "processPeakRssAfterBytes": 163643392
+          },
+          {
+            "sourceOrdinal": 5,
+            "cells": 8000000,
+            "elapsedMs": 119.449,
+            "processPeakRssBeforeBytes": 164069376,
+            "processPeakRssAfterBytes": 164069376
+          },
+          {
+            "sourceOrdinal": 6,
+            "cells": 8000000,
+            "elapsedMs": 70.054,
+            "processPeakRssBeforeBytes": 164265984,
+            "processPeakRssAfterBytes": 164265984
+          },
+          {
+            "sourceOrdinal": 7,
+            "cells": 8000000,
+            "elapsedMs": 65.768,
+            "processPeakRssBeforeBytes": 164265984,
+            "processPeakRssAfterBytes": 164265984
+          },
+          {
+            "sourceOrdinal": 8,
+            "cells": 8000000,
+            "elapsedMs": 70.102,
+            "processPeakRssBeforeBytes": 164364288,
+            "processPeakRssAfterBytes": 164364288
+          },
+          {
+            "sourceOrdinal": 9,
+            "cells": 8000000,
+            "elapsedMs": 61.083,
+            "processPeakRssBeforeBytes": 164380672,
+            "processPeakRssAfterBytes": 164380672
+          },
+          {
+            "sourceOrdinal": 10,
+            "cells": 8000000,
+            "elapsedMs": 72.09,
+            "processPeakRssBeforeBytes": 167821312,
+            "processPeakRssAfterBytes": 167821312
+          },
+          {
+            "sourceOrdinal": 11,
+            "cells": 8000000,
+            "elapsedMs": 85.889,
+            "processPeakRssBeforeBytes": 167821312,
+            "processPeakRssAfterBytes": 167821312
+          },
+          {
+            "sourceOrdinal": 12,
+            "cells": 8000000,
+            "elapsedMs": 62.592,
+            "processPeakRssBeforeBytes": 167821312,
+            "processPeakRssAfterBytes": 167821312
+          },
+          {
+            "sourceOrdinal": 13,
+            "cells": 8000000,
+            "elapsedMs": 58.899,
+            "processPeakRssBeforeBytes": 168083456,
+            "processPeakRssAfterBytes": 168083456
+          },
+          {
+            "sourceOrdinal": 14,
+            "cells": 8000000,
+            "elapsedMs": 60.85,
+            "processPeakRssBeforeBytes": 181796864,
+            "processPeakRssAfterBytes": 181796864
+          },
+          {
+            "sourceOrdinal": 15,
+            "cells": 8000000,
+            "elapsedMs": 55.67,
+            "processPeakRssBeforeBytes": 181846016,
+            "processPeakRssAfterBytes": 181846016
+          },
+          {
+            "sourceOrdinal": 16,
+            "cells": 8000000,
+            "elapsedMs": 56.939,
+            "processPeakRssBeforeBytes": 181960704,
+            "processPeakRssAfterBytes": 181960704
+          },
+          {
+            "sourceOrdinal": 17,
+            "cells": 8000000,
+            "elapsedMs": 54.417,
+            "processPeakRssBeforeBytes": 202424320,
+            "processPeakRssAfterBytes": 202424320
+          }
+        ],
+        "result": {
+          "result": "CheckSuccess",
+          "modules": 17
+        }
+      },
+      "rawEvidence": {
+        "stdoutSha256": "167f8feccc97e26e232b8bcf59cac226443c7441ed00faacdae167a8b93c5b65",
+        "stderrSha256": "1f2f05d80cd472739403726dcce983ed1b55b7541b902311dffdecbd10640ee2",
+        "reportSha256": "d99287654be328227ddd21cd285c067e4de24d09aa7508cc6170fa804ac2fa91",
+        "commandSha256": "bb29fa7a1b9969f38eee8aaecaa0f4b2450a5e86c2a7fb12f303af4ea6e968d2"
+      }
     }
   ],
-  "laterDiagnosticEnvironment": {
-    "node": "23.11.0",
-    "v8": "12.9.202.28-node.14",
-    "rssGuardGiB": 8,
-    "physicalGuardGiB": 8,
-    "timeoutSeconds": 600,
-    "samplingMilliseconds": 10,
-    "worker": [
-      256,
-      6144,
-      128
-    ],
-    "abi": 13,
-    "quantum": 64
+  "summary": {
+    "official": {
+      "sourceProcessingElapsedMs": {
+        "n": 3,
+        "median": 2588.2169169999997,
+        "min": 2106.6779579999998,
+        "max": 3306.987
+      },
+      "sampledPeakRssBytes": {
+        "n": 3,
+        "median": 781025280,
+        "min": 754270208,
+        "max": 783974400
+      },
+      "sampledPeakFootprintBytes": {
+        "n": 3,
+        "median": 787298088,
+        "min": 784856560,
+        "max": 789574528
+      },
+      "fullCommandElapsedMs": {
+        "n": 3,
+        "median": 3082,
+        "min": 2551,
+        "max": 3660
+      }
+    },
+    "selfhostNative": {
+      "sourceProcessingElapsedMs": {
+        "n": 3,
+        "median": 27706.625,
+        "min": 25611.239999999998,
+        "max": 33691.837
+      },
+      "sampledPeakRssBytes": {
+        "n": 3,
+        "median": 310607872,
+        "min": 269287424,
+        "max": 338264064
+      },
+      "sampledPeakFootprintBytes": {
+        "n": 3,
+        "median": 333939504,
+        "min": 333693744,
+        "max": 334037808
+      },
+      "fullCommandElapsedMs": {
+        "n": 3,
+        "median": 28154,
+        "min": 25960,
+        "max": 34264
+      }
+    },
+    "nativeToOfficialTimeRatio": 10.704908393889461
   },
-  "corpora": {
-    "scope": "Separate named source revisions and measures. Selected source declarations are not R12 checked definitions; no cross-corpus compiler-speedup claim.",
-    "selected": {
-      "record": "G56 selected corpus, reused by later diagnostics",
-      "sourceRevision": "9a2a13ab",
-      "files": 52,
-      "bendModules": 17,
-      "foreignJsFiles": 35,
-      "sourceDeclarations": 2954,
-      "expandSteps": 263032,
-      "checkSteps": 1975761
+  "provenance": {
+    "artifacts": [
+      {
+        "role": "officialKernel",
+        "path": "checkpoints/local2039g56-tail-complete-input/bend2/bend.ts",
+        "sha256": "22b5915cd7cccd23b6aa28849b23a7f1e3549333cdd0954ab48103ddd0777e9e",
+        "bytes": 138252
+      },
+      {
+        "role": "currentOfficialKernel",
+        "path": "bend2/bend.ts",
+        "sha256": "22b5915cd7cccd23b6aa28849b23a7f1e3549333cdd0954ab48103ddd0777e9e",
+        "bytes": 138252
+      },
+      {
+        "role": "nativeCompiler",
+        "path": "checkpoints/local2039g24r12/native",
+        "sha256": "b3459184f37d3159f44e9b7f67642ad6c3850dc806ae5f7837f348fc842b3f71",
+        "bytes": 18808824
+      },
+      {
+        "role": "nativeBuildReceipt",
+        "path": "checkpoints/local2039g24r12/root-native-build.json",
+        "sha256": "3b41f94b3d60d5a9177452c11b525b371e1c8b17584f388dff61edc071b5886b",
+        "bytes": 3072527
+      },
+      {
+        "role": "nativeAcceptanceReceipt",
+        "path": "evals/receipts/root2039g24r12_native_fixedpoint.json",
+        "sha256": "cb66ed5542e56516f83d2c04fb80f5ab8597130ab137a4128be8491391911d50",
+        "bytes": 110390
+      },
+      {
+        "role": "retainedCorpusPlan",
+        "path": "checkpoints/local2039g56-corpus.json",
+        "sha256": "9390ec6d6d352293009a6a161bcf9daaef770eea593174835047de6bf43e8fdb",
+        "bytes": 9805
+      },
+      {
+        "role": "nodeRuntime",
+        "path": "nodeRuntime",
+        "sha256": "ead5889f15f4e17b37f941c7d9e92b624396786bd74d8155ef470f6381f032c5",
+        "bytes": 113935712
+      },
+      {
+        "role": "bunRuntime",
+        "path": "bunRuntime",
+        "sha256": "28c7dd0a06916aba284d570ef44a2d70e9c538eaf2ba58dfe0910525563b3f79",
+        "bytes": 70469776
+      },
+      {
+        "role": "nativeRuntimeHelper",
+        "path": "evals/native_seed_runtime.mjs",
+        "sha256": "7f81a9b9013853355910b93bf59586b2acbcda4de7bcaa08d7942ebf45c0147a",
+        "bytes": 14377
+      },
+      {
+        "role": "guardianScript",
+        "path": "evals/heavy_gate.ts",
+        "sha256": "e72f2b81970be76734df918e35b1a4289d0fb194039e5ca20e9785e5ac0ee015",
+        "bytes": 13538
+      },
+      {
+        "role": "guardianSource",
+        "path": "evals/heavy_gate_native.c",
+        "sha256": "1ff233edacdbf13c6ffd4a8bf38cbf153629e8c76be4860deec8a5b591d3fa8b",
+        "bytes": 15936
+      },
+      {
+        "role": "guardianExecutable",
+        "path": "guardianExecutable",
+        "sha256": "19c772e2d516d9d79bed99886f3fc66cf1ca17eb8d62570bad0d51e26db18ccc",
+        "bytes": 35672
+      },
+      {
+        "role": "officialAdapter",
+        "path": "measurement/official-check.mjs",
+        "sha256": "4d9cf4fee25eee2a7bab26944f057dd1df291f371024e47cc677b21c5a673770",
+        "bytes": 3108
+      },
+      {
+        "role": "cohortProtocol",
+        "path": "measurement/run-matched.mjs",
+        "sha256": "29dfa38fc06c5268b242ae378ce15589c1fbd3439636de48e3c47fe927dfa9f6",
+        "bytes": 21182
+      }
+    ],
+    "checksExcluded": 0,
+    "outputPatches": 0,
+    "sourcesPreservedPrivately": true,
+    "rawLogsPreservedPrivately": true,
+    "currentSourceAuthenticationLimitation": "The historical native build no longer authenticates against current lexer/driver sources. That known wrapper failure was not rerun, patched or bypassed as a qualification claim. Execution uses the explicitly digest-bound raw native CLI.",
+    "sourceReferences": [
+      "evals/native_seed_runtime.mjs:18-109",
+      "evals/native_seed_runtime.mjs:190-191",
+      "evals/native_compiler_experiment.ts:598-633",
+      "evals/heavy_gate.ts",
+      "evals/heavy_gate_native.c",
+      "bend2/bend.ts:3804"
+    ]
+  },
+  "reproducibility": {
+    "prerequisites": "Retained source corpus, pinned cached compiler and receipts, matching Node/Bun runtimes, and existing guardian helper. No rebuild is performed.",
+    "cohort": "REPO=\"$COMPILER_CHECKOUT\" NODE=\"$NODE_23_11_0\" BUN=\"$BUN_1_4_3\" \"$BUN_1_4_3\" measurement/run-matched.mjs",
+    "official": "\"$BUN\" --smol \"$REPO/evals/heavy_gate.ts\" --memory-mib 8192 --rss-mib 8192 --poll-ms 10 --timeout-ms 600000 --term-grace-ms 1000 -- \"$NODE\" --experimental-strip-types --max-old-space-size=6144 --max-semi-space-size=128 measurement/official-check.mjs \"$OUT/request.json\" \"$OUT/official-N.json\"",
+    "native": "\"$BUN\" --smol \"$REPO/evals/heavy_gate.ts\" --memory-mib 8192 --rss-mib 8192 --poll-ms 10 --timeout-ms 600000 --term-grace-ms 1000 -- \"$REPO/checkpoints/local2039g24r12/native\" +RTS --threads 1 --gpu off --RTS \"$SOURCE/checkpoints/local2039g49-compiler-root.bend\" \"$SOURCE/bend2/base.bend\" \"$OUT/runtime.tsv\" \"$OUT/exports.txt\" check \"$OUT/native-N.unused-output\"",
+    "environment": {
+      "BEND_NO_TELEMETRY": "1",
+      "removed": [
+        "SELFHOST_CPU_PROFILE_DIR",
+        "NODE_OPTIONS",
+        "HEAVY_GATE_LEASE_TOKEN",
+        "HEAVY_GATE_LEASE_PATH"
+      ]
+    }
+  },
+  "limitations": [
+    "Single host and selected frozen compiler-source workload; not a universal performance proxy.",
+    "Check-only: not end-to-end compilation, code generation, C compilation, fixedpoint or fresh current-source build qualification.",
+    "Template expansion is interleaved differently; checker-only phase ratios are not comparable.",
+    "Three fresh processes per role; filesystem and OS caches were not flushed and no warmup samples were discarded.",
+    "Sampled process-tree peaks are not exact allocation peaks or end-of-phase heap sizes.",
+    "Fresh measurements do not replace separate historical self-hosting validation."
+  ],
+  "title": "Self-hosted Bend compiler",
+  "officialRelease": false,
+  "sourceRepository": "https://github.com/IlyaGulya/bend",
+  "architecture": {
+    "sourceSnapshotCommit": "f63679c31e3219b9fbd119625d35ec03cb2ad224",
+    "sourceRepository": "https://github.com/IlyaGulya/bend",
+    "pipeline": [
+      "Bend source",
+      "Checked program (front-end IR)",
+      "Shared lowering",
+      "Executable program (backend IR)",
+      "C or JavaScript"
+    ],
+    "limitations": [
+      "The checked-program and backend-IR contracts are not a mechanized semantic-preservation proof.",
+      "The official TypeScript compiler already has checked terms and intermediate representations.",
+      "Shared lowering does not remove target-specific layout, analysis, runtime or foreign-code work.",
+      "Array-backed pools and numeric handles do not imply zero allocation or that all structures are flat."
+    ]
+  },
+  "validation": {
+    "scope": "Previously validated compiler snapshot; separate evidence from the fresh check-only comparison.",
+    "compilerSourceCommit": "5916d410",
+    "nativeArtifactSha256": "b3459184f37d3159f44e9b7f67642ad6c3850dc806ae5f7837f348fc842b3f71",
+    "nativeBuildReceiptSha256": "3b41f94b3d60d5a9177452c11b525b371e1c8b17584f388dff61edc071b5886b",
+    "byteFixedpoint": {
+      "equal": true,
+      "successiveSelfProducedImages": 2,
+      "language": "JavaScript",
+      "bytesEach": 31758507,
+      "sha256Each": "85aff9e534c18b4a1d6acac5f3237571dabc58f2c1a75a7ea2040f1c477ab60e"
     },
-    "r12FullRoot": {
-      "compilerSourceCommit": "5916d410",
-      "corpusEntries": 53,
-      "modules": 18,
-      "checkedDefinitions": 12456,
-      "validatedEvents": 13050,
-      "outputPatches": 0,
-      "excludedChecks": 0,
-      "expandChunkAdvances": 1069406,
-      "checkChunkAdvances": 10405401,
-      "emitChunkAdvances": 1284300,
-      "chunkQuantum": 64
+    "fixtures": {
+      "distinctFixtures": 95,
+      "compilerImages": 3,
+      "totalExecutions": 285
     },
-    "g56IterationCost": {
-      "selectedBaselineRuns": 6,
-      "selectedMedianSeconds": 71.6063119375,
-      "retainedFullSourceCohortMedianRangeSeconds": [323.171950916, 345.852395291],
-      "paired": false,
-      "compilerSpeedupClaim": false,
-      "original45SecondTargetPassed": false
-    },
+    "checksExcluded": 0,
+    "outputPatches": 0,
+    "notEstablished": [
+      "Universal semantic preservation",
+      "Pure-C self-hosting",
+      "GPU, Metal, CUDA or WASM qualification",
+      "Default official CLI cutover"
+    ],
     "sourceUrls": [
-      "https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/local2039g56-summary.json",
-      "https://github.com/IlyaGulya/bend/blob/f63679c3/evals/receipts/root2039g24r12_native_fixedpoint.json"
+      "https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/evals/receipts/root2039g24r12_native_fixedpoint.json",
+      "https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/evals/receipts/root2039g24r12_emitted_suites.json"
     ]
   }
 }

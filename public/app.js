@@ -1,110 +1,77 @@
 const stages = {
   source: {
-    title: "Source, not a host-side replay",
+    title: "Bend source",
     description:
-      "The self-hosted compiler owns parsing, checking, lowering, and emission. Host drivers advance opaque native-owned Run values; they do not replace the language algorithm.",
-    file: "checkpoints/SELFHOST_IR_ARCHITECTURE.md",
-    label: "Read the architecture",
+      "The front end parses modules, expands templates and checks types and permitted value uses. Success produces a checked program; failure produces a diagnostic.",
+    file: "bend2/selfhost/FIR_LAWS.md",
+    label: "Read the front-end contract",
   },
   fir: {
-    title: "A checked semantic boundary",
+    title: "Checked program",
     description:
-      "Checked FIR preserves the front end’s meaning and ownership obligations. Compact handles and declaration-scoped storage keep representation choices separate from those obligations.",
-    file: "bend2/selfhost/FIR_LAWS.md",
-    label: "Read the FIR contract",
+      "One owned source arena travels with checked modules, signatures and scope metadata. Checked occurrences retain the facts consumed by lowering.",
+    file: "bend2/selfhost/checked_frontend.bend",
+    label: "Inspect the checked program",
+  },
+  lower: {
+    title: "Shared lowering",
+    description:
+      "The driver lowers the checked program once before selecting a target. This pass decides erasure, evaluation order, closure captures, calls and pattern control flow.",
+    file: "bend2/selfhost/backend_lower.bend",
+    label: "Inspect shared lowering",
   },
   bir: {
-    title: "One shared lowering",
+    title: "Executable program",
     description:
-      "Backend IR makes calls, captures, control flow, and representation choices explicit. C and JavaScript consume this common lowered structure rather than inventing separate semantics.",
-    file: "bend2/selfhost/BIR_LAWS.md",
-    label: "Read the BIR contract",
+      "Structured blocks describe bindings, branches, returns, tail calls and lexical regions. Separate descriptors retain metadata for layout, display and host interfaces.",
+    file: "bend2/selfhost/backend_ir.bend",
+    label: "Inspect the backend representation",
   },
   c: {
-    title: "C, from the shared program",
+    title: "C backend",
     description:
-      "The C backend renders the common backend IR into native code. A historical accepted baseline completed the full frozen compiler root under the original resource guards.",
+      "The C backend computes layouts and sharing plans, builds runtime tables, and emits executable segments and continuations. It still owns C-specific primitives and foreign-code integration.",
     file: "bend2/selfhost/c_backend.bend",
     label: "Inspect the C backend",
   },
   js: {
-    title: "JavaScript that compiles itself",
+    title: "JavaScript backend",
     description:
-      "The JavaScript backend retains a public boxed ABI and a bounded private scheduler. Self-emission is checked with actual stage images, byte identity, and consumer behavior.",
+      "The JavaScript backend plans continuation captures and region frames, emits functions and runtime helpers, and adapts values at host boundaries. Shared IR does not make it just a text printer.",
     file: "bend2/selfhost/js_backend.bend",
-    label: "Inspect the JS backend",
+    label: "Inspect the JavaScript backend",
   },
 };
-const sourceBase = "https://github.com/IlyaGulya/bend/blob/f63679c3/";
+const sourceBase =
+  "https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/";
 const stageButtons = [...document.querySelectorAll("[data-stage]")];
-for (const button of stageButtons)
+for (const button of stageButtons) {
+  button.disabled = false;
   button.addEventListener("click", () => {
     const stage = stages[button.dataset.stage];
     if (!stage) return;
     for (const other of stageButtons)
       other.setAttribute("aria-pressed", String(other === button));
     document.querySelector("#trace-title").textContent = stage.title;
-    document.querySelector("#trace-description").textContent =
-      stage.description;
+    document.querySelector("#trace-description").textContent = stage.description;
     const source = document.querySelector("#trace-source");
     source.href = sourceBase + stage.file;
     source.querySelector("span").textContent = stage.label;
   });
-const comparisons = {
-  native: {
-    label: "Native compiler root",
-    baseline: 94.619261667,
-    candidate: 81.992515625,
-    memory:
-      "Native median RSS: +2.99%. This historical checkpoint passed its recorded gates; the later diagnostics use a separate physical-footprint gate.",
-  },
-  js: {
-    label: "JavaScript compiler root",
-    baseline: 305.989907584,
-    candidate: 266.464503208,
-    memory:
-      "JavaScript median RSS: −14.70%. This historical checkpoint passed its recorded gates; the later diagnostics use a separate physical-footprint gate.",
-  },
-};
-const backendButtons = [...document.querySelectorAll("[data-backend]")];
-for (const button of backendButtons)
-  button.addEventListener("click", () => {
-    const d = comparisons[button.dataset.backend];
-    if (!d) return;
-    for (const other of backendButtons)
-      other.setAttribute("aria-pressed", String(other === button));
-    document.querySelector("#comparison-title").textContent = d.label;
-    document.querySelector("#baseline-duration").textContent =
-      d.baseline.toFixed(3) + " s";
-    document.querySelector("#candidate-duration").textContent =
-      d.candidate.toFixed(3) + " s";
-    document
-      .querySelector("#baseline-bar")
-      .style.setProperty("--duration-ratio", "1");
-    document
-      .querySelector("#candidate-bar")
-      .style.setProperty("--duration-ratio", String(d.candidate / d.baseline));
-    document.querySelector("#comparison-delta").textContent =
-      ((1 - d.candidate / d.baseline) * 100).toFixed(1) + "%";
-    document.querySelector("#comparison-memory").textContent = d.memory;
-    document.querySelector("#comparison-update").textContent =
-      d.label +
-      ": baseline " +
-      d.baseline.toFixed(3) +
-      " seconds, R12 " +
-      d.candidate.toFixed(3) +
-      " seconds. Three same-host pairs; historical accepted result.";
-  });
+}
 const copy = document.querySelector("#copy-checksum");
-copy?.addEventListener("click", async () => {
-  const output = document.querySelector("#copy-feedback");
-  try {
-    if (!navigator.clipboard?.writeText) throw Error("Clipboard unavailable");
-    await navigator.clipboard.writeText(
-      document.querySelector("#fixedpoint-sha").textContent.trim(),
-    );
-    output.textContent = "SHA-256 copied.";
-  } catch {
-    output.textContent = "Select the checksum to copy it manually.";
-  }
-});
+if (copy) {
+  copy.hidden = false;
+  copy.addEventListener("click", async () => {
+    const output = document.querySelector("#copy-feedback");
+    try {
+      if (!navigator.clipboard?.writeText) throw Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(
+        document.querySelector("#fixedpoint-sha").textContent.trim(),
+      );
+      output.textContent = "SHA-256 copied.";
+    } catch {
+      output.textContent = "Clipboard unavailable. Select the checksum to copy it manually.";
+    }
+  });
+}
