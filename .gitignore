@@ -1,0 +1,7 @@
+# Local Netlify folder
+.netlify/
+.DS_Store
+.impeccable/*
+!.impeccable/design.json
+!.impeccable/font-provenance.json
+!.impeccable/surfaces/

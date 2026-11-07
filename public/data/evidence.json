@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "title": "Bend Compiler Lab",
+  "officialRelease": false,
+  "sourceRepository": "https://github.com/IlyaGulya/bend",
+  "sourceSnapshotCommit": "f63679c3",
+  "publicationNotes": [
+    "Historical G24 R12 acceptance is not acceptance of later experiments.",
+    "Diagnostics are not shipped speedups. CPU, wall time, RSS, and whole-tree physical footprint are different measurements.",
+    "No claim of universal corpus representativeness, full semantic proof, GPU or WASM parity."
+  ],
+  "historicalAccepted": {
+    "id": "G24 R12",
+    "accepted": true,
+    "acceptedCompilerSourceCommit": "5916d410",
+    "comparison": "Three interleaved same-host pairs on the frozen G22 source closure; G23 04e0b600 versus R12 5916d410; compiler-execution pipeline, not C toolchain build time.",
+    "nativeBuildFlags": "-O1 diagnostic, not the official default",
+    "orchestratorNote": "Original summary-wrapper FAIL retained. Twelve timed commands and runtime gates passed; authenticated reports were summarized offline with zero measurement reruns for separate parent acceptance.",
+    "native": {
+      "baselineMedianSeconds": 94.619261667,
+      "candidateMedianSeconds": 81.992515625,
+      "elapsedReductionPercent": 13.3447945159815,
+      "medianRssChangePercent": 2.99
+    },
+    "javascript": {
+      "baselineMedianSeconds": 305.989907584,
+      "candidateMedianSeconds": 266.464503208,
+      "elapsedReductionPercent": 12.91722484838802,
+      "medianRssChangePercent": -14.7,
+      "warning": "Baseline and candidate RSS ranges overlap; this is a memory caveat, not an elapsed-time interval."
+    },
+    "fixedpoint": {
+      "bytes": 31758507,
+      "sha256": "85aff9e534c18b4a1d6acac5f3237571dabc58f2c1a75a7ea2040f1c477ab60e",
+      "scope": "Native seed to JavaScript stage1 to JavaScript stage2 at R12 only; not pure-C self-hosting and not a new fixedpoint for G79."
+    },
+    "sourceUrls": [
+      "https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/SELFHOST_IR_ARCHITECTURE.md",
+      "https://github.com/IlyaGulya/bend/blob/f63679c3/evals/receipts/producer2039g24r12_throughput.json",
+      "https://github.com/IlyaGulya/bend/blob/f63679c3/evals/receipts/producer2039g24r12_summary_repair.json",
+      "https://github.com/IlyaGulya/bend/blob/f63679c3/evals/receipts/root2039g24r12_native_fixedpoint.json"
+    ]
+  },
+  "architecture": {
+    "pipeline": [
+      "Bend source",
+      "Checked FIR",
+      "Shared lowering",
+      "Backend IR",
+      "C or JavaScript emission"
+    ],
+    "sourceUrls": [
+      "https://github.com/IlyaGulya/bend/blob/f63679c3/bend2/selfhost/FIR_LAWS.md",
+      "https://github.com/IlyaGulya/bend/blob/f63679c3/bend2/selfhost/BIR_LAWS.md",
+      "https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/SELFHOST_IR_ARCHITECTURE.md"
+    ]
+  },
+  "diagnostics": [
+    {
+      "id": "G79",
+      "accepted": false,
+      "sourceCommit": "c3d3cf9c",
+      "reportCommit": "f63679c3",
+      "comparison": "Emitted-image candidate C / matched-byte neutral N; two counter-free pairs, not production candidate versus original baseline.",
+      "eligibleCallees": 255,
+      "eligibleCallSites": 9096,
+      "genericRegistrationsBypassed": 75565159,
+      "registrationWarning": "Scheduler registration/pop bookkeeping, not a count of heap allocations.",
+      "checkerCpuGeometricRatio": 0.9118002219179218,
+      "checkerCpuRatio95CI": [
+        0.5045182662,
+        1.6478682744
+      ],
+      "elapsedGeometricRatio": 0.9135854557,
+      "ratioOfMedianWholeTreePhysicalFootprints": 1.0149794479,
+      "pairedWholeTreePhysicalRatios": [
+        1.2190165828,
+        0.8483335771
+      ],
+      "memoryGate": {
+        "requiredRatioOfMediansMax": 1,
+        "requiredEveryPairedRatioMax": 1.05,
+        "passed": false
+      },
+      "sourceUrls": [
+        "https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/local2039g79d1-results.json",
+        "https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/local2039g79d1-decision.json",
+        "https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/local2039g79d1-protocol.json"
+      ]
+    },
+    {
+      "id": "G78",
+      "accepted": false,
+      "sourceCommit": "62ddcd40",
+      "experimentCommit": "fc79ba40",
+      "reportCommit": "36cfb7b9",
+      "pairs": 4,
+      "postVerificationNodeCpuIntervalRatio": 0.1941831835,
+      "postVerificationWarning": "Not exclusive hashing CPU, not elapsed time, not end-to-end build speedup.",
+      "ratioOfMedianWholeTreePhysicalFootprints": 0.7331138706,
+      "checkerCpuGeometricRatio": 1.0353714152,
+      "sourceUrls": [
+        "https://github.com/IlyaGulya/bend/commit/36cfb7b9"
+      ]
+    },
+    {
+      "id": "G77",
+      "accepted": false,
+      "reportCommit": "51c3336b",
+      "finding": "Observer-on/off runs and physical sampling located instrumented high-water rises after checking; observer passivity and GC/JIT/OS causality were not established.",
+      "sourceUrls": [
+        "https://github.com/IlyaGulya/bend/commit/51c3336b"
+      ]
+    }
+  ],
+  "laterDiagnosticEnvironment": {
+    "node": "23.11.0",
+    "v8": "12.9.202.28-node.14",
+    "rssGuardGiB": 8,
+    "physicalGuardGiB": 8,
+    "timeoutSeconds": 600,
+    "samplingMilliseconds": 10,
+    "worker": [
+      256,
+      6144,
+      128
+    ],
+    "abi": 13,
+    "quantum": 64
+  },
+  "corpora": {
+    "scope": "Separate named source revisions and measures. Selected source declarations are not R12 checked definitions; no cross-corpus compiler-speedup claim.",
+    "selected": {
+      "record": "G56 selected corpus, reused by later diagnostics",
+      "sourceRevision": "9a2a13ab",
+      "files": 52,
+      "bendModules": 17,
+      "foreignJsFiles": 35,
+      "sourceDeclarations": 2954,
+      "expandSteps": 263032,
+      "checkSteps": 1975761
+    },
+    "r12FullRoot": {
+      "compilerSourceCommit": "5916d410",
+      "corpusEntries": 53,
+      "modules": 18,
+      "checkedDefinitions": 12456,
+      "validatedEvents": 13050,
+      "outputPatches": 0,
+      "excludedChecks": 0,
+      "expandChunkAdvances": 1069406,
+      "checkChunkAdvances": 10405401,
+      "emitChunkAdvances": 1284300,
+      "chunkQuantum": 64
+    },
+    "g56IterationCost": {
+      "selectedBaselineRuns": 6,
+      "selectedMedianSeconds": 71.6063119375,
+      "retainedFullSourceCohortMedianRangeSeconds": [323.171950916, 345.852395291],
+      "paired": false,
+      "compilerSpeedupClaim": false,
+      "original45SecondTargetPassed": false
+    },
+    "sourceUrls": [
+      "https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/local2039g56-summary.json",
+      "https://github.com/IlyaGulya/bend/blob/f63679c3/evals/receipts/root2039g24r12_native_fixedpoint.json"
+    ]
+  }
+}

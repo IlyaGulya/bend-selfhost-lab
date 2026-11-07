@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bend Compiler Lab — Faster is not enough.</title>
+    <meta
+      name="description"
+      content="An evidence-led engineering notebook on self-hosting Bend: shared FIR/BIR architecture, accepted performance results, and experiments that did not pass the memory gate."
+    />
+    <meta name="theme-color" content="#f2f4f3" />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Bend Compiler Lab — Faster is not enough."
+    />
+    <meta
+      property="og:description"
+      content="Shared compiler IR. Measured results. Rejected experiments kept in the record."
+    />
+    <meta property="og:url" content="https://bend-selfhost-lab.netlify.app/" />
+    <link rel="canonical" href="https://bend-selfhost-lab.netlify.app/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="preload"
+      href="/assets/fonts/archivo.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/assets/fonts/fragment-mono.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to the report</a>
+    <header class="site-header wrap">
+      <a class="brand" href="#main" aria-label="Bend Compiler Lab home"
+        ><span class="brand-mark">bend.</span
+        ><span class="brand-description">COMPILER<br />LAB</span></a
+      >
+      <nav class="main-nav" aria-label="Report sections">
+        <a href="#architecture">Architecture</a><a href="#results">Results</a
+        ><a href="#experiments">Experiments</a><a href="#method">Method</a>
+      </nav>
+      <a
+        class="repo-link"
+        href="https://github.com/IlyaGulya/bend/tree/selfhost/integration"
+        >GitHub
+        <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M6 18 18 6M6 6h12v12" /></svg
+      ></a>
+    </header>
+    <main id="main">
+      <div class="wrap">
+        <section class="hero" aria-labelledby="hero-title">
+          <div>
+            <h1 class="hero-title" id="hero-title">
+              <span>Faster</span><span>is not</span
+              ><span class="final-word">enough.</span>
+            </h1>
+            <p class="hero-copy">
+              Self-hosting Bend, with one shared compiler IR and a hard rule: a
+              CPU win must pass correctness and its memory gate, too.
+            </p>
+            <div class="hero-actions">
+              <a class="action-link primary" href="#results"
+                >Explore results
+                <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M12 4v16m-6-6 6 6 6-6" /></svg></a
+              ><a
+                class="action-link secondary"
+                href="https://github.com/IlyaGulya/bend/tree/selfhost/integration"
+                >View on GitHub</a>
+            </div>
+          </div>
+          <aside class="verdict-strip" aria-label="Separate checkpoint acceptance records">
+            <span class="stamp">SEPARATE<br />CHECKPOINTS</span>
+            <p>
+              <strong>G24 R12 · historical accepted.</strong><br />
+              <strong>G79 · not accepted.</strong> 75,565,159 frame registrations
+              bypassed; its memory gate failed.
+            </p>
+            <a href="#g79"
+              >Read the verdict
+              <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M6 18 18 6M6 6h12v12" /></svg
+            ></a>
+          </aside>
+          <figure
+            class="trace"
+            aria-label="Interactive compiler architecture: Bend source to checked FIR, shared lowering to BIR, then C or JavaScript"
+          >
+            <div class="trace-diagram">
+              <div
+                class="trace-main"
+                role="group"
+                aria-label="Choose a compiler stage to inspect"
+              >
+                <button
+                  class="stage"
+                  type="button"
+                  data-stage="source"
+                  aria-pressed="false"
+                  aria-controls="trace-detail"
+                >
+                  <span class="stage-symbol" aria-hidden="true">.b</span
+                  ><span class="stage-name">Bend source</span
+                  ><span class="stage-note">parse · check</span>
+                </button>
+                <div class="trace-connector" aria-hidden="true"></div>
+                <button
+                  class="stage"
+                  type="button"
+                  data-stage="fir"
+                  aria-pressed="true"
+                  aria-controls="trace-detail"
+                >
+                  <span class="stage-symbol" aria-hidden="true">F</span
+                  ><span class="stage-name">Checked FIR</span
+                  ><span class="stage-note">meaning · ownership</span>
+                </button>
+                <div class="trace-connector labelled">
+                  <span>shared lowering</span>
+                </div>
+                <button
+                  class="stage"
+                  type="button"
+                  data-stage="bir"
+                  aria-pressed="false"
+                  aria-controls="trace-detail"
+                >
+                  <span class="stage-symbol" aria-hidden="true">B</span
+                  ><span class="stage-name">Backend IR</span
+                  ><span class="stage-note">execution · values</span>
+                </button>
+                <div class="trace-fork" aria-hidden="true"></div>
+                <div class="trace-targets">
+                  <button
+                    class="stage"
+                    type="button"
+                    data-stage="c"
+                    aria-pressed="false"
+                    aria-controls="trace-detail"
+                  >
+                    <span class="stage-symbol" aria-hidden="true">C</span
+                    ><span class="stage-name">C backend</span></button
+                  ><button
+                    class="stage"
+                    type="button"
+                    data-stage="js"
+                    aria-pressed="false"
+                    aria-controls="trace-detail"
+                  >
+                    <span class="stage-symbol" aria-hidden="true">JS</span
+                    ><span class="stage-name">JS backend</span>
+                  </button>
+                </div>
+              </div>
+              <div
+                class="trace-detail"
+                id="trace-detail"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                <h2 id="trace-title">A checked semantic boundary</h2>
+                <p id="trace-description">
+                  Checked FIR preserves the front end’s meaning and ownership
+                  obligations. Compact handles and declaration-scoped storage
+                  keep representation choices separate from those obligations.
+                </p>
+                <a
+                  id="trace-source"
+                  href="https://github.com/IlyaGulya/bend/blob/f63679c3/bend2/selfhost/FIR_LAWS.md"
+                  ><span>Read the FIR contract</span
+                  ><svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M6 18 18 6M6 6h12v12" /></svg
+                ></a>
+              </div>
+              <figcaption class="trace-caption">
+                Select a stage to inspect its contract and source.
+              </figcaption>
+            </div>
+          </figure>
+        </section>
+
+        <section
+          class="chapter"
+          id="architecture"
+          aria-labelledby="architecture-title"
+        >
+          <div class="chapter-intro">
+            <h2 id="architecture-title">
+              One semantic boundary.<br />Two backends.
+            </h2>
+            <p>
+              The front end decides what a program means. Shared lowering makes
+              its execution explicit. Backends render that common program into C
+              or JavaScript—not two independently evolving implementations of
+              the language.
+            </p>
+          </div>
+          <div class="architecture-notes">
+            <article class="architecture-note">
+              <h3>Keep meaning in FIR.</h3>
+              <p>
+                Checked front-end IR carries semantic and affine obligations
+                across the boundary. Representation changes must preserve these
+                obligations; a faster emitter is not permission to weaken them.
+              </p>
+              <a
+                class="source-link"
+                href="https://github.com/IlyaGulya/bend/blob/f63679c3/bend2/selfhost/FIR_LAWS.md"
+                >FIR_LAWS.md
+                <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M6 18 18 6M6 6h12v12" /></svg
+              ></a>
+            </article>
+            <article class="architecture-note">
+              <h3>Lower decisions once.</h3>
+              <p>
+                BIR is the shared place for executable structure, calls,
+                captures, and value representation. Target emitters should not
+                quietly invent different evaluation or ownership rules.
+              </p>
+              <a
+                class="source-link"
+                href="https://github.com/IlyaGulya/bend/blob/f63679c3/bend2/selfhost/BIR_LAWS.md"
+                >BIR_LAWS.md
+                <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M6 18 18 6M6 6h12v12" /></svg
+              ></a>
+            </article>
+            <article class="architecture-note">
+              <h3>Make data pay its way.</h3>
+              <p>
+                Use compact, scoped structures and explicit lifetimes. Count
+                retained storage as well as work removed. Fewer scheduler
+                operations alone did not guarantee a smaller process.
+              </p>
+              <a
+                class="source-link"
+                href="https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/SELFHOST_IR_ARCHITECTURE.md"
+                >Architecture &amp; constraints
+                <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M6 18 18 6M6 6h12v12" /></svg
+              ></a>
+            </article>
+          </div>
+        </section>
+
+        <section class="chapter" id="results" aria-labelledby="results-title">
+          <div class="chapter-intro">
+            <h2 id="results-title">What we can<br />actually claim.</h2>
+            <p>
+              G24 R12 is a historical accepted checkpoint, not the latest
+              experiment. Three same-host pairs on the full frozen compiler root
+              produced these median durations. Both execution modes passed their
+              recorded acceptance work.
+            </p>
+          </div>
+          <div class="results-layout">
+            <figure class="result-figure" aria-labelledby="comparison-title">
+              <div class="figure-toolbar">
+                <span class="status accepted">HISTORICAL · ACCEPTED</span>
+                <div
+                  class="segmented"
+                  role="group"
+                  aria-label="Choose compiler execution runtime"
+                >
+                  <button
+                    type="button"
+                    data-backend="native"
+                    aria-pressed="true"
+                  >
+                    Native C</button
+                  ><button type="button" data-backend="js" aria-pressed="false">
+                    JavaScript
+                  </button>
+                </div>
+              </div>
+              <div class="result-heading">
+                <h3 id="comparison-title">Native compiler root</h3>
+                <p class="result-delta">
+                  <strong id="comparison-delta">13.3%</strong
+                  ><span>less median wall time</span>
+                </p>
+              </div>
+              <table class="duration-table">
+                <caption class="sr-only">
+                  Historical G24 R12 median wall duration, three same-host pairs
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Version</th>
+                    <th scope="col" class="bar-cell">Relative duration</th>
+                    <th scope="col">Median</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Baseline</td>
+                    <td class="bar-cell">
+                      <span
+                        class="duration-bar"
+                        id="baseline-bar"
+                        style="--duration-ratio: 1"
+                        aria-hidden="true"
+                      ></span>
+                    </td>
+                    <td class="duration" id="baseline-duration">94.619 s</td>
+                  </tr>
+                  <tr>
+                    <td>G24 R12</td>
+                    <td class="bar-cell">
+                      <span
+                        class="duration-bar accepted"
+                        id="candidate-bar"
+                        style="--duration-ratio: 0.866552054840185"
+                        aria-hidden="true"
+                      ></span>
+                    </td>
+                    <td class="duration" id="candidate-duration">81.993 s</td>
+                  </tr>
+                </tbody>
+              </table>
+              <figcaption class="figure-note">
+                Frozen G22 source closure: G23 control (04e0b600) versus R12
+                (5916d410), three same-host pairs. Native uses diagnostic -O1,
+                not the official build default. This is compiler-execution
+                pipeline time, not a fresh C toolchain build. The JavaScript RSS
+                ranges overlap; no individual slice gain is claimed.
+              </figcaption>
+              <p class="figure-note" id="comparison-memory">
+                Native median RSS: +2.99%. This historical checkpoint passed its
+                recorded gates; the later diagnostics use a separate
+                physical-footprint gate.
+              </p>
+              <p class="figure-note">
+                The original orchestrator FAIL is preserved: runtime gates and
+                all 12 timed commands passed; a final summary wrapper was repaired
+                offline against authenticated reports, without measurement reruns.
+              </p>
+              <div class="figure-sources">
+                <a
+                  class="source-link"
+                  id="comparison-source"
+                  href="https://github.com/IlyaGulya/bend/blob/f63679c3/evals/receipts/producer2039g24r12_throughput.json"
+                  >Raw timing receipts
+                  <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M6 18 18 6M6 6h12v12" /></svg></a
+                ><a class="source-link" href="/data/evidence.json" download
+                  >Public data JSON
+                  <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M12 4v16m-6-6 6 6 6-6" /></svg
+                ></a>
+                <a class="source-link"
+                  href="https://github.com/IlyaGulya/bend/blob/f63679c3/evals/receipts/producer2039g24r12_summary_repair.json"
+                  >Aggregation repair
+                  <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M6 18 18 6M6 6h12v12" />
+                  </svg>
+                </a>
+              </div>
+              <p class="sr-only" id="comparison-update" aria-live="polite"></p>
+              <noscript
+                ><p class="figure-note">
+                  JavaScript medians: 305.990 s baseline → 266.465 s R12, 12.9%
+                  less median wall time. Target switching requires JavaScript;
+                  the complete evidence remains linked above.
+                </p></noscript
+              >
+            </figure>
+            <aside class="proof-note" aria-labelledby="proof-title">
+              <h3 id="proof-title">
+                Self-hosted means<br />it emitted itself.
+              </h3>
+              <p>
+                The accepted record includes a native seed → JavaScript stage 1 →
+                JavaScript stage 2 chain and a byte-identical JS compiler image.
+                This is not pure-C self-hosting.
+              </p>
+              <p>
+                Full-root validation covered 12,456 checked definitions and
+                13,050 validated events, with no output patches or excluded checks.
+                Runtime and AST checks support this checkpoint, not a universal
+                semantic proof or a GPU/WASM claim.
+              </p>
+              <div class="fixedpoint">
+                <strong>31,758,507</strong
+                ><span class="unit"
+                  >bytes in the historical fixedpoint image</span
+                >
+                <div class="checksum">
+                  <code id="fixedpoint-sha"
+                    >85aff9e534c18b4a1d6acac5f3237571dabc58f2c1a75a7ea2040f1c477ab60e</code
+                  ><button
+                    class="copy-button"
+                    id="copy-checksum"
+                    type="button"
+                    aria-label="Copy the historical fixedpoint SHA-256"
+                  >
+                    <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                      <rect x="8" y="8" width="12" height="12" />
+                      <path d="M16 8V4H4v12h4" />
+                    </svg>
+                  </button>
+                </div>
+                <p class="copy-feedback" id="copy-feedback" role="status"></p>
+              </div>
+              <a
+                class="source-link"
+                href="https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/SELFHOST_IR_ARCHITECTURE.md"
+                >Read the checkpoint’s limits
+                <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M6 18 18 6M6 6h12v12" /></svg
+              ></a>
+            </aside>
+          </div>
+        </section>
+
+        <section
+          class="chapter"
+          id="experiments"
+          aria-labelledby="experiments-title"
+        >
+          <h2 id="experiments-title">The speedups<br />we didn’t ship.</h2>
+          <p class="study-intro">
+            A useful experiment can fail admission. These later diagnostics
+            remain on separate branches; none earned a new compiler promotion.
+            Each comparison keeps its own denominator and workload.
+          </p>
+          <details class="experiment" id="g79" open>
+            <summary>
+              <span class="experiment-id">G79</span
+              ><span class="experiment-title"
+                >Projection leaves, without generic frames</span
+              ><span class="status rejected">NOT ACCEPTED</span
+              ><span class="experiment-plus" aria-hidden="true"></span>
+            </summary>
+            <div class="experiment-body">
+              <p>
+                A structural specialization bypassed generic scheduler
+                bookkeeping for 255 eligible callees across 9,096 call sites.
+                The counted registrations are not a count of heap allocations.
+                This was an emitted-image diagnostic, not a promoted BIR
+                transformation.
+              </p>
+              <div
+                class="table-scroll"
+                role="region"
+                aria-label="G79 candidate compared with neutral control"
+                tabindex="0"
+              >
+                <table class="data-table">
+                  <caption>
+                    Candidate C / matched-byte neutral N · 2 counter-free pairs
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Measurement</th>
+                      <th scope="col">Point estimate</th>
+                      <th scope="col">Admission</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Checker CPU, geometric mean</td>
+                      <td class="number good">−8.82%</td>
+                      <td>CPU point gate passed</td>
+                    </tr>
+                    <tr>
+                      <td>Elapsed time, geometric mean</td>
+                      <td class="number">−8.64%</td>
+                      <td>Diagnostic only</td>
+                    </tr>
+                    <tr>
+                      <td>Whole-tree physical footprint, median</td>
+                      <td class="number bad">+1.50%</td>
+                      <td class="bad">Memory gate failed</td>
+                    </tr>
+                    <tr>
+                      <td>Worst paired physical footprint</td>
+                      <td class="number bad">+21.90%</td>
+                      <td class="bad">Pair ceiling failed</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="experiment-finding">
+                <p>
+                  <strong>What held.</strong> Six selected-corpus full-work runs
+                  passed. Semantic checks exercised emitted Base, returns,
+                  captures, scheduler depth, and boundary negatives. The public
+                  boxed ABI stayed unchanged.
+                </p>
+                <p>
+                  <strong>What did not.</strong> The memory gate required median
+                  C/N ≤ 1 and every pair ≤ 1.05. Both conditions failed. The CPU
+                  ratio’s 95% interval spans 0.505–1.648; two pairs do not
+                  establish a reliable speedup.
+                </p>
+              </div>
+              <div class="experiment-links">
+                <a
+                  class="source-link"
+                  href="https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/local2039g79d1-results.json"
+                  >Results &amp; raw pairs
+                  <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M6 18 18 6M6 6h12v12" /></svg></a
+                ><a
+                  class="source-link"
+                  href="https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/local2039g79d1-decision.json"
+                  >Admission decision
+                  <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M6 18 18 6M6 6h12v12" /></svg></a
+                ><a
+                  class="source-link"
+                  href="https://github.com/IlyaGulya/bend/tree/selfhost/g79-projection-e3afg2vc"
+                  >Experiment branch
+                  <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M6 18 18 6M6 6h12v12" /></svg
+                ></a>
+              </div>
+            </div>
+          </details>
+          <details class="experiment" id="g78">
+            <summary>
+              <span class="experiment-id">G78</span
+              ><span class="experiment-title"
+                >Stream verification, not the whole file</span
+              ><span class="status rejected">NOT PROMOTED</span
+              ><span class="experiment-plus" aria-hidden="true"></span>
+            </summary>
+            <div class="experiment-body">
+              <p>
+                Whole-file verification reads were replaced with a reusable 64
+                KiB buffer, explicit short-read handling, and reliable
+                descriptor cleanup. The diagnostic isolated verification
+                overhead without replacing the compiler image or frozen input.
+              </p>
+              <div
+                class="table-scroll"
+                role="region"
+                aria-label="G78 candidate compared with baseline"
+                tabindex="0"
+              >
+                <table class="data-table">
+                  <caption>
+                    Candidate / baseline · 4 paired selected-corpus comparisons
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Measurement</th>
+                      <th scope="col">Point estimate</th>
+                      <th scope="col">Scope</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Post-verification Node CPU interval</td>
+                      <td class="number good">−80.58%</td>
+                      <td>Not end-to-end compile time</td>
+                    </tr>
+                    <tr>
+                      <td>Whole-tree physical footprint, median</td>
+                      <td class="number good">−26.69%</td>
+                      <td>One pair still increased</td>
+                    </tr>
+                    <tr>
+                      <td>Checker CPU, geometric mean</td>
+                      <td class="number bad">+3.54%</td>
+                      <td class="bad">Overall gates failed</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>
+                The CPU interval is not exclusive hashing CPU. A large local
+                improvement did not establish an admitted full-work improvement.
+                The source candidate remains isolated; no main-branch promotion
+                followed.
+              </p>
+              <div class="experiment-links">
+                <a
+                  class="source-link"
+                  href="https://github.com/IlyaGulya/bend/commit/36cfb7b9"
+                  >Committed measurements &amp; verdict
+                  <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M6 18 18 6M6 6h12v12" /></svg></a
+                ><a
+                  class="source-link"
+                  href="https://github.com/IlyaGulya/bend/tree/selfhost/g78-hash-623_t7sq"
+                  >Experiment branch
+                  <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M6 18 18 6M6 6h12v12" /></svg
+                ></a>
+              </div>
+            </div>
+          </details>
+          <details class="experiment" id="g77">
+            <summary>
+              <span class="experiment-id">G77</span
+              ><span class="experiment-title"
+                >Measure the observer before trusting it</span
+              ><span class="status diagnostic">DIAGNOSTIC</span
+              ><span class="experiment-plus" aria-hidden="true"></span>
+            </summary>
+            <div class="experiment-body">
+              <p>
+                Paired observer-on/off runs and a native physical-memory sampler
+                placed instrumented Node high-water rises after checking, around
+                verification. That changed the next hypothesis—not the
+                compiler’s acceptance status.
+              </p>
+              <p>
+                Heap-statistics calls can themselves allocate. GC callbacks did
+                not cover every isolate or all pause time. No forced collection
+                was used, and the data did not prove that the observer was
+                perfectly passive or establish GC/JIT/OS causality.
+              </p>
+              <div class="experiment-links">
+                <a
+                  class="source-link"
+                  href="https://github.com/IlyaGulya/bend/commit/51c3336b"
+                  >Observer evidence &amp; limitations
+                  <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M6 18 18 6M6 6h12v12" /></svg></a
+                ><a
+                  class="source-link"
+                  href="https://github.com/IlyaGulya/bend/tree/selfhost/g77-natural-31floyvd"
+                  >Experiment branch
+                  <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M6 18 18 6M6 6h12v12" /></svg
+                ></a>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section class="chapter" id="method" aria-labelledby="method-title">
+          <div class="method-layout">
+            <div class="method-copy">
+              <h2 id="method-title">
+                A smaller loop.<br />Not a smaller standard.
+              </h2>
+              <p>
+                The later screening loop uses a frozen source corpus and
+                recorded work counts. It is smaller than the full compiler root;
+                it is not a substitute for a full bootstrap or a license to
+                compare different workloads as if they were equal.
+              </p>
+              <p>
+                Only promising candidates should pay the full self-hosting cost.
+                Admission still requires behavior, work, memory, runtime, and
+                byte-fixedpoint evidence at the appropriate gate.
+              </p>
+            </div>
+            <div>
+              <div
+                class="table-scroll"
+                role="region"
+                aria-label="Historical G56 selected corpus work and iteration cost"
+                tabindex="0"
+              >
+                <table class="data-table corpus-table">
+                  <caption>
+                    G56 selected corpus · work and observed iteration cost
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Work</th>
+                      <th scope="col">Selected screening corpus</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Source files</td>
+                      <td class="number">52</td>
+                    </tr>
+                    <tr>
+                      <td>Bend modules</td>
+                      <td class="number">17</td>
+                    </tr>
+                    <tr>
+                      <td>Foreign-JS files</td>
+                      <td class="number">35</td>
+                    </tr>
+                    <tr>
+                      <td>Source declarations</td>
+                      <td class="number">2,954</td>
+                    </tr>
+                    <tr>
+                      <td>Expand steps</td>
+                      <td class="number">263,032</td>
+                    </tr>
+                    <tr>
+                      <td>Check steps</td>
+                      <td class="number">1,975,761</td>
+                    </tr>
+                    <tr>
+                      <td>Median iteration wall time (6 runs)</td>
+                      <td class="number">71.606 s</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="corpus-note">
+                Retained full-source cohort medians were 323.172–345.852 s.
+                Different workload and separate cohorts: this is descriptive
+                iteration-cost evidence, not a paired compiler speedup or emitter
+                benchmark. The original 45 s target failed; limits were not relaxed.
+              </p>
+              <a
+                class="source-link"
+                href="https://github.com/IlyaGulya/bend/blob/f63679c3/checkpoints/local2039g56-summary.json"
+                >Corpus, cost &amp; qualification limits
+                <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M6 18 18 6M6 6h12v12" /></svg
+              ></a>
+            </div>
+          </div>
+          <dl
+            class="method-band"
+            aria-label="Later G78–G79 diagnostic environment"
+          >
+            <div>
+              <dt>RUNTIME</dt>
+              <dd>Node 23.11.0<br />V8 12.9.202.28-node.14</dd>
+            </div>
+            <div>
+              <dt>RESOURCE GUARD</dt>
+              <dd>8 GiB RSS &amp; physical<br />600 s · original limits</dd>
+            </div>
+            <div>
+              <dt>WORKER SCHEDULER</dt>
+              <dd>256 / 6144 / 128<br />ABI 13 · quantum 64</dd>
+            </div>
+            <div>
+              <dt>DECISION RULE</dt>
+              <dd>Correctness first.<br />CPU and memory together.</dd>
+            </div>
+          </dl>
+          <p class="method-footnote">
+            Environment above applies to the later diagnostics, not
+            retroactively to every historical run. Timing rows, commands,
+            hashes, confidence intervals, and failed receipts remain in the
+            committed evidence.
+          </p>
+        </section>
+        <section class="closing" aria-labelledby="closing-title">
+          <h2 id="closing-title">The record is part<br />of the result.</h2>
+          <a
+            class="action-link primary"
+            href="https://github.com/IlyaGulya/bend/tree/selfhost/integration"
+            >Open the research on GitHub
+            <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M6 18 18 6M6 6h12v12" /></svg
+          ></a>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer wrap">
+      <p>
+        Independent engineering notes on Bend self-hosting. Not an official Bend
+        release.<br />Historical acceptance: G24 R12. Latest record: G79, not
+        accepted. Source snapshot
+        <a href="https://github.com/IlyaGulya/bend/commit/f63679c3">f63679c3</a
+        >.
+      </p>
+      <div class="footer-links">
+        <a href="/data/evidence.json">Data</a
+        ><a href="https://github.com/IlyaGulya/bend-selfhost-lab"
+          >Website source</a
+        ><a
+          href="https://github.com/IlyaGulya/bend-selfhost-lab/tree/main/public/assets/fonts"
+          >Font licenses</a
+        >
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+[
+  {
+    "family": "archivo",
+    "source": "https://cdn.jsdelivr.net/npm/@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2",
+    "packageVersion": "5.3.0",
+    "sha256": "8f704806dbedeaaeca334b11ec348bc3ac3a439d6431544b3afb54f534ee4967",
+    "bytes": 34928,
+    "license": "SIL Open Font License 1.1",
+    "licenseSource": "https://cdn.jsdelivr.net/npm/@fontsource-variable/archivo/LICENSE"
+  },
+  {
+    "family": "fragment-mono",
+    "source": "https://cdn.jsdelivr.net/npm/@fontsource/fragment-mono/files/fragment-mono-latin-400-normal.woff2",
+    "packageVersion": "5.3.0",
+    "sha256": "44c4e39bff5e76652a24a872cbebabccbcfb20f62c4633b27c1f2745cba86b56",
+    "bytes": 25224,
+    "license": "SIL Open Font License 1.1",
+    "licenseSource": "https://cdn.jsdelivr.net/npm/@fontsource/fragment-mono/LICENSE"
+  }
+]
