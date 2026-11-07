@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-07T06:55:47Z",
+  "title": "Design System: Bend Compiler Lab",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Cool Folio Paper",
+        "canonical": "oklch(96.5% 0.0025 165.1)",
+        "tonalRamp": ["oklch(15.0% 0.0025 165.1)", "oklch(27.0% 0.0025 165.1)", "oklch(39.0% 0.0025 165.1)", "oklch(51.0% 0.0025 165.1)", "oklch(63.0% 0.0025 165.1)", "oklch(75.0% 0.0025 165.1)", "oklch(87.0% 0.0025 165.1)", "oklch(95.0% 0.0022 165.1)"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Green-Black Ink",
+        "canonical": "oklch(26.5% 0.0170 183.7)",
+        "tonalRamp": ["oklch(15.0% 0.0170 183.7)", "oklch(27.0% 0.0170 183.7)", "oklch(39.0% 0.0170 183.7)", "oklch(51.0% 0.0170 183.7)", "oklch(63.0% 0.0170 183.7)", "oklch(75.0% 0.0170 183.7)", "oklch(87.0% 0.0170 183.7)", "oklch(95.0% 0.0153 183.7)"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Sage Annotation",
+        "canonical": "oklch(49.4% 0.0280 166.1)",
+        "tonalRamp": ["oklch(15.0% 0.0280 166.1)", "oklch(27.0% 0.0280 166.1)", "oklch(39.0% 0.0280 166.1)", "oklch(51.0% 0.0280 166.1)", "oklch(63.0% 0.0280 166.1)", "oklch(75.0% 0.0280 166.1)", "oklch(87.0% 0.0280 166.1)", "oklch(95.0% 0.0252 166.1)"]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline Lead",
+        "canonical": "oklch(81.3% 0.0147 162.4)",
+        "tonalRamp": ["oklch(15.0% 0.0147 162.4)", "oklch(27.0% 0.0147 162.4)", "oklch(39.0% 0.0147 162.4)", "oklch(51.0% 0.0147 162.4)", "oklch(63.0% 0.0147 162.4)", "oklch(75.0% 0.0147 162.4)", "oklch(87.0% 0.0147 162.4)", "oklch(95.0% 0.0132 162.4)"]
+      },
+      "yellow": {
+        "role": "primary",
+        "displayName": "Evidence Acid",
+        "canonical": "oklch(90.8% 0.1746 117.0)",
+        "tonalRamp": ["oklch(15.0% 0.1746 117.0)", "oklch(27.0% 0.1746 117.0)", "oklch(39.0% 0.1746 117.0)", "oklch(51.0% 0.1746 117.0)", "oklch(63.0% 0.1746 117.0)", "oklch(75.0% 0.1746 117.0)", "oklch(87.0% 0.1746 117.0)", "oklch(95.0% 0.1571 117.0)"]
+      },
+      "positive": {
+        "role": "secondary",
+        "displayName": "Pass Green",
+        "canonical": "oklch(40.4% 0.0675 159.8)",
+        "tonalRamp": ["oklch(15.0% 0.0675 159.8)", "oklch(27.0% 0.0675 159.8)", "oklch(39.0% 0.0675 159.8)", "oklch(51.0% 0.0675 159.8)", "oklch(63.0% 0.0675 159.8)", "oklch(75.0% 0.0675 159.8)", "oklch(87.0% 0.0675 159.8)", "oklch(95.0% 0.0607 159.8)"]
+      },
+      "warning": {
+        "role": "secondary",
+        "displayName": "Rejection Rust",
+        "canonical": "oklch(44.2% 0.1044 38.4)",
+        "tonalRamp": ["oklch(15.0% 0.1044 38.4)", "oklch(27.0% 0.1044 38.4)", "oklch(39.0% 0.1044 38.4)", "oklch(51.0% 0.1044 38.4)", "oklch(63.0% 0.1044 38.4)", "oklch(75.0% 0.1044 38.4)", "oklch(87.0% 0.1044 38.4)", "oklch(95.0% 0.0940 38.4)"]
+      },
+      "warning-paper": {
+        "role": "secondary",
+        "displayName": "Rejection Wash",
+        "canonical": "oklch(92.4% 0.0204 58.1)",
+        "tonalRamp": ["oklch(15.0% 0.0204 58.1)", "oklch(27.0% 0.0204 58.1)", "oklch(39.0% 0.0204 58.1)", "oklch(51.0% 0.0204 58.1)", "oklch(63.0% 0.0204 58.1)", "oklch(75.0% 0.0204 58.1)", "oklch(87.0% 0.0204 58.1)", "oklch(95.0% 0.0184 58.1)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The page thesis only; tightly tracked multi-line Archivo." },
+      "headline": { "displayName": "Headline", "purpose": "Chapter openers and closing statements." },
+      "title": { "displayName": "Title", "purpose": "Note, figure, and experiment headings; locally narrows to 18-27px." },
+      "body": { "displayName": "Body", "purpose": "Running prose at 17px/1.65 within a 68ch measure." },
+      "label": { "displayName": "Label", "purpose": "Status stamps, metadata keys, captions, and source filenames in Fragment Mono." },
+      "data": { "displayName": "Data", "purpose": "Duration values at 15px with normal line-height and numeric table cells at local sizes use Fragment Mono with tabular figures; prominent delta and fixedpoint figures stay in Archivo." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "ease-folio", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "The only easing curve; used for stage and data-bar state changes." },
+      { "name": "duration-state", "value": "180ms", "purpose": "Stage fill and border acknowledgement on hover and selection." },
+      { "name": "duration-ratio", "value": "500ms", "purpose": "Transform-only scale of comparison bars when the runtime switches." },
+      { "name": "reduced-motion", "value": "0ms", "purpose": "prefers-reduced-motion removes all transitions, animations, and smooth scrolling." }
+    ],
+    "breakpoints": [
+      { "name": "wide", "value": "1450px" },
+      { "name": "compact", "value": "1050px" },
+      { "name": "mobile", "value": "760px" },
+      { "name": "narrow", "value": "370px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "action-primary",
+      "description": "Square ink action used for the report's primary destination; hover confirms with pass green.",
+      "html": "<a class='ds-action-primary' href='#results'>Explore results <svg class='ds-icon' viewBox='0 0 24 24' aria-hidden='true'><path d='M12 4v16m-6-6 6 6 6-6'/></svg></a>",
+      "css": ".ds-action-primary { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; padding: 12px 19px; background: var(--ink, #1c2826); color: var(--paper, #f2f4f3); font-family: var(--sans, Archivo, system-ui, sans-serif); font-size: 15px; font-weight: 600; line-height: 1.2; text-decoration: none; border-radius: 0; }\n.ds-action-primary:hover { background: var(--positive, #23543c); }\n.ds-action-primary:focus-visible { outline: 2px solid var(--ink, #1c2826); outline-offset: 5px; }\n.ds-icon { width: 18px; height: 18px; flex: 0 0 18px; stroke: currentColor; stroke-width: 1.7; fill: none; }"
+    },
+    {
+      "name": "Secondary source action",
+      "kind": "button",
+      "description": "Ruled text action carrying the source link; never a second filled button.",
+      "html": "<a class='ds-action-secondary' href='https://github.com/IlyaGulya/bend/tree/selfhost/integration'>View on GitHub <svg class='ds-icon' viewBox='0 0 24 24' aria-hidden='true'><path d='M6 18 18 6M6 6h12v12'/></svg></a>",
+      "css": ".ds-action-secondary { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; color: var(--ink, #1c2826); font-family: var(--sans, Archivo, system-ui, sans-serif); font-size: 15px; font-weight: 600; line-height: 1.2; text-decoration: none; border-bottom: 1px solid var(--ink, #1c2826); }\n.ds-action-secondary:focus-visible { outline: 2px solid var(--ink, #1c2826); outline-offset: 5px; }\n.ds-icon { width: 18px; height: 18px; flex: 0 0 18px; stroke: currentColor; stroke-width: 1.7; fill: none; }"
+    },
+    {
+      "name": "Architecture stage node",
+      "kind": "custom",
+      "description": "Square stage button in the compiler trace; selected stage fills Evidence Acid.",
+      "html": "<div class='ds-stage-stack'><button class='ds-stage' type='button' aria-pressed='false'><span class='ds-stage-symbol' aria-hidden='true'>.b</span><span class='ds-stage-name'>Bend source</span><span class='ds-stage-note'>parse · check</span></button><div class='ds-connector'></div><button class='ds-stage' type='button' aria-pressed='true'><span class='ds-stage-symbol' aria-hidden='true'>F</span><span class='ds-stage-name'>Checked FIR</span><span class='ds-stage-note'>meaning · ownership</span></button></div>",
+      "css": ".ds-stage-stack { width: 100%; max-width: 382px; color: var(--ink, #1c2826); font-family: var(--sans, Archivo, system-ui, sans-serif); }\n.ds-stage { display: flex; align-items: center; gap: 13px; width: 100%; min-height: 52px; padding: 12px 15px; background: transparent; color: inherit; border: 1px solid var(--line, #bac5bf); border-radius: 0; text-align: left; font: inherit; cursor: pointer; transition: background-color 180ms cubic-bezier(0.16, 1, 0.3, 1), border-color 180ms cubic-bezier(0.16, 1, 0.3, 1); }\n.ds-stage:hover { background: #e8ece9; border-color: var(--muted, #53675e); }\n.ds-stage[aria-pressed='true'] { background: var(--yellow, #d9ef57); border-color: var(--ink, #1c2826); }\n.ds-stage:focus-visible { outline: 2px solid var(--ink, #1c2826); outline-offset: 5px; }\n.ds-stage-symbol { display: inline-flex; align-items: center; justify-content: center; width: 25px; height: 25px; flex: 0 0 25px; border: 1px solid currentColor; font: 400 11px/1 var(--mono, 'Fragment Mono', monospace); }\n.ds-stage-name { font-size: 16px; font-weight: 550; line-height: 1.3; }\n.ds-stage-note { margin-left: auto; color: var(--muted, #53675e); font: 400 12px/1.5 var(--mono, 'Fragment Mono', monospace); text-align: right; }\n.ds-connector { position: relative; height: 29px; }\n.ds-connector::before { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; border-left: 1px solid var(--ink, #1c2826); }\n@media (prefers-reduced-motion: reduce) { .ds-stage { transition: none; } }"
+    },
+    {
+      "name": "Runtime segmented control",
+      "kind": "custom",
+      "description": "Two-state runtime switch with a 3px active underline over a 1px rule.",
+      "html": "<div class='ds-segmented' role='group' aria-label='Choose compiler execution runtime'><button type='button' aria-pressed='true'>Native C</button><button type='button' aria-pressed='false'>JavaScript</button></div>",
+      "css": ".ds-segmented { display: flex; border-bottom: 1px solid var(--ink, #1c2826); font-family: var(--sans, Archivo, system-ui, sans-serif); }\n.ds-segmented button { background: none; border: 0; border-bottom: 3px solid transparent; margin-bottom: -1px; padding: 9px 13px; min-height: 44px; color: var(--ink, #1c2826); font-family: inherit; font-size: 13px; font-weight: 400; line-height: 1.2; cursor: pointer; }\n.ds-segmented button[aria-pressed='true'] { border-bottom-color: var(--ink, #1c2826); font-weight: 650; }\n.ds-segmented button:hover { background: #e6ebe7; }\n.ds-segmented button:focus-visible { outline: 2px solid var(--ink, #1c2826); outline-offset: 5px; }"
+    },
+    {
+      "name": "Status stamp",
+      "kind": "chip",
+      "description": "Mono status label with a square mark and explicit words for accepted, rejected, or diagnostic.",
+      "html": "<div class='ds-status-row'><span class='ds-status ds-status--accepted'>HISTORICAL · ACCEPTED</span><span class='ds-status ds-status--rejected'>NOT ACCEPTED</span><span class='ds-status ds-status--diagnostic'>DIAGNOSTIC</span></div>",
+      "css": ".ds-status-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }\n.ds-status { display: inline-flex; align-items: center; gap: 7px; padding: 6px 8px; border: 1px solid currentColor; border-radius: 0; font: 400 12px/1.5 var(--mono, 'Fragment Mono', monospace); letter-spacing: 0.025em; white-space: nowrap; }\n.ds-status::before { content: ''; width: 5px; height: 5px; background: currentColor; flex: 0 0 5px; }\n.ds-status--accepted { color: var(--positive, #23543c); }\n.ds-status--rejected { color: var(--warning, #823b24); background: var(--warning-paper, #f1e3d9); }\n.ds-status--diagnostic { color: var(--muted, #53675e); }"
+    },
+    {
+      "name": "Checkpoint verdict band",
+      "kind": "custom",
+      "description": "The single yellow band naming separate accepted and rejected checkpoints without merging cohorts.",
+      "html": "<aside class='ds-verdict' aria-label='Separate checkpoint acceptance records'><span class='ds-verdict-stamp'>SEPARATE<br>CHECKPOINTS</span><p><strong>G24 R12 · historical accepted.</strong><br><strong>G79 · not accepted.</strong> 75,565,159 frame registrations bypassed; its memory gate failed.</p><a class='ds-verdict-link' href='#g79'>Read the verdict <svg class='ds-icon' viewBox='0 0 24 24' aria-hidden='true'><path d='M6 18 18 6M6 6h12v12'/></svg></a></aside>",
+      "css": ".ds-verdict { display: grid; grid-template-columns: 106px 1fr auto; gap: 24px; align-items: center; padding: 24px 28px; background: var(--yellow, #d9ef57); color: var(--ink, #1c2826); font-family: var(--sans, Archivo, system-ui, sans-serif); }\n.ds-verdict-stamp { font: 400 12px/1.5 var(--mono, 'Fragment Mono', monospace); }\n.ds-verdict p { margin: 0; max-width: none; font-size: 20px; line-height: 1.4; letter-spacing: -0.015em; }\n.ds-verdict strong { font-weight: 650; }\n.ds-verdict-link { display: flex; align-items: center; gap: 9px; color: inherit; font-size: 13px; white-space: nowrap; text-underline-offset: 0.22em; text-decoration-thickness: 1px; }\n.ds-verdict-link:hover { text-decoration-thickness: 2px; }\n.ds-verdict-link:focus-visible { outline: 2px solid var(--ink, #1c2826); outline-offset: 5px; }\n.ds-icon { width: 18px; height: 18px; flex: 0 0 18px; stroke: currentColor; stroke-width: 1.7; fill: none; }\n@media (max-width: 760px) { .ds-verdict { grid-template-columns: 1fr; gap: 13px 18px; padding: 22px 20px; } }"
+    },
+    {
+      "name": "Duration comparison table",
+      "kind": "custom",
+      "description": "Two-row duration ledger whose bars animate transform scale only.",
+      "html": "<table class='ds-duration-table'><caption class='ds-sr-only'>Historical median wall duration, three same-host pairs</caption><thead><tr><th scope='col'>Version</th><th scope='col' class='ds-bar-cell'>Relative duration</th><th scope='col'>Median</th></tr></thead><tbody><tr><td>Baseline</td><td class='ds-bar-cell'><span class='ds-duration-bar' style='--duration-ratio: 1' aria-hidden='true'></span></td><td class='ds-duration'>94.619 s</td></tr><tr><td>G24 R12</td><td class='ds-bar-cell'><span class='ds-duration-bar ds-duration-bar--accepted' style='--duration-ratio: 0.866552' aria-hidden='true'></span></td><td class='ds-duration'>81.993 s</td></tr></tbody></table>",
+      "css": ".ds-duration-table { width: 100%; border-collapse: collapse; font-family: var(--sans, Archivo, system-ui, sans-serif); color: var(--ink, #1c2826); }\n.ds-duration-table th { padding-bottom: 15px; text-align: left; font-size: 12px; font-weight: 400; color: var(--muted, #53675e); }\n.ds-duration-table th:first-child { width: 24%; }\n.ds-duration-table th:last-child { text-align: right; }\n.ds-duration-table td { padding: 15px 0; border-top: 1px solid var(--line, #bac5bf); font-size: 14px; vertical-align: middle; }\n.ds-bar-cell { width: 50%; padding-inline: 8px 20px; }\n.ds-duration-bar { display: block; height: 29px; min-width: 2px; width: 100%; transform: scaleX(var(--duration-ratio, 1)); transform-origin: left center; background: var(--ink, #1c2826); transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1); }\n.ds-duration-bar--accepted { background: var(--yellow, #d9ef57); border: 1px solid var(--ink, #1c2826); }\n.ds-duration { font: 400 15px/1 var(--mono, 'Fragment Mono', monospace); white-space: nowrap; text-align: right; }\n.ds-sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); }\n@media (prefers-reduced-motion: reduce) { .ds-duration-bar { transition: none; } }"
+    },
+    {
+      "name": "Experiment disclosure",
+      "kind": "custom",
+      "description": "Ruled native details row with a mono identifier, title, status, and drawn plus.",
+      "html": "<details class='ds-experiment' open><summary><span class='ds-exp-id'>G79</span><span class='ds-exp-title'>Projection leaves, without generic frames</span><span class='ds-exp-status'>NOT ACCEPTED</span><span class='ds-exp-plus' aria-hidden='true'></span></summary><div class='ds-exp-body'>A structural specialization bypassed generic scheduler bookkeeping for eligible callees across recorded call sites. This was an emitted-image diagnostic, not a promoted BIR transformation.</div></details>",
+      "css": ".ds-experiment { border-top: 1px solid var(--line, #bac5bf); border-bottom: 1px solid var(--line, #bac5bf); color: var(--ink, #1c2826); font-family: var(--sans, Archivo, system-ui, sans-serif); }\n.ds-experiment summary { display: grid; grid-template-columns: 70px 1fr auto 22px; gap: 16px; align-items: center; list-style: none; padding: 25px 0; cursor: pointer; }\n.ds-experiment summary::-webkit-details-marker { display: none; }\n.ds-experiment summary:hover .ds-exp-title { text-decoration: underline; text-underline-offset: 5px; }\n.ds-exp-id { font: 400 13px/1.5 var(--mono, 'Fragment Mono', monospace); color: var(--muted, #53675e); }\n.ds-exp-title { font-size: 24px; font-weight: 550; line-height: 1.25; letter-spacing: -0.02em; }\n.ds-exp-status { padding: 6px 8px; border: 1px solid currentColor; color: var(--warning, #823b24); background: var(--warning-paper, #f1e3d9); font: 400 12px/1.5 var(--mono, 'Fragment Mono', monospace); letter-spacing: 0.025em; white-space: nowrap; }\n.ds-exp-plus { position: relative; width: 18px; height: 18px; }\n.ds-exp-plus::before, .ds-exp-plus::after { content: ''; position: absolute; background: var(--ink, #1c2826); }\n.ds-exp-plus::before { left: 0; right: 0; top: 8px; height: 1px; }\n.ds-exp-plus::after { top: 0; bottom: 0; left: 8px; width: 1px; }\n.ds-experiment[open] .ds-exp-plus::after { display: none; }\n.ds-exp-body { padding: 2px 38px 32px 86px; max-width: 69ch; color: var(--muted, #53675e); font-size: 15px; line-height: 1.6; }\n@media (max-width: 760px) { .ds-experiment summary { grid-template-columns: 45px 1fr 18px; gap: 10px; padding-block: 23px; } .ds-exp-title { font-size: 20px; } .ds-exp-status { grid-column: 2; grid-row: 2; justify-self: start; } .ds-exp-plus { grid-column: 3; grid-row: 1 / 3; } .ds-exp-body { padding: 3px 0 26px 0; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Instrument Run Sheet",
+    "overview": "The system reads like a measurement instrument's printed run sheet: cool off-white paper, green-black ink, sparse hairline rules, and a single acid-yellow band reserved for evidence, not acceptance alone. Nothing floats. Sections open directly on the paper rather than sitting inside cards, and every comparison is drawn with the same square-ended bar, table rule, and mono number so results can be read down a column instead of admired as decoration.\n\nArchivo carries the reading voice: tightly tracked headlines and a steady 17px body held to a 68-character measure. Fragment Mono appears only where a value, identifier, status, or source file has to look recorded, which keeps argument and evidence visually separable without adding a third decorative face.\n\nMotion acknowledges state and stops there. A stage button changes fill in 180ms; a comparison bar changes its transform scale over 500ms; both vanish under reduced motion. Depth is carried by rules and fills, never shadows, and every control ends square.",
+    "keyCharacteristics": [
+      "Cool off-white field, green-black ink, one acid-yellow evidence fill.",
+      "Open ruled sections: no cards, shadows, gradients, blur, or rounding.",
+      "Two typographic registers: Archivo for prose, Fragment Mono for recorded values.",
+      "Explicit status words, with square marks on status stamps; hue is never the sole carrier.",
+      "Transform-only data animation, with a global reduced-motion stop.",
+      "Square-ended controls, visible ink focus rings, and 44px minimum heights on action, copy, and segmented controls—not all links or navigation."
+    ],
+    "rules": [
+      { "name": "The One Signal Rule", "body": "Acid yellow marks evidence, selection, or a control state—not acceptance exclusively. It appears as the checkpoint band, one selected stage, one accepted bar, or a control state, never as a page wash or a second band. The checkpoint band includes historical accepted R12 alongside G79 NOT ACCEPTED; explicit words, not the yellow fill, distinguish their verdicts.", "section": "colors" },
+      { "name": "The Words Before Hue Rule", "body": "Every status carries explicit words; status stamps also carry a square mark, but the checkpoint labels inside the yellow band do not. Green and rust reinforce verdicts, while yellow marks evidence or selection: the verdict must survive grayscale, color-blindness, or forced-colors rendering.", "section": "colors" },
+      { "name": "The Two-Register Rule", "body": "Archivo carries everything read as prose. Fragment Mono is confined to recorded values, identifiers, source stamps, and status labels. A paragraph is never set in Fragment Mono, and visible text never drops below 12px; the only smaller marks are aria-hidden stage symbols at 10-11px.", "section": "typography" },
+      { "name": "The Tabular Record Rule", "body": "Tabular duration values and numeric table cells use Fragment Mono with tabular figures. Prominent delta and fixedpoint figures, as well as prose percentages, stay in Archivo; the mono data role does not cover every displayed number.", "section": "typography" },
+      { "name": "The Deliberate Mobile Column Rule", "body": "Mobile is a recomposed reading column, not a scaled desktop. Preserve the reading order and the complete verdict before long diagrams; never compress a two-column ledger into unreadable side-by-side text.", "section": "layout" },
+      { "name": "The Ruled-Not-Lifted Rule", "body": "Separate with a rule, a fill, or spacing. Never with a shadow. Hover states darken the paper one step; they do not lift the element or add a halo. Focus is an outline, not a glow.", "section": "elevation" },
+      { "name": "The Square-End Rule", "body": "Every corner is 0. A new surface inherits square edges unless the entire world is being replaced, and a rounded variant is not an acceptable \"softening\" of an existing one.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do keep body text at 17px/1.65 with a 68ch measure, and keep all visible text at 12px or larger.",
+      "Do reserve Evidence Acid for evidence, selection, and control states: the checkpoint band, one selected stage, or one accepted bar, never a page wash. Keep accepted and unaccepted checkpoint verdicts explicit within the shared band.",
+      "Do pair every status with explicit words and add square marks to status stamps; checkpoint labels in the yellow band convey their verdicts through words without those marks.",
+      "Do divide sections with 1px rules and 60-93px chapter padding; let content open on the paper.",
+      "Do animate comparison bars with transform: scaleX(var(--duration-ratio)) only, and honor the global reduced-motion stop.",
+      "Do use 2px ink focus outlines at 5px offset, 44px minimum heights on action, copy, and segmented controls, and arrow icons at 18px with 1.7 stroke.",
+      "Do keep Fragment Mono on values, identifiers, stamps, and source names, with tabular figures in numeric tables.",
+      "Do label separate checkpoints individually when accepted and rejected results appear together."
+    ],
+    "donts": [
+      "Don't add border-radius, box-shadow, gradients, blur, glass, or paper texture; the world is flat and square.",
+      "Don't use color alone for accepted, rejected, or diagnostic status.",
+      "Don't set paragraphs in Fragment Mono or visible text below 12px.",
+      "Don't animate width, height, top, or left on data marks; use transform.",
+      "Don't style rejected diagnostics with accepted treatment: no yellow accepted bar, no pass-green status, no merged denominator.",
+      "Don't introduce KPI card grids, pill dashboards, fake live counters, or ambient loops.",
+      "Don't box reading content in cards or give a hover state a shadow halo."
+    ]
+  }
+}
