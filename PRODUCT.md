@@ -20,6 +20,8 @@ Publish a compact visual guide titled **Self-hosted Bend compiler**. Start with 
 
 The user explicitly rejected slogans and an oversized forced-line title, and requests substantially less empty space and default prose, with more infographics for people new to the project. Historical experiment identifiers, acceptance timelines and rejected optimization stories are not the primary reading path.
 
+The separate `/ir/` route supplies the detailed, more engaging explanation: follow one real function across representation views, select nodes and trace bindings, then inspect actual carrier records, lifetime and control-flow mechanisms. It inherits the visual system; it must not make the compact overview a long reference page again.
+
 ## Positioning
 
 Independent compiler engineering report, not an official Bend release announcement or a promise of speed. Self-hosting means compiling the compiler’s own source. The official compiler already has checked terms and intermediate representations; the architectural distinction is the explicit owned checked-program boundary and shared lowering, not “IR versus no IR.” Both target backends still perform analysis and representation work.
@@ -30,11 +32,11 @@ Independent compiler engineering report, not an official Bend release announceme
 - Live report: `https://bend-selfhost-lab.netlify.app`.
 - Compiler source: `https://github.com/IlyaGulya/bend`, integration branch `selfhost/integration`.
 - Architecture permalink snapshot: `f63679c31e3219b9fbd119625d35ec03cb2ad224`.
-- Report files: `public/index.html`, `public/styles.css`, `public/app.js`.
+- Report files: `public/index.html`, `public/styles.css`, `public/app.js`; detailed walkthrough: `public/ir/index.html`, `public/ir/ir.css`, `public/ir/ir.js`.
 - Public evidence: `public/data/evidence.json`, schema version 2.
 - Retained measurement adapters/protocol: `measurement/`.
-- Source research: `.impeccable/review/engineering-architecture-research.md` and `.impeccable/review/official-comparison-research.md`.
-- Design contract: `DESIGN.md`, `.impeccable/surfaces/public-index-html.md`.
+- Source research: `.impeccable/review/engineering-architecture-research.md`, `.impeccable/review/official-comparison-research.md`, `.impeccable/review/ir-fir-source-research.md`.
+- Design contract: `DESIGN.md` and the overview/IR route briefs under `.impeccable/surfaces/`.
 
 Publish only `public/`, not development notes or private timing outputs. Keep compiler source changes and website publication separate.
 
@@ -51,6 +53,7 @@ Publish only `public/`, not development notes or private timing outputs. Keep co
 9. Explain source pools, numeric handles, start/count slices and scratch reuse with labelled conceptual geometry—not compiler dumps or heap profiles. Keep the official/selfhost responsibility comparison and ownership qualifications in architecture details.
 10. Plot native sample 3 only: parse 6.198936 s, expand 1.834936 s, check 19.672753 s; total 27.706625 s. The 71.00% check share identifies recorded cost, not causality. Parser-fuel setup is 1.318933 s inside parse, not another phase. No isolated official/native phase comparisons.
 11. Use native disclosures for detailed contracts, protocol and provenance. Loading, actual runtime success and failure are distinct demo states; source and module downloads remain available without running anything. No eval, dynamic Function construction or weakened CSP.
+12. The detailed IR page is a source-backed teaching model, not a browser compiler or recorded compiler trace. Distinguish synthetic IDs and schematic application structure from actual declarations. Keep source arena, contextual occurrences, lexical identities, BIR capture values/use contracts and descriptors separate. Preserve useful no-JavaScript content and keyboard interaction.
 
 ## Brand Commitments
 

@@ -19,6 +19,19 @@ python3 -m http.server 4173 --bind 127.0.0.1 --directory public
 
 Open http://127.0.0.1:4173. The HTML contains the complete report, source example, diagrams, phase labels and comparison table. JavaScript enhances stage inspection, checksum copying and an optional precompiled-example run; it does not fetch or populate primary report results. Fonts are served locally. There are no analytics or remote runtime dependencies.
 
+## Detailed IR/FIR walkthrough
+
+[`/ir/`](https://bend-selfhost-lab.netlify.app/ir/) is the separate, source-backed deep dive. The homepage links to it without expanding the overview.
+
+- One real `adder` source excerpt across source/core, checked FIR, lowering and backend IR.
+- Follow captured `k` or later argument `x`; select any diagram node to inspect its fields.
+- Actual carrier declarations, arena/occurrence distinction, positional captures, structured regions, descriptor metadata and ownership.
+- All four representation panels and their explanations remain available without JavaScript; keyboard controls enhance the teaching model.
+
+The diagrams use explicitly synthetic IDs and schematic application topology. They are not captured parser/checker/lowering output, and the page runs no compiler or new benchmark. Real declarations and primary source links use snapshot `f63679c31e3219b9fbd119625d35ec03cb2ad224`. The source audit is `.impeccable/review/ir-fir-source-research.md`.
+
+Implementation: `public/ir/index.html`, `public/ir/ir.css`, `public/ir/ir.js`. The controller selects authored HTML, highlights relationships and measures node positions for SVG wires; it does not manufacture compilation receipts.
+
 ## Real closure example
 
 Below the literal title and short definition, [`public/examples/closure.bend`](public/examples/closure.bend) sits beside a capture/addition diagram: `adder(k)` returns a function remembering `k`, and `compute(k, x)` calls it once. “Run emitted JavaScript” dynamically imports the unchanged [`closure.generated.mjs`](public/examples/closure.generated.mjs), then calls its real synchronous `default.compute(5, 3)` export. Both arguments and the returned U32 use ordinary JavaScript numbers; there is no adapter or replacement arithmetic.
@@ -101,7 +114,7 @@ This historical evidence belongs to its recorded artifact, not automatically to 
 
 Keep the authored HTML table and public JSON synchronized from the same admitted measurements. The table's static proportional bars are part of its cells, not a duplicate chart. Preserve operation boundaries, denominators, sample counts and artifact limitations. Keep the default path diagram-led and move expert prose into native disclosures. Do not restore backend toggles, historical timing substitutes, experiment-led navigation or slogans. The title caps at 40px desktop and 30px mobile; body is 16px/24px.
 
-Files: `public/index.html` (authored report and diagrams), `public/styles.css` (compact Instrument Run Sheet layout), `public/app.js` (stage, copy and genuine emitted-module execution controls), `public/examples/` (source, unchanged generated module and provenance). Product intent is in `PRODUCT.md`; maintained visual constraints are in `DESIGN.md` and `.impeccable/surfaces/public-index-html.md`.
+Files: `public/index.html` (compact overview), `public/styles.css` (shared Instrument Run Sheet styling), `public/app.js` (overview interactions), `public/ir/` (detailed representation explorer), `public/examples/` (source, unchanged generated module and provenance). Product intent is in `PRODUCT.md`; maintained visual constraints are in `DESIGN.md` and the route briefs in `.impeccable/surfaces/`.
 
 Before publication, inspect the real page at desktop, compact desktop and narrow mobile widths, including keyboard controls, reduced motion, table legibility, disclosure expansion and the no-JavaScript report. Exercise genuine module-load success, loading and failure states; initial text must never claim execution. Verify visible values against JSON and source/excerpts against the actual artifacts. No eval, dynamic Function constructor or CSP relaxation is needed.
 
