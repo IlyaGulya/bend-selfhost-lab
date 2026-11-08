@@ -17,7 +17,7 @@ Title and h1: **Self-hosted Bend compiler**. Preserve the literal title, the est
 
 **World:** Instrument run sheet. Cool off-white paper, green-black ink, sage annotations, hairline rules and square controls. Self-hosted Archivo carries prose; Fragment Mono carries code, hashes and measured values. No raster artwork, decorative illustrations, shadows, gradients, cards or dependencies. Borders enclose actual source/storage artifacts, not arbitrary prose groups.
 
-**Typography and density:** Natural-wrapping h1 capped at 40px desktop and 30px mobile; body 16px/24px with a 70-character measure. Desktop chapter padding is 30px, mobile 24px. Use available width for diagrams instead of percentage-based empty gutters. No eyebrow labels or decorative numbered sections.
+**Typography and density:** h1 is 28px desktop and 24px mobile. Chapter headings are 22px/21px; body text is 16px/24px. Keep the existing compact spacing and ruled figures. Use Simplified Technical English for all visible copy and dynamic states. No slogan, metaphor, oversized title or duplicate introduction.
 
 **Reading order:**
 
@@ -33,6 +33,8 @@ Title and h1: **Self-hosted Bend compiler**. Preserve the literal title, the est
 **Example interaction:** Initial HTML says the example has not run and disables its button. JavaScript enables it; a user action loads a local precompiled ES module with dynamic import and calls its real exported API. Loading, successful result and error feedback use a polite live region. During loading, disable the control. On failure leave downloads available and explain retry/reload. No eval, dynamic Function constructor, compiler download or CSP change. Static expected results must be labelled as expectations, never browser execution receipts.
 
 **Architecture:** Six square stage buttons select source, checked program, shared lowering, executable program, C or JavaScript. Each changes an explanation and pinned source link. Code-shape illustrations and conceptual operations are labelled explanatory, not compiler dumps. Actual emitted excerpts must match the downloaded module. Detailed checking guarantees, target responsibilities and execution machinery remain in native disclosures.
+
+**Page connection:** Both routes have identical Overview / IR and lowering navigation with an explicit current-page state. The architecture section has a visible IR reference link and direct links to `/ir/#lowering` and `/ir/#operations`. Local overview section navigation is separate from page navigation.
 
 **Measurement:** A static semantic table is the sole official/native timing comparison, with proportional bars inside the value cells. Fixed 26/38/36 percent column tracks keep both metrics visible on narrow phones. The native sample-3 ribbon uses exact proportional widths and text labels: parse 6.199 s / 22.37%, expand 1.835 s / 6.62%, check 19.673 s / 71.00%, total 27.706625 s. Fuel setup 1.319 s is inside parse, not an additional phase. Counts/shares do not explain the official/native gap. No timing animation or backend toggle.
 

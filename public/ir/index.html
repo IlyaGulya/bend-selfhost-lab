@@ -1,251 +1,1152 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Inside the Bend compiler · FIR, lowering and backend IR</title>
-  <meta name="description" content="Follow one captured value through Bend source, checked FIR, shared lowering and backend IR. Explore actual compiler records, lexical identity, capture slots and ownership." />
-  <meta name="theme-color" content="#f2f4f3" />
-  <meta property="og:title" content="Inside the Bend compiler" />
-  <meta property="og:description" content="An interactive, source-backed guide to FIR, lowering, captures and structured backend IR." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://bend-selfhost-lab.netlify.app/ir/" />
-  <link rel="canonical" href="https://bend-selfhost-lab.netlify.app/ir/" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="preload" href="/assets/fonts/archivo.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="/assets/fonts/fragment-mono.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/styles.css" />
-  <link rel="stylesheet" href="/ir/ir.css" />
-  <script src="/ir/ir.js" defer></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bend IR and lowering</title>
+<meta name="description" content="Bend FIR records, lowering rules, all 9 backend operations, 8 control blocks, 10 operands and 121 primitives. Static diagrams with source links." />
+<meta name="theme-color" content="#f2f4f3" />
+<meta property="og:title" content="Bend IR and lowering" />
+<meta property="og:description" content="Checked data to executable operations: diagrams, exact fields and a complete primitive catalog." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://bend-selfhost-lab.netlify.app/ir/" />
+<link rel="canonical" href="https://bend-selfhost-lab.netlify.app/ir/" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preload" href="/assets/fonts/archivo.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/assets/fonts/fragment-mono.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="/styles.css" />
+<link rel="stylesheet" href="/ir/ir.css" />
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to the compiler walkthrough</a>
-  <header class="site-header wrap">
-    <a class="brand" href="/" aria-label="Back to the Bend compiler report"><span class="brand-mark">bend.</span><span class="brand-description">Inside the compiler</span></a>
-    <nav class="main-nav" aria-label="Walkthrough sections"><a href="#fir">FIR</a><a href="#lowering">Lowering</a><a href="#bir">Backend IR</a><a href="#ownership">Ownership</a></nav>
-    <a class="repo-link" href="/">Overview <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6v12h12" /></svg></a>
-  </header>
-  <main id="main" class="wrap">
-    <section class="ir-intro" aria-labelledby="page-title">
-      <h1 id="page-title">Inside the Bend compiler</h1>
-      <p class="lead">IR is the compiler’s program data. Follow one function through four representations.</p>
-    </section>
+<a class="skip-link" href="#main">Skip to IR reference</a>
+<header class="site-header wrap">
+<a class="brand" href="/" aria-label="Bend compiler overview"><span class="brand-mark">bend.</span><span class="brand-description">Compiler report</span></a>
+<nav class="main-nav page-nav" aria-label="Pages"><a href="/">Overview</a><a href="/ir/" aria-current="page">IR and lowering</a></nav>
+<a class="repo-link" href="https://github.com/IlyaGulya/bend/tree/selfhost/integration">GitHub <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M6 18 18 6M6 6h12v12" /></svg></a>
+</header>
+<main class="wrap" id="main">
+<nav class="section-nav" aria-label="IR sections"><a href="#fir">FIR records</a><a href="#lowering">Lowering rules</a><a href="#operations">Operations</a><a href="#control">Control blocks</a><a href="#atoms">Operands</a><a href="#primitives">Primitives</a><a href="#ownership">Storage</a></nav>
+<section class="ir-intro" aria-labelledby="page-title">
+<h1 id="page-title">IR and lowering</h1>
+<p class="lead">IR is an internal program format. Lowering converts checked source data (FIR) into backend operations.</p>
+<div class="ir-context"><a href="/#architecture">Compiler overview</a><a href="/#performance">Time and memory measurements</a><a href="/#example-title">Run the compiled example</a></div>
+</section>
+<div class="ir-pipeline" aria-label="Compiler pipeline"><a class="ir-stage" href="#lowering"><strong>Bend source</strong><span>Expressions and names</span></a><svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg><a class="ir-stage active" href="#fir"><strong>FIR</strong><span>Resolved names, types and uses</span></a><svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg><a class="ir-stage" href="#lowering"><strong>Lowering</strong><span>Bindings, erasure and call order</span></a><svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg><a class="ir-stage active" href="#operations"><strong>Backend IR</strong><span>Operands, operations and control</span></a><svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg><a class="ir-stage" href="#targets"><strong>C / JavaScript</strong><span>Target analysis and code output</span></a></div>
+<p class="ir-caption">Diagram notation: names replace numeric IDs. Some fields are omitted. These diagrams are not compiler output.</p>
+<p class="ir-caption"><code>U32</code> is an unsigned 32-bit integer. <code>F32</code> is a 32-bit floating-point value. Quantity records a binding’s use limit.</p>
+<section class="ir-section" id="fir" aria-labelledby="fir-title">
+<div class="ir-heading">
+<h2 id="fir-title">FIR: checked source data</h2>
+<a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checked_frontend.bend#L8-L34">Source</a></div>
+<div class="ir-two">
+<div class="ir-record">
+<h3>CheckedProgram</h3>
+<div class="record-field"><code>source</code><span>Arena storage for terms, types and syntax lists.</span></div>
+<div class="record-field"><code>modules</code><span>Modules and declarations with checked occurrence records.</span></div>
+<div class="record-field"><code>signatures</code><span>Global declaration types, values and identities.</span></div>
+<div class="record-field"><code>metadata</code><span>Module scope and datatype-family metadata.</span></div>
+</div>
+<div>
+<div class="fir-relation">
+<div><strong>Source arena</strong><code>TermLam · TermApp<br />TermVar · TermRef</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div><strong>Checked occurrence</strong><code>term handle<br />ty handle</code></div>
+</div>
+<p class="note">The arena stores syntax. An occurrence stores facts for one checking context. Several occurrences can refer to one term.</p>
+<p class="note"><code>CheckedBinding</code> stores quantity, type and type depth. It does not store a unique variable identity.</p>
+<p class="note"><code>Symbol</code> identifies a global declaration. <code>TermVar.index</code> selects a local environment entry.</p>
+</div>
+</div>
+<h3 class="table-title">All checked occurrence variants</h3>
+<table class="compact-table ">
+<thead>
+<tr>
+<th scope="col">Variant</th>
+<th scope="col">Role and fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row"><code>TypedOccurrence</code></th>
+<td>Read the term and its checked children. Store types, quantities and resolved symbols.<small>term, ty, formal, symbol, bindings, children</small></td>
+</tr>
+<tr>
+<th scope="row"><code>LocalReferenceOccurrence</code></th>
+<td>Resolve the lexical variable. Do not execute the saved semantic value.<small>term, ty, binding, value</small></td>
+</tr>
+<tr>
+<th scope="row"><code>ScalarOccurrence</code></th>
+<td>Use a certified scalar identity. Lower to a native atom or constructor structure.<small>term, ty, symbol, bits, symbols</small></td>
+</tr>
+<tr>
+<th scope="row"><code>StringOccurrence</code></th>
+<td>Use certified string identities. Lower to TextValue or constructor structure.<small>term, ty, symbols, chars</small></td>
+</tr>
+<tr>
+<th scope="row"><code>CaseOccurrence</code></th>
+<td>Store one checked pattern row and its body. The match path consumes this record.<small>term, ty, patterns, body</small></td>
+</tr>
+<tr>
+<th scope="row"><code>LocalOccurrence</code></th>
+<td>Lower values in order. Match patterns, add bindings, then lower the body.<small>term, ty, patterns, values, body</small></td>
+</tr>
+</tbody>
+</table>
+<a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checker_ir.bend#L27-L58">Occurrence declarations</a></section>
+<section class="ir-section" id="lowering" aria-labelledby="lowering-title">
+<div class="ir-heading">
+<h2 id="lowering-title">Lowering: source form to backend IR</h2>
+<a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L1884-L1992">Source</a></div>
+<div class="capture-map">
+<div><strong>Build the catalog</strong><code>definitions · layouts<br />families · type functions</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div><strong>Lower each definition</strong><code>checked root → instructions<br />instructions → Code / declaration</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div><strong>Return Program</strong><code>codes · declarations<br />layouts · metadata · ending</code></div>
+</div>
+<p class="ir-caption">The Direct examples use ordinary definitions with fixed signatures. Native and foreign calls use separate paths.</p>
+<div class="lower-head" aria-hidden="true"><span>Before</span><span>Decision</span><span>After</span></div>
+<article class="lower-rule">
+<div class="rule-before"><span class="rule-label">Before</span><code>formal = QZero
+argument = expression</code></div>
+<div class="rule-decision">
+<h3>Erased parameter</h3>
+<p>Keep its lexical position. Do not evaluate the argument. Do not create a runtime parameter.</p>
+<a class="rule-source" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L945-L979">Source</a></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="rule-after"><span class="rule-label">After</span>
+<pre class="ir-code"><code>ErasedSlot
+no runtime Arg
+no live Parameter</code></pre>
+</div>
+</article>
+<article class="lower-rule">
+<div class="rule-before"><span class="rule-label">Before</span><code>let v = expression
+use v in this frame</code></div>
+<div class="rule-decision">
+<h3>Local value</h3>
+<p>Evaluate each live value once. Bind its atom to a lexical slot. Later reads reuse that atom.</p>
+<a class="rule-source" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L1521-L1575">Source</a></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="rule-after"><span class="rule-label">After</span>
+<pre class="ir-code"><code>evaluate expression
+Slot(value = result)
+read existing atom</code></pre>
+</div>
+</article>
+<article class="lower-rule">
+<div class="rule-before"><span class="rule-label">Before</span><code>x =&gt; x + k
+k belongs to an outer frame</code></div>
+<div class="rule-decision">
+<h3>Captured lambda</h3>
+<p>Create a child frame. Resolve k by its owner and identity. Reuse its capture slot.</p>
+<a class="rule-source" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L141-L264">Source</a></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="rule-after"><span class="rule-label">After</span>
+<pre class="ir-code"><code>inner Code:
+  x = Local(x)
+  k = Capture(0)
+parent: Closure(inner, [k])</code></pre>
+</div>
+</article>
+<article class="lower-rule">
+<div class="rule-before"><span class="rule-label">Before</span><code>f(a, b)
+fixed signature; 2 live parameters</code></div>
+<div class="rule-decision">
+<h3>Exact known call</h3>
+<p>Evaluate the declared argument prefix. Omit erased arguments. Check the live argument count.</p>
+<a class="rule-source" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L875-L957">Source</a></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="rule-after"><span class="rule-label">After</span>
+<pre class="ir-code"><code>Let r = Direct(f, [a,b])
+continue with Local(r)</code></pre>
+</div>
+</article>
+<article class="lower-rule">
+<div class="rule-before"><span class="rule-label">Before</span><code>g(a)
+g is a runtime value</code></div>
+<div class="rule-decision">
+<h3>Unknown function</h3>
+<p>Lower the function first. Then lower its live argument. Use a unary call.</p>
+<a class="rule-source" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L945-L979">Source</a></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="rule-after"><span class="rule-label">After</span>
+<pre class="ir-code"><code>Let r = Apply(g, a)
+continue with Local(r)</code></pre>
+</div>
+</article>
+<article class="lower-rule">
+<div class="rule-before"><span class="rule-label">Before</span><code>f(a)
+f needs another live argument</code></div>
+<div class="rule-decision">
+<h3>Partial known call</h3>
+<p>Evaluate a now. Store it in an adapter closure. The adapter accepts the remaining argument.</p>
+<a class="rule-source" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L981-L1013">Source</a></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="rule-after"><span class="rule-label">After</span>
+<pre class="ir-code"><code>Closure(adapter, [a])
+adapter(b):
+  TailDirect(f, [Capture(0),b])</code></pre>
+</div>
+</article>
+<article class="lower-rule">
+<div class="rule-before"><span class="rule-label">Before</span><code>f(a)(make_x())(make_y())
+f consumes the first argument</code></div>
+<div class="rule-decision">
+<h3>Over-application</h3>
+<p>Call f before evaluating make_x. Call the result before evaluating make_y. Keep strict order.</p>
+<a class="rule-source" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L911-L979">Source</a></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="rule-after"><span class="rule-label">After</span>
+<pre class="ir-code"><code>r = Direct(f, [a])
+x = call make_x
+s = Apply(r, x)
+y = call make_y
+t = Apply(s, y)</code></pre>
+</div>
+</article>
+<article class="lower-rule">
+<div class="rule-before"><span class="rule-label">Before</span><code>Let r = Direct(f, args)
+Return(Local(r))</code></div>
+<div class="rule-decision">
+<h3>Final returned call</h3>
+<p>Convert only the final returned Direct or Apply. A primitive call keeps its Let and Return.</p>
+<a class="rule-source" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L125-L140">Source</a></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="rule-after"><span class="rule-label">After</span>
+<pre class="ir-code"><code>TailDirect(f, args)
 
-    <section class="ir-workbench" data-ir-explorer aria-labelledby="workbench-title">
-      <div class="workbench-heading"><h2 id="workbench-title">Follow the value the function remembers</h2><p>Switch views. Select a node. Trace <code>k</code> or <code>x</code>.</p></div>
-      <div class="phase-controls" role="group" aria-label="Representation to explore">
-        <button type="button" data-phase-choice="source" aria-pressed="false" aria-controls="view-source" disabled><strong>Source / core</strong><span>Names and expression shape</span></button>
-        <button type="button" data-phase-choice="fir" aria-pressed="true" aria-controls="view-fir" disabled><strong>FIR</strong><span>Checked meaning and bindings</span></button>
-        <button type="button" data-phase-choice="lower" aria-pressed="false" aria-controls="view-lower" disabled><strong>Lowering</strong><span>Discover the capture</span></button>
-        <button type="button" data-phase-choice="bir" aria-pressed="false" aria-controls="view-bir" disabled><strong>Backend IR</strong><span>Explicit operands and work</span></button>
-      </div>
-      <div class="workbench-layout">
-        <aside class="source-context" aria-labelledby="source-title">
-          <h3 id="source-title">One returned function</h3>
-          <pre class="source-code"><code>def adder(<span data-binding="k">k</span>: U32) -&gt; U32 -&gt; U32:
-  <span data-binding="x">x</span> =&gt; (<span data-binding="x">x</span> + <span data-binding="k">k</span> : U32)</code></pre>
-          <fieldset class="binding-controls"><legend>Follow a binding</legend><button type="button" data-follow="k" aria-pressed="true" disabled>Captured k</button><button type="button" data-follow="x" aria-pressed="false" disabled>Argument x</button><button type="button" data-follow="none" aria-pressed="false" disabled>Show all</button></fieldset>
-          <p class="binding-description" id="binding-description" aria-live="polite">Following k: the value received by adder and remembered by its returned function.</p>
-        </aside>
-        <div class="ir-representations">
-          <p class="sr-only" id="representation-status" role="status" aria-live="polite">FIR: retained term handles plus contextual checking facts.</p>
+Apply → TailApply</code></pre>
+</div>
+</article>
+<article class="lower-rule">
+<div class="rule-before"><span class="rule-label">Before</span><code>constructor(erased_type, x, y)</code></div>
+<div class="rule-decision">
+<h3>Constructor fields</h3>
+<p>Omit erased runtime fields. Keep source field identities. Native constructors can use atoms or primitives.</p>
+<a class="rule-source" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L467-L577">Source</a></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="rule-after"><span class="rule-label">After</span>
+<pre class="ir-code"><code>Construct(C, [x,y])
+Project(value, C, field_id)</code></pre>
+</div>
+</article>
+<article class="lower-rule">
+<div class="rule-before"><span class="rule-label">Before</span><code>case C(nested_pattern): body
+case other: fallback</code></div>
+<div class="rule-decision">
+<h3>Pattern alternatives</h3>
+<p>Evaluate scrutinees first. Test tags and project fields. Exit the case region on a failed test.</p>
+<a class="rule-source" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L1224-L1316">Source</a></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="rule-after"><span class="rule-label">After</span>
+<pre class="ir-code"><code>Region(r,
+  tests → body
+  failed test → LeaveRegion(r),
+  next = remaining cases)</code></pre>
+</div>
+</article>
+<article class="lower-rule">
+<div class="rule-before"><span class="rule-label">Before</span><code>checked type handle
+erased type position</code></div>
+<div class="rule-decision">
+<h3>Type metadata</h3>
+<p>Build a separate descriptor. Runtime erasure does not remove required layout or host-interface metadata.</p>
+<a class="rule-source" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L293-L307">Source</a></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="rule-after"><span class="rule-label">After</span>
+<pre class="ir-code"><code>PrimitiveCall.types
+Export.result
+Family field descriptors</code></pre>
+</div>
+</article>
+<div class="capture-map" aria-label="Captured value mapping">
+<div><strong>Outer body</strong><code>k → Local(k)</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="capture-cell"><strong>Closure creation</strong><code>captures[0] = Local(k)</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div><strong>Inner body</strong><code>k → Capture(0)<br />x → Local(x)</code></div>
+</div>
+<p class="ir-caption">Code.captures stores use limits. Closure.captures supplies values. This diagram does not specify a target heap allocation.</p>
+<p class="ir-caption">Typed array and Map adapters retain element descriptors. Other partial native calls can use Apply.</p>
+</section>
+<section class="ir-section" id="operations" aria-labelledby="operations-title">
+<div class="ir-heading">
+<h2 id="operations-title">Operations: all 9 variants</h2>
+<a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_ir.bend#L188-L197">Source</a></div>
+<p>Each operation produces one value. A Let block binds that value before the next block runs.</p>
+<div class="operation-list">
+<figure class="operation" id="op-Copy" data-op="Copy">
+<figcaption><code>Copy</code>Return the operand value. This is not a deep-copy instruction.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>value</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>Copy</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>same value</code></div>
+</div>
+<p class="op-fields"><code>value: Atom</code></p>
+</figure>
+<figure class="operation" id="op-PrimitiveCall" data-op="PrimitiveCall">
+<figcaption><code>PrimitiveCall</code>Call one operation from the closed primitive catalog.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>args + type metadata</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>PrimitiveCall</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>primitive result</code></div>
+</div>
+<p class="op-fields"><code>primitive: Primitive; args: List&lt;Arg&gt;; types: List&lt;Descriptor&gt;</code></p>
+</figure>
+<figure class="operation" id="op-Closure" data-op="Closure">
+<figcaption><code>Closure</code>Create a callable value with supplied captures.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>code + captures</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>Closure</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>callable value</code></div>
+</div>
+<p class="op-fields"><code>code: U32; captures: List&lt;Arg&gt;; parameters: List&lt;Parameter&gt;</code></p>
+</figure>
+<figure class="operation" id="op-Direct" data-op="Direct">
+<figcaption><code>Direct</code>Call a known code body with its live arguments.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>code ID + args</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>Direct</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>call result</code></div>
+</div>
+<p class="op-fields"><code>code: U32; args: List&lt;Arg&gt;</code></p>
+</figure>
+<figure class="operation" id="op-Apply" data-op="Apply">
+<figcaption><code>Apply</code>Call a function value with one live argument.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>function + argument</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>Apply</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>call result</code></div>
+</div>
+<p class="op-fields"><code>fn: Atom; arg: Arg</code></p>
+</figure>
+<figure class="operation" id="op-LoadSymbol" data-op="LoadSymbol">
+<figcaption><code>LoadSymbol</code>Load a declaration value at this position in execution.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>declaration ID + key</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>LoadSymbol</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>loaded value</code></div>
+</div>
+<p class="op-fields"><code>id: U32; key: String</code></p>
+</figure>
+<figure class="operation" id="op-Construct" data-op="Construct">
+<figcaption><code>Construct</code>Build a constructor value with its live fields.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>layout + fields</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>Construct</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>constructor value</code></div>
+</div>
+<p class="op-fields"><code>constructor: U32; tag: String; fields: List&lt;Field&gt;</code></p>
+</figure>
+<figure class="operation" id="op-Project" data-op="Project">
+<figcaption><code>Project</code>Read one field by its source identity.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>value + field ID</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>Project</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>field value</code></div>
+</div>
+<p class="op-fields"><code>value: Atom; constructor: U32; field: U32; key: String</code></p>
+</figure>
+<figure class="operation" id="op-HasTag" data-op="HasTag">
+<figcaption><code>HasTag</code>Test whether a value has the specified constructor tag.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>value + constructor</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>HasTag</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>Boolean result</code></div>
+</div>
+<p class="op-fields"><code>value: Atom; constructor: U32; tag: String</code></p>
+</figure>
+</div>
+<p class="ir-caption">Project does not test the tag. LoadSymbol fixes the evaluation position. A nullary declaration runs again on each load.</p>
+</section>
+<section class="ir-section" id="control" aria-labelledby="control-title">
+<div class="ir-heading">
+<h2 id="control-title">Control: all 8 block variants</h2>
+<a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_ir.bend#L199-L214">Source</a></div>
+<p>Blocks form recursive trees. Region labels permit forward exits, not arbitrary jumps or loops.</p>
+<div class="block-list">
+<figure class="operation" id="block-Let" data-block="Let">
+<figcaption><code>Let</code>Run an operation before the next block. Bind its result to id.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>operation</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>Let</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>next block</code></div>
+</div>
+<p class="op-fields"><code>id: U32; op: Op; next: Block</code></p>
+</figure>
+<figure class="operation" id="block-Return" data-block="Return">
+<figcaption><code>Return</code>End this code body and return a value.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>value</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>Return</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>caller</code></div>
+</div>
+<p class="op-fields"><code>value: Atom</code></p>
+</figure>
+<figure class="operation" id="block-Branch" data-block="Branch">
+<figcaption><code>Branch</code>Run the yes block or the no block.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>condition</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>Branch</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>yes / no block</code></div>
+</div>
+<p class="op-fields"><code>condition: Atom; yes: Block; no: Block</code></p>
+</figure>
+<figure class="operation" id="block-Region" data-block="Region">
+<figcaption><code>Region</code>Enter the body. A matching LeaveRegion selects next.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>body + next</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>Region</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>body; next on exit</code></div>
+</div>
+<p class="op-fields"><code>label: U32; body: Block; next: Block</code></p>
+</figure>
+<figure class="operation" id="block-LeaveRegion" data-block="LeaveRegion">
+<figcaption><code>LeaveRegion</code>Exit an enclosing region with the same label.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>region label</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>LeaveRegion</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>that region’s next</code></div>
+</div>
+<p class="op-fields"><code>label: U32</code></p>
+</figure>
+<figure class="operation" id="block-TailDirect" data-block="TailDirect">
+<figcaption><code>TailDirect</code>End this body with a call to known code.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>code ID + args</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>TailDirect</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>call result to caller</code></div>
+</div>
+<p class="op-fields"><code>code: U32; args: List&lt;Arg&gt;</code></p>
+</figure>
+<figure class="operation" id="block-TailApply" data-block="TailApply">
+<figcaption><code>TailApply</code>End this body with a unary function call.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>function + argument</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>TailApply</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>call result to caller</code></div>
+</div>
+<p class="op-fields"><code>fn: Atom; arg: Arg</code></p>
+</figure>
+<figure class="operation" id="block-Failure" data-block="Failure">
+<figcaption><code>Failure</code>Stop execution with a diagnostic message.</figcaption>
+<div class="signal">
+<div class="port"><small>Input</small><code>message</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="op-node"><code>Failure</code></div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div class="port"><small>Result</small><code>no normal result</code></div>
+</div>
+<p class="op-fields"><code>message: String</code></p>
+</figure>
+</div>
+<div class="region-example">
+<figure><svg viewBox="0 0 370 340" role="img" aria-labelledby="region-svg-title region-svg-desc"><title id="region-svg-title">Two pattern tests share one failure exit</title><desc id="region-svg-desc">Test the outer pattern, then the inner pattern. Success returns one. Either failed test leaves region r. Region.next returns two. The successful return does not run next.</desc><rect x="1" y="28" width="366" height="236" fill="none" stroke="var(--border)"/><text x="12" y="20" class="mono">Region r: body</text><g fill="var(--surface)" stroke="currentColor"><rect x="8" y="52" width="140" height="44"/><rect x="200" y="52" width="140" height="44"/><rect x="200" y="130" width="140" height="44"/><rect x="8" y="200" width="140" height="44"/></g><rect x="8" y="288" width="332" height="44" fill="var(--accent)" stroke="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M148 74h52m-5-4 5 4-5 4M78 96v104m-4-5 4 5 4-5M270 96v34m-4-5 4 5 4-5M340 74h18v148H148m5-4-5 4 5 4M78 244v44m-4-5 4 5 4-5"/></g><g text-anchor="middle"><text x="78" y="79">Outer test</text><text x="270" y="79">Inner test</text><text x="270" y="157" class="mono">Return(1)</text><text x="78" y="227" class="mono">LeaveRegion(r)</text><text x="174" y="315" class="mono">next: Return(2)</text><text x="174" y="63" class="small">yes</text><text x="290" y="116" class="small">yes</text><text x="60" y="146" class="small">no</text><text x="344" y="192" class="small">no</text></g></svg>
+<figcaption>Two failed tests use one exit. The remaining cases are stored once.</figcaption>
+</figure>
+<div>
+<h3>Pattern failure and successful return</h3>
+<pre class="ir-code"><code>Region(r,
+  Branch(outer_ok,
+    Branch(inner_ok,
+      Return(1),
+      LeaveRegion(r)),
+    LeaveRegion(r)),
+  next = Return(2))</code></pre>
+<p>A failed test selects Region.next. A successful Return ends the code body. It does not execute Region.next.</p>
+<a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L1224-L1259">Pattern lowering source</a></div>
+</div>
+</section>
+<section class="ir-section" id="atoms" aria-labelledby="atoms-title">
+<div class="ir-heading">
+<h2 id="atoms-title">Operands: all 10 Atom variants</h2>
+<a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_ir.bend#L4-L29">Source</a></div>
+<div class="ir-legend">
+<p><code>Arg{use, value}</code> pairs an operand with a use limit.</p>
+<p><code>Affine</code>: at most one logical use. <code>Many</code>: repeated use is permitted.</p>
+</div>
+<table class="compact-table atom-table">
+<thead>
+<tr>
+<th scope="col">Atom</th>
+<th scope="col">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row"><code>Local{id}</code></th>
+<td>Read a value bound in this Code body.</td>
+</tr>
+<tr>
+<th scope="row"><code>Capture{slot}</code></th>
+<td>Read a positional value supplied by a closure.</td>
+</tr>
+<tr>
+<th scope="row"><code>Symbol{id, key}</code></th>
+<td>Refer to a public value by its canonical key. Strict reads use LoadSymbol.</td>
+</tr>
+<tr>
+<th scope="row"><code>Word{value}</code></th>
+<td>Hold a U32 integer.</td>
+</tr>
+<tr>
+<th scope="row"><code>Natural{value}</code></th>
+<td>Hold a natural-number constant. Native arithmetic has a size limit.</td>
+</tr>
+<tr>
+<th scope="row"><code>FloatBits{bits}</code></th>
+<td>Hold the 32-bit representation of an F32 value.</td>
+</tr>
+<tr>
+<th scope="row"><code>TextValue{value}</code></th>
+<td>Hold a string value.</td>
+</tr>
+<tr>
+<th scope="row"><code>Boolean{value}</code></th>
+<td>Hold true or false.</td>
+</tr>
+<tr>
+<th scope="row"><code>Null{}</code></th>
+<td>Hold a null placeholder, for example for a type-only reference. This is not Maybe.None.</td>
+</tr>
+<tr>
+<th scope="row"><code>Undefined{}</code></th>
+<td>Hold an undefined placeholder. This is not an unbound local.</td>
+</tr>
+</tbody>
+</table>
+<p class="ir-caption">Atoms contain no nested operation tree. Source Quantity also has Erased. Erased positions have no live Arg or Parameter.</p>
+</section>
+<section class="ir-section" id="primitives" aria-labelledby="primitives-title">
+<div class="ir-heading">
+<h2 id="primitives-title">Primitive calls: all 121 names</h2>
+<a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_ir.bend#L31-L154">Source</a></div>
+<p>PrimitiveCall selects one name below. Inputs are live arguments in order. A pair is one tuple result, not two IR results.</p>
+<nav class="primitive-index" aria-label="Primitive groups"><a href="#primitive-group-0">U32</a><a href="#primitive-group-1">Nat</a><a href="#primitive-group-2">F32</a><a href="#primitive-group-3">Conversions</a><a href="#primitive-group-4">Strings</a><a href="#primitive-group-5">Tests</a><a href="#primitive-group-6">Arrays</a><a href="#primitive-group-7">Atomics</a><a href="#primitive-group-8">Maps</a></nav>
+<div class="primitive-groups">
+<section class="primitive-group" id="primitive-group-0" aria-labelledby="primitive-group-0-title">
+<h3 id="primitive-group-0-title">U32</h3>
+<p>U32 results wrap to 32 bits. Shift-right inserts zero bits. Cmp is LT, EQ or GT.</p>
+<div class="primitive-row" data-primitive="PrimU32Add">
+<div><code>PrimU32Add</code><small>U32,U32 → U32</small></div>
+<p>Add; wrap modulo 2^32.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32Sub">
+<div><code>PrimU32Sub</code><small>U32,U32 → U32</small></div>
+<p>Subtract; wrap modulo 2^32.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32Mul">
+<div><code>PrimU32Mul</code><small>U32,U32 → U32</small></div>
+<p>Multiply; keep low 32 bits.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32Div">
+<div><code>PrimU32Div</code><small>U32,U32 → U32</small></div>
+<p>Integer quotient; divisor zero gives zero.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32Mod">
+<div><code>PrimU32Mod</code><small>U32,U32 → U32</small></div>
+<p>Remainder; divisor zero gives the dividend.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32And">
+<div><code>PrimU32And</code><small>U32,U32 → U32</small></div>
+<p>Bitwise AND.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32Or">
+<div><code>PrimU32Or</code><small>U32,U32 → U32</small></div>
+<p>Bitwise OR.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32Xor">
+<div><code>PrimU32Xor</code><small>U32,U32 → U32</small></div>
+<p>Bitwise XOR.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32IsEq">
+<div><code>PrimU32IsEq</code><small>U32,U32 → Bool</small></div>
+<p>Test equality.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32IsNe">
+<div><code>PrimU32IsNe</code><small>U32,U32 → Bool</small></div>
+<p>Test inequality.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32IsLt">
+<div><code>PrimU32IsLt</code><small>U32,U32 → Bool</small></div>
+<p>Test less than.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32IsLe">
+<div><code>PrimU32IsLe</code><small>U32,U32 → Bool</small></div>
+<p>Test less than or equal.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32IsGt">
+<div><code>PrimU32IsGt</code><small>U32,U32 → Bool</small></div>
+<p>Test greater than.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32IsGe">
+<div><code>PrimU32IsGe</code><small>U32,U32 → Bool</small></div>
+<p>Test greater than or equal.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32IsZero">
+<div><code>PrimU32IsZero</code><small>U32 → Bool</small></div>
+<p>Test zero.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32Inc">
+<div><code>PrimU32Inc</code><small>U32 → U32</small></div>
+<p>Add one; wrap modulo 2^32.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32Not">
+<div><code>PrimU32Not</code><small>U32 → U32</small></div>
+<p>Invert all 32 bits.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32Shl">
+<div><code>PrimU32Shl</code><small>U32 → U32</small></div>
+<p>Shift left by exactly one bit.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32Shr">
+<div><code>PrimU32Shr</code><small>U32 → U32</small></div>
+<p>Shift right by exactly one bit.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32Shln">
+<div><code>PrimU32Shln</code><small>U32,Nat → U32</small></div>
+<p>Shift left by n; n &gt;= 32 gives zero.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32Shrn">
+<div><code>PrimU32Shrn</code><small>U32,Nat → U32</small></div>
+<p>Shift right by n; n &gt;= 32 gives zero.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32Cmp">
+<div><code>PrimU32Cmp</code><small>U32,U32 → Cmp</small></div>
+<p>Return LT, EQ or GT.</p>
+</div>
+</section>
+<section class="primitive-group" id="primitive-group-1" aria-labelledby="primitive-group-1-title">
+<h3 id="primitive-group-1-title">Nat</h3>
+<p>Native arithmetic checks the immediate limit: 2^48 − 1. Cmp is LT, EQ or GT.</p>
+<div class="primitive-row" data-primitive="PrimNatAdd">
+<div><code>PrimNatAdd</code><small>Nat,Nat → Nat</small></div>
+<p>Add; check the immediate limit.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimNatSub">
+<div><code>PrimNatSub</code><small>Nat,Nat → Nat</small></div>
+<p>Subtract; clamp below zero to zero.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimNatMul">
+<div><code>PrimNatMul</code><small>Nat,Nat → Nat</small></div>
+<p>Multiply; check the immediate limit.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimNatCmp">
+<div><code>PrimNatCmp</code><small>Nat,Nat → Cmp</small></div>
+<p>Return LT, EQ or GT; not −1, 0, 1.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimNatMin">
+<div><code>PrimNatMin</code><small>Nat,Nat → Nat</small></div>
+<p>Return the smaller operand.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimNatMax">
+<div><code>PrimNatMax</code><small>Nat,Nat → Nat</small></div>
+<p>Return the larger operand.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimNatDouble">
+<div><code>PrimNatDouble</code><small>Nat → Nat</small></div>
+<p>Multiply by two; check the limit.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimNatIsLt">
+<div><code>PrimNatIsLt</code><small>Nat,Nat → Bool</small></div>
+<p>Test less than.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimNatDivmod">
+<div><code>PrimNatDivmod</code><small>Nat,Nat → (Nat,Nat)</small></div>
+<p>Return (quotient,remainder). Zero divisor gives (0,dividend).</p>
+</div>
+<div class="primitive-row" data-primitive="PrimNatPredecessor">
+<div><code>PrimNatPredecessor</code><small>positive Nat → Nat</small></div>
+<p>Return n - 1 after a successor match. Zero behavior differs between targets.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimNatSuccessor">
+<div><code>PrimNatSuccessor</code><small>Nat → Nat</small></div>
+<p>Add one; check the limit.</p>
+</div>
+</section>
+<section class="primitive-group" id="primitive-group-2" aria-labelledby="primitive-group-2-title">
+<h3 id="primitive-group-2-title">F32</h3>
+<p>F32 is a 32-bit floating-point value. Functions can produce infinity or NaN.</p>
+<div class="primitive-row" data-primitive="PrimF32Add">
+<div><code>PrimF32Add</code><small>F32,F32 → F32</small></div>
+<p>Add and round to binary32.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Sub">
+<div><code>PrimF32Sub</code><small>F32,F32 → F32</small></div>
+<p>Subtract and round to binary32.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Mul">
+<div><code>PrimF32Mul</code><small>F32,F32 → F32</small></div>
+<p>Multiply and round to binary32.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Div">
+<div><code>PrimF32Div</code><small>F32,F32 → F32</small></div>
+<p>Floating division; not U32 zero-divisor behavior.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Mod">
+<div><code>PrimF32Mod</code><small>F32,F32 → F32</small></div>
+<p>Floating remainder (% / fmod), not Euclidean modulo.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Neg">
+<div><code>PrimF32Neg</code><small>F32 → F32</small></div>
+<p>Negate.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Sqrt">
+<div><code>PrimF32Sqrt</code><small>F32 → F32</small></div>
+<p>Square root.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Abs">
+<div><code>PrimF32Abs</code><small>F32 → F32</small></div>
+<p>Absolute value.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32IsEq">
+<div><code>PrimF32IsEq</code><small>F32,F32 → Bool</small></div>
+<p>Numeric equality.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32IsNe">
+<div><code>PrimF32IsNe</code><small>F32,F32 → Bool</small></div>
+<p>Numeric inequality.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32IsLt">
+<div><code>PrimF32IsLt</code><small>F32,F32 → Bool</small></div>
+<p>Ordered less than.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32IsLe">
+<div><code>PrimF32IsLe</code><small>F32,F32 → Bool</small></div>
+<p>Ordered less than or equal.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32IsGt">
+<div><code>PrimF32IsGt</code><small>F32,F32 → Bool</small></div>
+<p>Ordered greater than.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32IsGe">
+<div><code>PrimF32IsGe</code><small>F32,F32 → Bool</small></div>
+<p>Ordered greater than or equal.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Pow">
+<div><code>PrimF32Pow</code><small>F32,F32 → F32</small></div>
+<p>Raise first operand to second. JS handles 1^b and (-1)^±Infinity as 1.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Atan2">
+<div><code>PrimF32Atan2</code><small>F32,F32 → F32</small></div>
+<p>atan2(first,second); first is the y argument.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Exp">
+<div><code>PrimF32Exp</code><small>F32 → F32</small></div>
+<p>Base-e exponential.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Log">
+<div><code>PrimF32Log</code><small>F32 → F32</small></div>
+<p>Natural logarithm.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Log2">
+<div><code>PrimF32Log2</code><small>F32 → F32</small></div>
+<p>Base-2 logarithm.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Log10">
+<div><code>PrimF32Log10</code><small>F32 → F32</small></div>
+<p>Base-10 logarithm.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Sin">
+<div><code>PrimF32Sin</code><small>F32 → F32</small></div>
+<p>Sine, with radians as input.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Cos">
+<div><code>PrimF32Cos</code><small>F32 → F32</small></div>
+<p>Cosine, with radians as input.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Tan">
+<div><code>PrimF32Tan</code><small>F32 → F32</small></div>
+<p>Tangent, with radians as input.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Asin">
+<div><code>PrimF32Asin</code><small>F32 → F32</small></div>
+<p>Inverse sine; result in radians.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Acos">
+<div><code>PrimF32Acos</code><small>F32 → F32</small></div>
+<p>Inverse cosine; result in radians.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Atan">
+<div><code>PrimF32Atan</code><small>F32 → F32</small></div>
+<p>Inverse tangent; result in radians.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Sinh">
+<div><code>PrimF32Sinh</code><small>F32 → F32</small></div>
+<p>Hyperbolic sine.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Cosh">
+<div><code>PrimF32Cosh</code><small>F32 → F32</small></div>
+<p>Hyperbolic cosine.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Tanh">
+<div><code>PrimF32Tanh</code><small>F32 → F32</small></div>
+<p>Hyperbolic tangent.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Floor">
+<div><code>PrimF32Floor</code><small>F32 → F32</small></div>
+<p>Round toward negative infinity. Result remains F32.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Ceil">
+<div><code>PrimF32Ceil</code><small>F32 → F32</small></div>
+<p>Round toward positive infinity. Result remains F32.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Trunc">
+<div><code>PrimF32Trunc</code><small>F32 → F32</small></div>
+<p>Remove fractional part toward zero. Result remains F32.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Show">
+<div><code>PrimF32Show</code><small>F32 → String</small></div>
+<p>Format a float. JS handles nan, inf, -inf, -0 explicitly.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Read">
+<div><code>PrimF32Read</code><small>String → Maybe&lt;F32&gt;</small></div>
+<p>Parse a float; return Some or None. JS recognizes decimal/exponent, inf/infinity and nan forms. Its parser has a case-insensitive syntax check.</p>
+</div>
+</section>
+<section class="primitive-group" id="primitive-group-3" aria-labelledby="primitive-group-3-title">
+<h3 id="primitive-group-3-title">Conversions</h3>
+<p>Numeric conversion and bit conversion are different operations. F32ToNat has target-dependent limits.</p>
+<div class="primitive-row" data-primitive="PrimU32ToNat">
+<div><code>PrimU32ToNat</code><small>U32 → Nat</small></div>
+<p>Preserve the unsigned numeric value.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32FromNat">
+<div><code>PrimU32FromNat</code><small>Nat → U32</small></div>
+<p>Keep the low 32 bits; not a checked conversion.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32ToF32">
+<div><code>PrimU32ToF32</code><small>U32 → F32</small></div>
+<p>Numeric conversion, rounded to binary32.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32ToU32">
+<div><code>PrimF32ToU32</code><small>F32 → U32</small></div>
+<p>Truncate nonnegative values below 2^32. Invalid/range-exceeding values give zero. Fractions below one also give zero.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32ToNat">
+<div><code>PrimF32ToNat</code><small>F32 → Nat on valid input</small></div>
+<p>JS uses Math.floor without range checks. C clamps negative values and checks the Nat limit. Invalid inputs do not have a common target contract.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32Bits">
+<div><code>PrimF32Bits</code><small>F32 → U32</small></div>
+<p>Extract binary32 bits. Not numeric conversion.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32FromBits">
+<div><code>PrimF32FromBits</code><small>U32 → F32</small></div>
+<p>Interpret a 32-bit pattern as binary32.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimWordToU32">
+<div><code>PrimWordToU32</code><small>Word(32n) → U32</small></div>
+<p>Pack the recursive Boolean word, low bit first.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimU32ToWord">
+<div><code>PrimU32ToWord</code><small>U32 → Word(32n)</small></div>
+<p>Build 32 Boolean word cells, low bit first.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32FromWord">
+<div><code>PrimF32FromWord</code><small>Word(32n) → F32</small></div>
+<p>Pack the word and reinterpret its bits.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimF32ToWord">
+<div><code>PrimF32ToWord</code><small>F32 → Word(32n)</small></div>
+<p>Extract float bits and build the Boolean word.</p>
+</div>
+</section>
+<section class="primitive-group" id="primitive-group-4" aria-labelledby="primitive-group-4-title">
+<h3 id="primitive-group-4-title">Strings</h3>
+<p>Character counts use language characters, not a byte count.</p>
+<div class="primitive-row" data-primitive="PrimStringAppend">
+<div><code>PrimStringAppend</code><small>String,String → String</small></div>
+<p>Concatenate in operand order.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimStringEq">
+<div><code>PrimStringEq</code><small>String,String → Bool</small></div>
+<p>Compare complete string contents.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimStringCmp">
+<div><code>PrimStringCmp</code><small>String,String → ((String,String),Cmp)</small></div>
+<p>Return both original strings and their lexicographic character-code order. Not just Cmp.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimStringToList">
+<div><code>PrimStringToList</code><small>String → List&lt;Char&gt;</small></div>
+<p>Split into language characters, preserving order.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimStringLength">
+<div><code>PrimStringLength</code><small>String → Nat</small></div>
+<p>Count language characters.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimCharNew">
+<div><code>PrimCharNew</code><small>U32 → Char</small></div>
+<p>Construct a character from its full U32 code.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimCharCode">
+<div><code>PrimCharCode</code><small>Char → U32</small></div>
+<p>Extract the character code.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimStringHead">
+<div><code>PrimStringHead</code><small>nonempty String → Char</small></div>
+<p>Extract the first character after a nonempty match.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimStringTail">
+<div><code>PrimStringTail</code><small>nonempty String → String</small></div>
+<p>Extract the rest after a nonempty match.</p>
+</div>
+</section>
+<section class="primitive-group" id="primitive-group-5" aria-labelledby="primitive-group-5-title">
+<h3 id="primitive-group-5-title">Tests</h3>
+<p>Operands are already evaluated. These operations do not implement source short-circuit evaluation.</p>
+<div class="primitive-row" data-primitive="PrimBoolOr">
+<div><code>PrimBoolOr</code><small>Bool,Bool → Bool</small></div>
+<p>Inclusive OR of already evaluated operands; not source short-circuit evaluation.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimBoolXor">
+<div><code>PrimBoolXor</code><small>Bool,Bool → Bool</small></div>
+<p>True exactly when the Boolean operands differ.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimIsArrayLeaf">
+<div><code>PrimIsArrayLeaf</code><small>Array&lt;T&gt; → Bool</small></div>
+<p>Test whether the array has one element.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimIsArrayNode">
+<div><code>PrimIsArrayNode</code><small>Array&lt;T&gt; → Bool</small></div>
+<p>Test whether the valid array is not a leaf.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimIsNatZero">
+<div><code>PrimIsNatZero</code><small>Nat → Bool</small></div>
+<p>Test the zero representation.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimIsNatSuccessor">
+<div><code>PrimIsNatSuccessor</code><small>Nat → Bool</small></div>
+<p>Test positive Nat.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimIsStringEmpty">
+<div><code>PrimIsStringEmpty</code><small>String → Bool</small></div>
+<p>Test empty string.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimIsStringNonempty">
+<div><code>PrimIsStringNonempty</code><small>String → Bool</small></div>
+<p>Test nonempty string.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimIsTrue">
+<div><code>PrimIsTrue</code><small>Bool → Bool</small></div>
+<p>Test the True representation.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimIsFalse">
+<div><code>PrimIsFalse</code><small>Bool → Bool</small></div>
+<p>Test the False representation.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimSameValue">
+<div><code>PrimSameValue</code><small>runtime scalar,runtime scalar → Bool</small></div>
+<p>Runtime equality for scalar matching. JS uses ===; C compares encoded words. Not deep equality and not JavaScript Object.is/SameValue semantics.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimFloatBitsEqual">
+<div><code>PrimFloatBitsEqual</code><small>F32,U32 → Bool</small></div>
+<p>Compare float bits with an expected U32 bit pattern. JS operations do not always preserve NaN payload bits.</p>
+</div>
+</section>
+<section class="primitive-group" id="primitive-group-6" aria-labelledby="primitive-group-6-title">
+<h3 id="primitive-group-6-title">Arrays</h3>
+<p>Indexes wrap modulo the nonempty array length. A returned pair is one tuple value.</p>
+<div class="primitive-row" data-primitive="PrimArrayNew">
+<div><code>PrimArrayNew</code><small>Nat,T → Array&lt;T&gt;</small></div>
+<p>Allocate 2^depth elements initialized from the value. JS rejects depth &gt; 31. C also includes the element-layout exponent in this bound.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArraySet">
+<div><code>PrimArraySet</code><small>Array&lt;T&gt;,U32,T → Array&lt;T&gt;</small></div>
+<p>Replace one wrapped-index element; return the array.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayGet">
+<div><code>PrimArrayGet</code><small>Array&lt;T&gt;,U32 → (Array&lt;T&gt;,T)</small></div>
+<p>Read a wrapped-index element; return the array and value.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArraySwap">
+<div><code>PrimArraySwap</code><small>Array&lt;T&gt;,U32,T → (Array&lt;T&gt;,T)</small></div>
+<p>Store the new element; return the array and old element. Not a two-index swap.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArraySize">
+<div><code>PrimArraySize</code><small>Array&lt;T&gt; → (Array&lt;T&gt;,U32)</small></div>
+<p>Return the array and its element count, not its depth.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayClone">
+<div><code>PrimArrayClone</code><small>Array&lt;T&gt; → (Array&lt;T&gt;,Array&lt;T&gt;)</small></div>
+<p>Return original and copied array storage. This does not promise a recursive deep clone of element values.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayLeaf">
+<div><code>PrimArrayLeaf</code><small>T → Array&lt;T&gt;</small></div>
+<p>Construct a one-element array.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayNode">
+<div><code>PrimArrayNode</code><small>Array&lt;T&gt;,Array&lt;T&gt; → Array&lt;T&gt;</small></div>
+<p>Join two equal-sized halves. JS rejects unequal lengths.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayLeafValue">
+<div><code>PrimArrayLeafValue</code><small>one-element Array&lt;T&gt; → T</small></div>
+<p>Extract the leaf value after the leaf match.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayLeft">
+<div><code>PrimArrayLeft</code><small>node Array&lt;T&gt; → Array&lt;T&gt;</small></div>
+<p>Extract the first half. JS uses a slice; do not promise a zero-copy view.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayRight">
+<div><code>PrimArrayRight</code><small>node Array&lt;T&gt; → Array&lt;T&gt;</small></div>
+<p>Extract the second half. JS uses a slice.</p>
+</div>
+</section>
+<section class="primitive-group" id="primitive-group-7" aria-labelledby="primitive-group-7-title">
+<h3 id="primitive-group-7-title">Atomics</h3>
+<p>All operations return the array and old element as one tuple. Indexes wrap. C uses atomic helpers. JS uses sequential updates.</p>
+<div class="primitive-row" data-primitive="PrimArrayAtomicAdd">
+<div><code>PrimArrayAtomicAdd</code><small>Array&lt;U32&gt;,U32,U32 → (Array&lt;U32&gt;,U32)</small></div>
+<p>Store (old + v) mod 2^32.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayAtomicMin">
+<div><code>PrimArrayAtomicMin</code><small>Array&lt;U32&gt;,U32,U32 → (Array&lt;U32&gt;,U32)</small></div>
+<p>Store unsigned min(old,v).</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayAtomicMax">
+<div><code>PrimArrayAtomicMax</code><small>Array&lt;U32&gt;,U32,U32 → (Array&lt;U32&gt;,U32)</small></div>
+<p>Store unsigned max(old,v).</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayAtomicAnd">
+<div><code>PrimArrayAtomicAnd</code><small>Array&lt;U32&gt;,U32,U32 → (Array&lt;U32&gt;,U32)</small></div>
+<p>Store bitwise old AND v.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayAtomicOr">
+<div><code>PrimArrayAtomicOr</code><small>Array&lt;U32&gt;,U32,U32 → (Array&lt;U32&gt;,U32)</small></div>
+<p>Store bitwise old OR v.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayAtomicXor">
+<div><code>PrimArrayAtomicXor</code><small>Array&lt;U32&gt;,U32,U32 → (Array&lt;U32&gt;,U32)</small></div>
+<p>Store bitwise old XOR v.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayAtomicExch">
+<div><code>PrimArrayAtomicExch</code><small>Array&lt;U32&gt;,U32,U32 → (Array&lt;U32&gt;,U32)</small></div>
+<p>Store replacement v unconditionally.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayAtomicCas">
+<div><code>PrimArrayAtomicCas</code><small>Array&lt;U32&gt;,U32,U32,U32 → (Array&lt;U32&gt;,U32)</small></div>
+<p>Arguments are array,index,expected,replacement. Store replacement only when old equals expected.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimArrayAtomicFadd">
+<div><code>PrimArrayAtomicFadd</code><small>Array&lt;F32&gt;,U32,F32 → (Array&lt;F32&gt;,F32)</small></div>
+<p>Add and round the stored result to binary32.</p>
+</div>
+</section>
+<section class="primitive-group" id="primitive-group-8" aria-labelledby="primitive-group-8-title">
+<h3 id="primitive-group-8-title">Maps</h3>
+<p>Map operations use the native trie representation. A result pair is one tuple.</p>
+<div class="primitive-row" data-primitive="PrimMapBit">
+<div><code>PrimMapBit</code><small>String,Nat → (String,Bool)</small></div>
+<p>Preserve the query and read one trie bit. A character occupies 33 positions: presence bit, then its 32 code bits from most to least significant. Past the end gives false.</p>
+</div>
+<div class="primitive-row" data-primitive="PrimMapFind">
+<div><code>PrimMapFind</code><small>Map&lt;&amp;2,V&gt;,String → Maybe&lt;&amp;2,V&gt;</small></div>
+<p>Follow each node&#x27;s stored position; compare the complete key at a leaf. Return Some(stored value) or None. No map/query pair is returned. A hit shares the stored value; it does not deep-copy it. Node positions need not increase.</p>
+</div>
+</section>
+</div>
+<p class="ir-caption">The catalog does not prove equal target support. F32ToNat has different target behavior for invalid inputs.</p>
+<div class="source-links"><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/js_backend.bend#L1542-L1679">JavaScript primitive implementation</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/c_backend.bend#L1724-L1800">C primitive implementation</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/c_runtime.c">C runtime helpers</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/../base.bend">Base library types</a></div>
+</section>
+<section class="ir-section" id="ownership" aria-labelledby="ownership-title">
+<div class="ir-heading">
+<h2 id="ownership-title">Storage and output targets</h2>
+<a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L1962-L1992">Source</a></div>
+<div class="ownership-flow">
+<div><strong>Check</strong>
+<p>Use source storage and temporary declaration storage.</p>
+</div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div><strong>Publish</strong>
+<p>Copy reachable temporary data into retained source storage.</p>
+</div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div><strong>Rewind</strong>
+<p>Reset temporary used lengths. Keep capacity for reuse.</p>
+</div>
+<svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg>
+<div><strong>Lower</strong>
+<p>Consume CheckedProgram. Return an independent backend Program.</p>
+</div>
+</div>
+<div class="ir-two storage-records">
+<div class="ir-record">
+<h3>Backend Program</h3>
+<div class="record-field"><code>codes</code><span>Code IDs, capture-use limits, parameters and block bodies.</span></div>
+<div class="record-field"><code>declarations</code><span>Function, lazy, native and foreign declarations.</span></div>
+<div class="record-field"><code>constructors</code><span>Constructor identities and field layouts.</span></div>
+<div class="record-field"><code>families</code><span>Datatype-family and field metadata.</span></div>
+<div class="record-field"><code>type_functions</code><span>Type-level descriptor programs.</span></div>
+<div class="record-field"><code>ending</code><span>Executable main metadata or library exports.</span></div>
+</div>
+<div>
+<h3>Descriptor metadata</h3>
+<pre class="ir-code"><code>checked type
+  → DescriptorRef / DescriptorArrow / …
+  → layout, display and host conversion
 
-          <section class="ir-view" id="view-source" data-ir-view="source" data-status="Source/core view: schematic application structure and lexical variable uses." aria-labelledby="source-view-title">
-            <div class="view-heading"><h3 id="source-view-title">The expression, before checked facts</h3><span>Core-term topology · schematic</span></div>
-            <div class="node-graph">
-              <svg class="graph-wires" aria-hidden="true"><defs><marker id="arrow-source" markerWidth="7" markerHeight="7" refX="7" refY="3.5" orient="auto"><path d="M0 0 7 3.5 0 7Z" fill="context-stroke" /></marker></defs><path data-from="s-k" data-to="s-x" data-binding="k" marker-end="url(#arrow-source)" /><path data-from="s-x" data-to="s-apply" data-binding="k x" marker-end="url(#arrow-source)" /><path data-from="s-apply" data-to="s-partial" data-binding="x" marker-end="url(#arrow-source)" /><path data-from="s-apply" data-to="s-use-k" data-binding="k" marker-end="url(#arrow-source)" /><path data-from="s-partial" data-to="s-add" marker-end="url(#arrow-source)" /><path data-from="s-partial" data-to="s-use-x" data-binding="x" marker-end="url(#arrow-source)" /><path data-from="s-use-k" data-to="s-k" data-binding="k" data-relation="reference" marker-end="url(#arrow-source)" /></svg>
-              <button class="ir-node pos-a" data-node="s-k" data-binding="k" aria-pressed="true" aria-controls="note-s-k" disabled><strong>Parameter k</strong><code>TermLam</code><span>Outer binding</span></button>
-              <button class="ir-node pos-b" data-node="s-x" data-binding="x" aria-pressed="false" aria-controls="note-s-x" disabled><strong>Returned function</strong><code>TermLam</code><span>Binds x</span></button>
-              <button class="ir-node pos-c" data-node="s-apply" data-binding="k x" aria-pressed="false" aria-controls="note-s-apply" disabled><strong>Addition application</strong><code>TermApp</code><span>Function applied to k</span></button>
-              <button class="ir-node pos-e" data-node="s-partial" data-binding="x" aria-pressed="false" aria-controls="note-s-partial" disabled><strong>Function part</strong><code>TermApp</code><span>Addition applied to x</span></button>
-              <button class="ir-node pos-d" data-node="s-add" aria-pressed="false" aria-controls="note-s-add" disabled><strong>Addition reference</strong><code>TermRef</code><span>A declaration to resolve</span></button>
-              <button class="ir-node pos-f" data-node="s-use-x" data-binding="x" aria-pressed="false" aria-controls="note-s-use-x" disabled><strong>Use x</strong><code>TermVar</code><span>The inner binding</span></button>
-              <button class="ir-node pos-g" data-node="s-use-k" data-binding="k" aria-pressed="false" aria-controls="note-s-use-k" disabled><strong>Use k</strong><code>TermVar</code><span>Reaches the outer binding</span></button>
-            </div>
-            <div class="node-notes" aria-live="polite">
-              <article class="node-note" id="note-s-k" data-node-note="s-k"><h4>A declaration parameter becomes a lambda</h4><p>The checker wraps definition binders around the body. The returned function is inside that outer binding.</p><dl><dt>TermLam</dt><dd>quantity, key_id, index, body_id, span</dd><dt>body_id</dt><dd>Handle to the next term—not an embedded copied body.</dd></dl></article>
-              <article class="node-note" id="note-s-x" data-node-note="s-x"><h4>The lambda binds x, not k</h4><p>Its body may refer to both the new binding and the enclosing one. Source syntax does not yet contain a backend capture list.</p><dl><dt>key_id</dt><dd>Interned spelling for the binder.</dd><dt>body_id</dt><dd>The body is another arena term.</dd></dl></article>
-              <article class="node-note" id="note-s-apply" data-node-note="s-apply"><h4>TermApp has two handles</h4><p>This is a schematic curried application shape, not a captured parse of the operator token.</p><dl><dt>fn_id</dt><dd>Handle to the function expression.</dd><dt>arg_id</dt><dd>Handle to the argument expression.</dd></dl></article>
-              <article class="node-note" id="note-s-partial" data-node-note="s-partial"><h4>Applications can nest</h4><p>A function expression may itself be an application. Lowering will later decide direct calls, partial application and indirect application.</p><dl><dt>TermApp</dt><dd>fn_id, arg_id, span</dd></dl></article>
-              <article class="node-note" id="note-s-add" data-node-note="s-add"><h4>A global reference is not a local slot</h4><p>Checking resolves the declaration. This model does not claim an observed declaration owner or parser desugaring.</p><dl><dt>TermRef</dt><dd>key_id, span</dd><dt>later</dt><dd>The selected global Symbol is retained in occurrence facts.</dd></dl></article>
-              <article class="node-note" id="note-s-use-x" data-node-note="s-use-x"><h4>Find the lexical binding</h4><p>A variable's index selects its lexical environment entry. Its printed name is not the lookup identity.</p><dl><dt>TermVar</dt><dd>key_id, index, span</dd><dt>index</dt><dd>A Nat interpreted in the current lexical environment.</dd></dl></article>
-              <article class="node-note" id="note-s-use-k" data-node-note="s-use-k"><h4>Same expression, outer scope</h4><p>The use of k reaches outside the returned lambda. That relationship is what lowering must preserve when it discovers captures.</p><dl><dt>key_id</dt><dd>Spelling, not a globally unique binder ID.</dd><dt>index</dt><dd>Lexical lookup selects the enclosing binding.</dd></dl></article>
-            </div>
-            <a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checker_arena.bend#L8-L45">Read the real term constructors</a>
-          </section>
-
-          <section class="ir-view" id="view-fir" data-ir-view="fir" data-status="FIR: retained term handles plus contextual checking facts. No runtime capture list yet." aria-labelledby="fir-view-title">
-            <div class="view-heading"><h3 id="fir-view-title">The tree now carries checking decisions</h3><span>Real constructors · schematic relationships</span></div>
-            <div class="node-graph">
-              <svg class="graph-wires" aria-hidden="true"><defs><marker id="arrow-fir" markerWidth="7" markerHeight="7" refX="7" refY="3.5" orient="auto"><path d="M0 0 7 3.5 0 7Z" fill="context-stroke" /></marker></defs><path data-from="f-k" data-to="f-x" data-binding="k" marker-end="url(#arrow-fir)" /><path data-from="f-x" data-to="f-apply" data-binding="k x" marker-end="url(#arrow-fir)" /><path data-from="f-apply" data-to="f-partial" data-binding="x" marker-end="url(#arrow-fir)" /><path data-from="f-apply" data-to="f-use-k" data-binding="k" marker-end="url(#arrow-fir)" /><path data-from="f-partial" data-to="f-add" marker-end="url(#arrow-fir)" /><path data-from="f-partial" data-to="f-use-x" data-binding="x" marker-end="url(#arrow-fir)" /><path data-from="f-use-k" data-to="f-k" data-binding="k" data-relation="reference" marker-end="url(#arrow-fir)" /></svg>
-              <button class="ir-node pos-a" data-node="f-k" data-binding="k" aria-pressed="true" aria-controls="note-f-k" disabled><strong>Checked lambda k</strong><code>TypedOccurrence</code><span>Domain + permitted use</span></button>
-              <button class="ir-node pos-b" data-node="f-x" data-binding="x" aria-pressed="false" aria-controls="note-f-x" disabled><strong>Checked lambda x</strong><code>TypedOccurrence</code><span>Body checked in its scope</span></button>
-              <button class="ir-node pos-c" data-node="f-apply" data-binding="k x" aria-pressed="false" aria-controls="note-f-apply" disabled><strong>Checked application</strong><code>TypedOccurrence</code><span>Function and argument facts</span></button>
-              <button class="ir-node pos-e" data-node="f-partial" data-binding="x" aria-pressed="false" aria-controls="note-f-partial" disabled><strong>Checked function part</strong><code>TypedOccurrence</code><span>Application layers retained</span></button>
-              <button class="ir-node pos-d" data-node="f-add" aria-pressed="false" aria-controls="note-f-add" disabled><strong>Resolved declaration</strong><code>symbol: Some{Symbol}</code><span>Global identity, not spelling</span></button>
-              <button class="ir-node pos-f" data-node="f-use-x" data-binding="x" aria-pressed="false" aria-controls="note-f-use-x" disabled><strong>Checked use of x</strong><code>term + ty + binding</code><span>Refers to the inner binder</span></button>
-              <button class="ir-node pos-g" data-node="f-use-k" data-binding="k" aria-pressed="false" aria-controls="note-f-use-k" disabled><strong>Checked use of k</strong><code>term + ty + binding</code><span>Still a lexical reference</span></button>
-            </div>
-            <div class="node-notes" aria-live="polite">
-              <article class="node-note" id="note-f-k" data-node-note="f-k"><h4>Meaning retained, not guessed again</h4><p>The lambda occurrence retains the checked domain binding, its resolved quantity and the checked body. A capture list has not been created yet.</p><dl><dt>term / ty</dt><dd>Handles into the same retained term arena.</dd><dt>bindings</dt><dd>CheckedBinding{quantity, ty, type_depth}.</dd><dt>children</dt><dd>Context-specific checked occurrences; here, the body.</dd></dl></article>
-              <article class="node-note" id="note-f-x" data-node-note="f-x"><h4>Check the body under the new binder</h4><p>The parameter introduces a new lexical environment entry. Stored type depth is not a unique binder identity.</p><dl><dt>formal</dt><dd>The checked parameter quantity; this page does not infer its value.</dd><dt>children</dt><dd>One checked body occurrence.</dd></dl></article>
-              <article class="node-note" id="note-f-apply" data-node-note="f-apply"><h4>Application retains both checking contexts</h4><p>A checked application has function and argument children and the formal parameter quantity. The diagram's application topology is schematic.</p><dl><dt>children</dt><dd>[function occurrence, argument occurrence]</dd><dt>formal</dt><dd>Some{checked parameter quantity}</dd></dl></article>
-              <article class="node-note" id="note-f-partial" data-node-note="f-partial"><h4>Not one type cell per syntax node</h4><p>Occurrences describe checking invocations. A shared term handle does not make facts from different contexts interchangeable.</p><dl><dt>term</dt><dd>Which arena term was checked.</dd><dt>ty</dt><dd>The type term retained for this occurrence.</dd></dl></article>
-              <article class="node-note" id="note-f-add" data-node-note="f-add"><h4>The chosen global declaration</h4><p>Symbol stores a selected global identity. It is not a local binder ID and need not use the spelling from an import alias.</p><dl><dt>Symbol</dt><dd>owner, local, kind, signature</dd><dt>signature</dt><dd>Handle to the retained signature term.</dd></dl></article>
-              <article class="node-note" id="note-f-use-x" data-node-note="f-use-x"><h4>A normal parameter use is a TypedOccurrence</h4><p>Being local does not automatically mean LocalReferenceOccurrence. That separate constructor is used when a semantic value has been saved.</p><dl><dt>binding</dt><dd>The checked domain and permitted-use facts.</dd><dt>term</dt><dd>The lexical TermVar remains available.</dd></dl></article>
-              <article class="node-note" id="note-f-use-k" data-node-note="f-use-k"><h4>Preserve which k this is</h4><p>Lowering must recover the outer lexical binding—not substitute and re-run its initializer. The FIR does not already allocate a closure environment.</p><dl><dt>TermVar.index</dt><dd>Selects the binding in its lexical environment.</dd><dt>CheckedBinding</dt><dd>Has no stored name or unique binder ID.</dd></dl></article>
-            </div>
-            <a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checker_ir.bend#L27-L58">Read the actual checked-fact declarations</a>
-          </section>
-
-          <section class="ir-view" id="view-lower" data-ir-view="lower" data-status="Lowering: a reference crossing frame ownership becomes a positional capture." aria-labelledby="lower-view-title">
-            <div class="view-heading"><h3 id="lower-view-title">A lexical reach becomes a capture slot</h3><span>Frame and identity labels are synthetic</span></div>
-            <div class="node-graph">
-              <svg class="graph-wires" aria-hidden="true"><defs><marker id="arrow-lower" markerWidth="7" markerHeight="7" refX="7" refY="3.5" orient="auto"><path d="M0 0 7 3.5 0 7Z" fill="context-stroke" /></marker></defs><path data-from="l-slot" data-to="l-resolve" data-binding="k" data-relation="reference" marker-end="url(#arrow-lower)" /><path data-from="l-frame" data-to="l-resolve" marker-end="url(#arrow-lower)" /><path data-from="l-resolve" data-to="l-capture" data-binding="k" marker-end="url(#arrow-lower)" /><path data-from="l-capture" data-to="l-code" data-binding="k" marker-end="url(#arrow-lower)" /><path data-from="l-frame" data-to="l-code" data-binding="x" marker-end="url(#arrow-lower)" /><path data-from="l-code" data-to="l-closure" data-relation="reference" marker-end="url(#arrow-lower)" /><path data-from="l-slot" data-to="l-closure" data-binding="k" data-relation="reference" marker-end="url(#arrow-lower)" /></svg>
-              <button class="ir-node pos-a" data-node="l-slot" data-binding="k" aria-pressed="true" aria-controls="note-l-slot" disabled><strong>Outer slot k</strong><code>Local{10}</code><span>Owner 1 · identity 10</span></button>
-              <button class="ir-node pos-b" data-node="l-frame" data-binding="x" aria-pressed="false" aria-controls="note-l-frame" disabled><strong>Enter the inner frame</strong><code>Local{20}</code><span>x belongs to owner 2</span></button>
-              <button class="ir-node pos-c" data-node="l-resolve" data-binding="k" aria-pressed="false" aria-controls="note-l-resolve" disabled><strong>Resolve the use of k</strong><code>owner 1 ≠ owner 2</code><span>Its slot crosses this frame</span></button>
-              <button class="ir-node pos-d" data-node="l-capture" data-binding="k" aria-pressed="false" aria-controls="note-l-capture" disabled><strong>Assign or reuse a capture</strong><code>Capture{0}</code><span>Key: owner + identity</span></button>
-              <button class="ir-node pos-e" data-node="l-code" data-binding="k x" aria-pressed="false" aria-controls="note-l-code" disabled><strong>Publish the lifted body</strong><code>Code{101, …}</code><span>Capture uses + live parameters</span></button>
-              <button class="ir-node pos-f" data-node="l-closure" data-binding="k" aria-pressed="false" aria-controls="note-l-closure" disabled><strong>Build the closure operation</strong><code>Closure{code: 101, …}</code><span>Captures the evaluated Local{10}</span></button>
-            </div>
-            <div class="node-notes" aria-live="polite">
-              <article class="node-note" id="note-l-slot" data-node-note="l-slot"><h4>Track lexical identity, not text</h4><p>A lowering Slot carries its owning frame and a fresh identity as well as its current atom and use contract.</p><dl><dt>Slot</dt><dd>owner, identity, value, use</dd><dt>value</dt><dd>An existing BIR atom, not permission to evaluate an initializer again.</dd></dl></article>
-              <article class="node-note" id="note-l-frame" data-node-note="l-frame"><h4>x is local to this body</h4><p>A non-erased lambda creates a frame and a fresh parameter slot. A reference owned by this frame uses its existing local atom.</p><dl><dt>Frame</dt><dd>owner, instructions, captures, capture_count</dd><dt>erased lambda</dt><dd>Uses an ErasedSlot instead of creating a live parameter.</dd></dl></article>
-              <article class="node-note" id="note-l-resolve" data-node-note="l-resolve"><h4>The ownership comparison is the decision</h4><p>Lowering reads the lexical TermVar index and finds its Slot. A different owning frame requires a capture; a matching frame does not.</p><dl><dt>same frame</dt><dd>Use the slot's existing atom.</dd><dt>other frame</dt><dd>Search the capture list by (owner, identity).</dd></dl></article>
-              <article class="node-note" id="note-l-capture" data-node-note="l-capture"><h4>One positional slot per captured binding</h4><p>The first encounter assigns a capture index. Later encounters reuse that binding's slot, even when spellings elsewhere happen to match.</p><dl><dt>Capture</dt><dd>slot: Slot, index: U32</dd><dt>order</dt><dd>The finalized capture list preserves discovery order.</dd></dl></article>
-              <article class="node-note" id="note-l-code" data-node-note="l-code"><h4>Separate code from its supplied environment</h4><p>The lifted body refers to Capture{0}; its Code records positional capture-use contracts and live parameters.</p><dl><dt>Code.captures</dt><dd>List of use contracts, not the captured values themselves.</dd><dt>parameters</dt><dd>The live parameter IDs and their use contracts.</dd></dl></article>
-              <article class="node-note" id="note-l-closure" data-node-note="l-closure"><h4>The parent supplies evaluated values</h4><p>The parent resolves the captured slots and packages them as Args for the closure. An IR Closure does not by itself prove a target heap allocation.</p><dl><dt>Closure</dt><dd>code, captures: List&lt;Arg&gt;, parameters</dd><dt>captures</dt><dd>The values supplied to the body's positional capture slots.</dd></dl></article>
-            </div>
-            <a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L141-L264">Read actual capture resolution and closure creation</a>
-          </section>
-
-          <section class="ir-view" id="view-bir" data-ir-view="bir" data-status="Backend IR: explicit closure creation and a separate lifted body using Local and Capture operands." aria-labelledby="bir-view-title">
-            <div class="view-heading"><h3 id="bir-view-title">k is a capture; x is a local operand</h3><span>Source-informed schematic · synthetic IDs</span></div>
-            <div class="node-graph">
-              <svg class="graph-wires" aria-hidden="true"><defs><marker id="arrow-bir" markerWidth="7" markerHeight="7" refX="7" refY="3.5" orient="auto"><path d="M0 0 7 3.5 0 7Z" fill="context-stroke" /></marker></defs><path data-from="b-outer" data-to="b-closure" data-binding="k" marker-end="url(#arrow-bir)" /><path data-from="b-closure" data-to="b-inner" data-relation="reference" marker-end="url(#arrow-bir)" /><path data-from="b-inner" data-to="b-add" marker-end="url(#arrow-bir)" /><path data-from="b-capture" data-to="b-add" data-binding="k" marker-end="url(#arrow-bir)" /><path data-from="b-local" data-to="b-add" data-binding="x" marker-end="url(#arrow-bir)" /><path data-from="b-add" data-to="b-return" data-binding="k x" marker-end="url(#arrow-bir)" /><path data-from="b-closure" data-to="b-capture" data-binding="k" data-relation="reference" marker-end="url(#arrow-bir)" /></svg>
-              <button class="ir-node pos-a" data-node="b-outer" data-binding="k" aria-pressed="true" aria-controls="note-b-outer" disabled><strong>Code for adder</strong><code>Code{id: 100, …}</code><span>Parameter k is Local{10}</span></button>
-              <button class="ir-node pos-b" data-node="b-closure" data-binding="k" aria-pressed="false" aria-controls="note-b-closure" disabled><strong>Create and return a function</strong><code>Closure{code: 101, …}</code><span>Capture argument: Local{10}</span></button>
-              <button class="ir-node pos-c" data-node="b-inner" data-binding="k x" aria-pressed="false" aria-controls="note-b-inner" disabled><strong>Code for the returned body</strong><code>Code{id: 101, …}</code><span>One capture slot, parameter x</span></button>
-              <button class="ir-node pos-d" data-node="b-capture" data-binding="k" aria-pressed="false" aria-controls="note-b-capture" disabled><strong>The remembered k</strong><code>Capture{0}</code><span>Read slot 0 of this environment</span></button>
-              <button class="ir-node pos-e" data-node="b-local" data-binding="x" aria-pressed="false" aria-controls="note-b-local" disabled><strong>The later argument x</strong><code>Local{20}</code><span>Read the live parameter</span></button>
-              <button class="ir-node pos-f" data-node="b-add" data-binding="k x" aria-pressed="false" aria-controls="note-b-add" disabled><strong>Compute x + k</strong><code>PrimitiveCall{PrimU32Add{}, …}</code><span>Let binds the result as 21</span></button>
-              <button class="ir-node pos-g" data-node="b-return" data-binding="k x" aria-pressed="false" aria-controls="note-b-return" disabled><strong>Return the sum</strong><code>Return{Local{21}}</code><span>Ends the inner code body</span></button>
-            </div>
-            <div class="node-notes" aria-live="polite">
-              <article class="node-note" id="note-b-outer" data-node-note="b-outer"><h4>Two Code bodies, not one straight-line program</h4><p>The outer body creates and returns a closure. The inner body will perform the addition when that closure is called.</p><dl><dt>Code</dt><dd>id, captures: List&lt;Use&gt;, parameters, body: Block</dd><dt>outer return</dt><dd>Returns the closure result, not the sum.</dd></dl></article>
-              <article class="node-note" id="note-b-closure" data-node-note="b-closure"><h4>Code identity plus capture arguments</h4><p>The capture argument is Local{10} in the parent; it becomes slot 0 when the inner code reads it.</p><dl><dt>captures</dt><dd>Args: each combines a use contract with an Atom.</dd><dt>parameters</dt><dd>Live parameters expected by the resulting callable.</dd></dl></article>
-              <article class="node-note" id="note-b-inner" data-node-note="b-inner"><h4>The body is independently callable code</h4><p>The body names its captures positionally. It does not carry a checker, a source arena or a FIR occurrence tree.</p><dl><dt>captures</dt><dd>Positional use metadata; values arrive through closure creation.</dd><dt>body</dt><dd>A structured Block tree.</dd></dl></article>
-              <article class="node-note" id="note-b-capture" data-node-note="b-capture"><h4>An operand, not another computation tree</h4><p>Capture is one Atom variant. Slot 0 here is a teaching assignment, not an observed compiler ID.</p><dl><dt>Capture</dt><dd>slot: U32</dd><dt>relationship</dt><dd>The matching supplied closure argument is the outer k.</dd></dl></article>
-              <article class="node-note" id="note-b-local" data-node-note="b-local"><h4>x stays local to the lifted body</h4><p>Local refers to an existing BIR local ID. It is not the source variable spelling or an arena term handle.</p><dl><dt>Local</dt><dd>id: U32</dd><dt>Parameter</dt><dd>id: U32, use: Use</dd></dl></article>
-              <article class="node-note" id="note-b-add" data-node-note="b-add"><h4>Strict work belongs in a Let</h4><p>This illustrates the native U32-add primitive. The real constructor is PrimU32Add; no observed lowering trace or exact use annotations are claimed.</p><dl><dt>PrimitiveCall</dt><dd>primitive, args: List&lt;Arg&gt;, types: List&lt;Descriptor&gt;</dd><dt>Let</dt><dd>id, op, next: Block</dd></dl></article>
-              <article class="node-note" id="note-b-return" data-node-note="b-return"><h4>Return terminates the body</h4><p>The sum was already bound by the preceding Let. Return carries the result atom; it does not repeat the addition.</p><dl><dt>Return</dt><dd>value: Atom</dd><dt>tail calls</dt><dd>TailDirect and TailApply are other Block terminators, not Ops.</dd></dl></article>
-            </div>
-            <a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_ir.bend#L188-L214">Read real operations, blocks and code bodies</a>
-          </section>
-          <div class="graph-legend"><span><i class="legend-line" aria-hidden="true"></i>Structure / operands</span><span><i class="legend-line reference" aria-hidden="true"></i>Reference / lexical relation</span></div>
-        </div>
-      </div>
-      <p class="workbench-caption">Source-backed teaching model—not a live compiler or a captured IR dump. IDs, frame labels and application topology are schematic; use annotations are not inferred here. Exact declarations and implementation links are below. <noscript>JavaScript is off: all four representations and all node explanations are shown.</noscript></p>
-          <details class="source-context-more"><summary>Source, types and full program</summary><p class="source-caption"><code>k</code> arrives now. <code>x</code> arrives when the returned function is called. U32 is a 32-bit unsigned integer.</p><a class="source-link" href="/examples/closure.bend" download>Download the full real program</a><a class="source-link" href="/#example-title">Run its emitted JavaScript</a><p class="binding-description">The <code>compute</code> wrapper has its own parameters. Equal spelling does not mean the same binding.</p></details>
-    </section>
-
-    <section class="ir-chapter" id="why" aria-labelledby="why-title">
-      <div class="ir-section-heading"><h2 id="why-title">Why keep more than one representation?</h2></div>
-      <div class="ir-summary"><article><h3>Source / core terms</h3><p>Describe expressions and bindings. Names, application and lambda structure still look like the language.</p></article><article><h3>FIR: checked meaning</h3><p>Retain the checker’s decisions: types, quantities, resolved declarations and context-specific occurrences.</p></article><article><h3>Backend IR: execution</h3><p>Make captures, calls, operands and control explicit. Both output targets consume this structured program.</p></article></div>
-      <p class="note">These are different questions, not three successively “better” trees. The official compiler also has IRs; this design makes an owned checked boundary and one shared lowering explicit.</p>
-    </section>
-
-    <section class="ir-chapter" id="fir" aria-labelledby="fir-title">
-      <div class="ir-section-heading"><h2 id="fir-title">FIR is a package, not just an AST with types</h2><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checked_frontend.bend#L8-L25">Actual front-end boundary</a></div>
-      <div class="anatomy-layout">
-        <div class="record-plate"><div class="record-heading">CheckedProgram · affine owner</div><div class="record-row"><code>source</code><div><strong>Arena.Arena</strong><small>Retained term, pattern, binder and tape storage.</small></div></div><div class="record-row"><code>modules</code><div><strong>List of checked LoadedModule</strong><small>Declaration structure; definitions retain checked occurrences and classification facts.</small></div></div><div class="record-row"><code>signatures</code><div><strong>List of ArenaGlobal</strong><small>Global declarations’ type/value information.</small></div></div><div class="record-row"><code>metadata</code><div><strong>List of ModuleMetadata</strong><small>Module resolution scope and datatype-family facts—not lambda capture environments.</small></div></div></div>
-        <div><figure class="pool-map"><h3>Arena terms answer “what is this expression?”</h3><div class="pool-slots"><span>TermLam</span><span>TermApp</span><span class="retained-slot">TermVar</span><span>TermRef</span></div><figcaption>Symbolic entries. Child handles select pool entries; start/count slices select tape ranges. They are not byte offsets or literal memory sizes.</figcaption></figure><div class="occurrence-facts"><h3>Occurrences answer “what was checked here?”</h3><dl><dt>term / ty</dt><dd>Two handles into that same retained term arena.</dd><dt>formal</dt><dd>A checked parameter quantity, where applicable.</dd><dt>symbol</dt><dd>The selected global declaration, where applicable.</dd><dt>bindings</dt><dd>Domain, permitted uses and type interpretation depth.</dd><dt>children</dt><dd>Checked subexpressions in this occurrence’s context.</dd></dl><p class="note">No universal “one term → one type” lookup table. Occurrences from different checking contexts are not interchangeable.</p></div></div>
-      </div>
-      <details class="source-details"><summary>Actual checked-record declarations and what each field is not</summary><pre class="ir-code"><code>type CheckedProgram is Type:
-  CheckedProgram{source: Arena.Arena,
-    modules: List&lt;&amp;2, IR.LoadedModule&gt;,
-    signatures: List&lt;&amp;2, Scope.ArenaGlobal&gt;,
-    metadata: List&lt;&amp;2, ModuleMetadata&gt;}
-
-type CheckedBinding is Data:
-  CheckedBinding{quantity: Ast.Quantity, ty: U32, type_depth: Nat}
-
-type Occurrence is Data:
-  TypedOccurrence{term: U32, ty: U32,
-    formal: Maybe&lt;&amp;2, Ast.Quantity&gt;, symbol: Maybe&lt;&amp;2, Symbol&gt;,
-    bindings: List&lt;&amp;2, CheckedBinding&gt;, children: List&lt;&amp;2, Occurrence&gt;}
-  LocalReferenceOccurrence{term: U32, ty: U32,
-    binding: CheckedBinding, value: U32}</code></pre><p>Excerpt of the real variants. Other occurrences represent scalar/string literals, cases and local pattern blocks. A normal parameter read is ordinarily a TypedOccurrence. LocalReferenceOccurrence stores an additional semantic substitution value; lowering uses its lexical term, not that value as a new runtime operand.</p><p>A Symbol identifies a global declaration by <code>owner/local/kind/signature</code>. CheckedBinding has no name or unique binder ID; <code>type_depth</code> is not lexical identity. <code>TermVar.index</code> selects a lexical environment entry; its <code>key_id</code> supplies spelling. Declaration parameters are lambda-wrapped before body checking.</p><div class="source-links"><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checker_ir.bend#L27-L85">All occurrence and declaration records</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checker.bend#L3448-L3482">Semantic value versus lexical use</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checker.bend#L6546-L6574">Lambda occurrence producer</a></div></details>
-    </section>
-
-    <section class="ir-chapter" id="lowering" aria-labelledby="lowering-title">
-      <div class="ir-section-heading"><h2 id="lowering-title">Lowering turns lexical reach into explicit data</h2><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L141-L264">Capture implementation</a></div>
-      <div class="transformation-strip"><article class="transformation-item"><h3>Find the binding</h3><code>Slot{owner, identity, value, use}</code><p>Read the lexical environment. Reusing a checked semantic value is not permission to evaluate an initializer again.</p></article><svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg><article class="transformation-item"><h3>Cross a frame boundary</h3><code>Capture{slot, index}</code><p>Same owner: use the existing atom. Different owner: find or assign a capture by the pair (owner, identity).</p></article><svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg><article class="transformation-item"><h3>Separate code and environment</h3><code>Code + Closure</code><p>The lifted body reads Capture{0}. The parent supplies the corresponding evaluated argument when creating the closure.</p></article></div>
-      <details class="source-details"><summary>Erasure, evaluation order and calls are part of this boundary too</summary><p>Lowering omits runtime-erased parameters while retaining required descriptor metadata. It lowers checked captures and pattern flow before target dispatch. Strict operations become ordered Lets; over-application is an initial call followed by unary Apply operations, not one oversized Direct call. A final returned Direct/Apply may become TailDirect/TailApply.</p><p>Local identities survive semantic substitution. A local initializer must not be re-evaluated for every reference merely because the checker stored a semantic value. Missing checked facts, unresolved references and unelaborated forms can fail lowering; failure is a diagnostic, not fabricated target code.</p><div class="source-links"><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L100-L140">Strict order and tail conversion</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L1332-L1368">Lexical reference handling</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L1484-L1519">Lambda and erasure handling</a></div></details>
-    </section>
-
-    <section class="ir-chapter" id="bir" aria-labelledby="bir-title">
-      <div class="ir-section-heading"><h2 id="bir-title">Backend IR: operands, work, then control</h2><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_ir.bend#L4-L29">Operand declarations</a></div>
-      <div class="transformation-strip"><article class="transformation-item"><h3>Atom / Arg</h3><code>Local{id} · Capture{slot}<br />Arg{use, value}</code><p>An operand/reference, optionally paired with its consumer-use contract. Not a nested operation tree.</p></article><svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg><article class="transformation-item"><h3>Op</h3><code>Closure · PrimitiveCall<br />Direct · Apply · Project</code><p>A piece of work whose result can be bound. Closure names lifted code and supplies its capture arguments.</p></article><svg class="flow-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12h20m-6-6 6 6-6 6" /></svg><article class="transformation-item"><h3>Block</h3><code>Let{id, op, next}<br />Return{value}</code><p>Ordered executable structure. A Let performs the operation once and passes its result onward by a local ID.</p></article></div>
-      <div class="anatomy-layout" style="margin-top:24px"><div class="record-plate"><div class="record-heading">Program · independent backend representation</div><div class="record-row"><code>codes</code><div><strong>Callable bodies</strong><small>Each Code has capture-use metadata, live parameters and a Block.</small></div></div><div class="record-row"><code>declarations</code><div><strong>Functions, lazy, native and foreign declarations</strong><small>Entry identities and interface facts.</small></div></div><div class="record-row"><code>constructors</code><div><strong>Constructor layouts</strong><small>Target planning still chooses physical representations.</small></div></div><div class="record-row"><code>families</code><div><strong>Datatype-family metadata</strong><small>Retained independently of the checker arena.</small></div></div><div class="record-row"><code>type_functions</code><div><strong>Descriptor computations</strong><small>A separate metadata language, not executable source syntax.</small></div></div><div class="record-row"><code>ending</code><div><strong>Executable or library</strong><small>Main type or exported-interface descriptors.</small></div></div></div><div><h3>The same k in two different code bodies</h3><pre class="ir-code"><code>adder body:
-  closure = Closure(code: inner,
-                    captures: [Local(k)])
-  Return(Local(closure))
-
-inner body:
-  sum = PrimitiveCall(PrimU32Add,
-          [Local(x), <span class="capture-token">Capture(0)</span>])
-  Return(Local(sum))</code></pre><p class="note">Schematic short form, not literal Bend output. Arg use annotations and parameter lists are omitted—not guessed. The graph describes closure semantics; it does not prove a heap allocation.</p><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_ir.bend#L188-L249">Full Code and Program declarations</a></div></div>
-      <details class="source-details"><summary>Actual Op, Block and Code declarations</summary><pre class="ir-code"><code>type Op is Data:
-  Copy{value: Atom}
-  PrimitiveCall{primitive: Primitive, args: List&lt;&amp;2, Arg&gt;, types: List&lt;&amp;2, Descriptor&gt;}
-  Closure{code: U32, captures: List&lt;&amp;2, Arg&gt;, parameters: List&lt;&amp;2, Parameter&gt;}
-  Direct{code: U32, args: List&lt;&amp;2, Arg&gt;}
-  Apply{fn: Atom, arg: Arg}
-  LoadSymbol{id: U32, key: String}
-  Construct{constructor: U32, tag: String, fields: List&lt;&amp;2, Field&gt;}
-  Project{value: Atom, constructor: U32, field: U32, key: String}
-  HasTag{value: Atom, constructor: U32, tag: String}
-
-type Block is Data:
-  Return{value: Atom}
-  Let{id: U32, op: Op, next: Block}
-  Branch{condition: Atom, yes: Block, no: Block}
-  Region{label: U32, body: Block, next: Block}
-  LeaveRegion{label: U32}
-  TailDirect{code: U32, args: List&lt;&amp;2, Arg&gt;}
-  TailApply{fn: Atom, arg: Arg}
-  Failure{message: String}
-
-type Code is Data:
-  Code{id: U32, captures: List&lt;&amp;2, Use&gt;,
-    parameters: List&lt;&amp;2, Parameter&gt;, body: Block}</code></pre><p>The executable constructor is Closure, not a fabricated BIR Lambda. DescriptorLambda belongs to the separate descriptor language. Tail calls are terminators, not operations. Blocks remain structured recursive trees; IDs do not make this an arbitrary CFG, SSA form or bytecode.</p><p>Affine use means at most one logical consumer use, not “the caller value is dead” or “freeing is automatically safe.” Atoms contain no nested operation tree; that does not make every target-level operand evaluation allocation- or effect-free.</p></details>
-      <details class="source-details"><summary>Why descriptors survive when source types are no longer runtime expressions</summary><p>Descriptor is a separate metadata language used for layout, display and host interoperation. For example, DescriptorRef retains a canonical key and argument descriptors; DescriptorArrow retains a quantity, domain and body. Erased formal positions may still matter to dependent metadata. Not every stored descriptor is already normalized.</p><p>The backend Program owns codes, declarations, constructors, families, type functions and an ending. SourceFile records may be loaded separately as passive foreign target code. They are not a checker source-arena field inside Program.</p><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_ir.bend#L156-L186">Actual descriptor language</a></details>
-    </section>
-
-    <section class="ir-chapter" id="control" aria-labelledby="control-title">
-      <div class="ir-section-heading"><h2 id="control-title">A failed pattern does not copy the rest of the match</h2><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L1224-L1259">Actual region construction</a></div>
-      <div class="control-layout"><figure class="region-flow"><h3>One lexical Region, one shared next</h3><ol class="region-cases"><li><code>outer test</code><span>Pass → test the nested pattern.<br />Fail → LeaveRegion{900}.</span></li><li><code>nested test</code><span>Pass → Return{Word{1}}.<br />Fail → the same LeaveRegion{900}.</span></li></ol><p class="region-outcome"><strong>Region.next</strong> → Return{Word{2}}<br />Both failures reach this one fallback.</p><figcaption>Minimal schematic. Label 900 and result literals are illustrative; real pattern tests also insert strict projections and checks.</figcaption></figure><div><pre class="ir-code"><code>Region{900,
-  Branch{outer_ok,
-    Branch{nested_ok,
-      Return{Word{1}},
-      LeaveRegion{900}},
-    LeaveRegion{900}},
-  Return{Word{2}}}</code></pre><p class="note">This is lexical forward control. LeaveRegion exits an enclosing region to its next block. A successful Return ends execution of that code—it does not run Region.next afterward.</p><p class="note">The example illustrates Block semantics, not another input compiled by this page.</p></div></div>
-    </section>
-
-    <section class="ir-chapter" id="ownership" aria-labelledby="ownership-title">
-      <div class="ir-section-heading"><h2 id="ownership-title">Who owns the compiler’s storage?</h2><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_lower.bend#L1962-L1992">The real lowering handoff</a></div>
-      <div class="owner-track"><div class="owner-stage"><strong>Check a declaration</strong><span>Source storage plus declaration-local transient work.</span><code>ArenaStore{source, transient}</code></div><div class="owner-stage"><strong>Publish success</strong><span>Retained handles and occurrences reach source storage before scratch is rewound.</span><code>CheckSuccess{CheckedProgram}</code></div><div class="owner-stage transfer"><strong>Consume in lowering</strong><span>Pass the affine checked owner by value. The catalog temporarily threads it through.</span><code>CheckedProgram → lower</code></div><div class="owner-stage"><strong>Give backends a Program</strong><span>Independent operations and descriptors. No checker or source arena in its fields.</span><code>Lowered{BIR.Program}</code></div></div>
-      <div class="boundary-note"><article><h3>Scratch reuse is a lifetime mechanism</h3><p>Used lengths rewind; allocated capacity remains reusable. Transient publication is a traversal into retained storage, not merely clearing a handle’s high bit. Epochs invalidate transient substitution-memo entries.</p></article><article><h3>Ownership is not a memory benchmark</h3><p>Pool growth may copy; occurrences and blocks remain recursive. None of these diagrams establishes zero allocation, a drop in RSS, constant memory or stack safety.</p></article></div>
-      <details class="source-details"><summary>Handles, tapes, publication and validity limits</summary><p>The arena’s six main pools are nodes, patterns, binders, words, naturals and names, with additional metadata and memo tables. Node handles use bit 31 for transient storage. Tape cursors also use bit 30 for reversal; that is not a universal node flag. Words, Names, Naturals and Quantities have start/count slices, but Names traverses a word tape of name IDs before resolving strings.</p><p>Source publication retains terms, types and recursively reachable occurrence data before transient rewind. An already-source handle can be reused; a transient object must have its contents published. The pinned implementation retains capacity, clears the 64-entry case-prefix table, advances the epoch and logically invalidates the 4096-slot substitution/publication memo rather than clearing every slot. These cache sizes are not term or binder limits.</p><p>CheckedProgram is constructible as a plain affine record. The carrier alone does not prove all handles valid or all checking obligations satisfied. The contracts distinguish producer discipline, dynamic checks and open semantic obligations; there is no complete BIR validator or mechanized proof of this whole pipeline.</p><div class="source-links"><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checker_arena.bend#L86-L106">Arena and Mark</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checker_ir.bend#L87-L115">Handle decoding</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/checker_arena.bend#L1259-L1322">Rewind and epochs</a><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/FIR_LAWS.md#L114-L215">Carrier versus guarantees</a></div></details>
-    </section>
-
-    <section class="ir-chapter" id="targets" aria-labelledby="targets-title"><div class="ir-section-heading"><h2 id="targets-title">Shared IR does not make targets text printers</h2></div><div class="boundary-note"><article><h3>C still plans physical execution</h3><p>Layouts, sharing facts, runtime tables, entries, control segments and continuations. The driver loads the runtime and declared C sources before emission.</p><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/c_backend.bend#L466-L487">C planning</a></article><article><h3>JavaScript still plans captures and frames</h3><p>Continuation captures, region thunks, frame requirements, host-value adaptation and runtime assembly. Eligible record scalar replacement is target analysis, not another semantic IR.</p><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/js_backend.bend#L1110-L1202">JavaScript planning</a></article></div><p class="scope-note">The driver lowers once before target dispatch. Compiler chunking and emitted trampolines are execution machinery, not extra FIR/BIR layers or a proof of constant memory.</p><a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/driver.bend#L122-L177">Follow the actual dispatch</a></section>
-
-    <section class="ir-close" aria-labelledby="source-close-title"><h2 id="source-close-title">Read the implementation behind the drawings</h2><p class="scope-note">All source links use revision f63679c31e3219b9fbd119625d35ec03cb2ad224. The teaching model is not a parsed, checked or lowered compiler trace. No new performance measurement, correctness proof, complete target parity or compiler build is claimed.</p><div class="evidence-links"><a class="action-link secondary" href="https://github.com/IlyaGulya/bend/tree/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost">Compiler source</a><a class="action-link secondary" href="/">Back to the compact report</a><a class="action-link secondary" href="/data/evidence.json" download>Measured evidence</a></div></section>
-  </main>
-  <footer class="site-footer wrap"><p>Independent engineering report. Not an official Bend release.</p><a href="https://github.com/IlyaGulya/bend-selfhost-lab">Website source</a><a href="#main">Back to top</a></footer>
+runtime argument
+  → Arg{use, Atom}
+  → operation</code></pre>
+<p class="note">Descriptors are a separate language. DescriptorLambda is not Closure. DescriptorParameter is not Local.</p>
+<p class="note">Erased formal positions can remain in metadata. Normalization can return DescriptorFailure.</p>
+<a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/backend_ir.bend#L156-L186">Descriptor declarations</a>
+<h3 class="table-title">Failures</h3>
+<p class="note"><code>CheckFailure</code>: no checked program.<br /><code>LowerFailure</code>: no backend program.<br /><code>Failure</code>: a generated runtime stop.<br /><code>DescriptorFailure</code>: failed descriptor data.</p>
+</div>
+</div>
+<div class="ir-targets" id="targets">
+<article>
+<h3>C backend</h3>
+<p>Plans layouts, sharing, runtime tables and continuations. Then it generates C.</p>
+<a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/c_backend.bend#L466-L487">C backend source</a></article>
+<article>
+<h3>JavaScript backend</h3>
+<p>Plans continuation captures, frames, region functions and host conversion. Then it generates JavaScript.</p>
+<a class="source-link" href="https://github.com/IlyaGulya/bend/blob/f63679c31e3219b9fbd119625d35ec03cb2ad224/bend2/selfhost/js_backend.bend">JavaScript backend source</a></article>
+</div>
+<p class="ir-caption">The backend Program has no source arena field. Occurrences and blocks remain recursive. Pool growth can copy data. Scratch reuse does not prove lower RSS.</p>
+</section>
+<section class="ir-close" aria-label="Related report pages">
+<div class="evidence-links"><a class="action-link secondary" href="/">Compiler overview</a><a class="action-link secondary" href="/#performance">Time and memory</a><a class="action-link secondary" href="/#example-title">Source example and compiled output</a></div>
+<p class="ir-caption">Source revision: <a href="https://github.com/IlyaGulya/bend/commit/f63679c31e3219b9fbd119625d35ec03cb2ad224">f63679c31e3219b9fbd119625d35ec03cb2ad224</a>. This page explains source structure. It reports no new compiler build or measurement.</p>
+</section>
+</main>
+<footer class="site-footer wrap">
+<p>Independent engineering report. Not an official Bend release.</p>
+<a href="https://github.com/IlyaGulya/bend-selfhost-lab">Website source</a><a href="#main">Back to top</a></footer>
 </body>
 </html>

@@ -44,8 +44,8 @@ button { caret-color: var(--ink); }
 svg { display: block; max-width: 100%; }
 h1, h2, h3, h4, p, figure { margin: 0; }
 h1, h2, h3, h4 { font-weight: 600; line-height: 1.2; }
-h1 { font-size: clamp(1.875rem, 3.2vw, 2.5rem); font-weight: 650; letter-spacing: -0.025em; }
-h2 { font-size: clamp(1.375rem, 2.1vw, 1.75rem); letter-spacing: -0.02em; text-wrap: balance; }
+h1 { font-size: 28px; font-weight: 650; letter-spacing: -0.02em; }
+h2 { font-size: 22px; letter-spacing: -0.01em; text-wrap: balance; }
 h3 { font-size: 17px; margin-bottom: 12px; letter-spacing: -0.01em; }
 h4 { font-size: 16px; margin-bottom: 10px; }
 p { max-width: var(--measure); }
@@ -68,6 +68,15 @@ summary { cursor: pointer; }
 .main-nav a, .repo-link { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; }
 .main-nav a:hover, .repo-link:hover { text-decoration: underline; }
 .repo-link { gap: 8px; font-size: 14px; }
+.page-nav { gap: 4px; }
+.page-nav a { padding: 8px 12px; border-bottom: 2px solid transparent; }
+.page-nav a[aria-current="page"] { background: var(--surface); border-bottom-color: var(--ink); font-weight: 600; }
+.section-nav { display: flex; flex-wrap: wrap; gap: 4px 24px; padding-block: 4px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.section-nav a { display: inline-flex; align-items: center; min-height: 36px; text-decoration: none; }
+.section-nav a:hover { text-decoration: underline; }
+.route-link { display: grid; grid-template-columns: max-content 1fr; align-items: center; gap: 4px 24px; margin-top: 16px; padding-block: 12px; border-block: 1px solid var(--line); font-size: 14px; }
+.route-link a { display: inline-flex; align-items: center; min-height: 32px; font-weight: 600; }
+.route-link span { color: var(--muted); }
 .introduction { padding-block: 28px; border-bottom: 1px solid var(--line); }
 .lead { max-width: 86ch; margin-top: 12px; color: var(--muted); }
 .example-artifact { margin-top: 24px; min-width: 0; }
@@ -213,8 +222,12 @@ figcaption { color: var(--muted); font-size: 13px; line-height: 1.5; margin-top:
   .main-nav { grid-row: 2; grid-column: 1 / -1; justify-content: space-between; gap: 10px; font-size: 13px; }
   .repo-link { grid-column: 2; grid-row: 1; }
   .brand-mark { font-size: 28px; }
-  h1 { font-size: 30px; }
-  h2 { font-size: 24px; }
+  .page-nav { justify-content: flex-start; gap: 4px; font-size: 14px; }
+  h1 { font-size: 24px; }
+  h2 { font-size: 21px; }
+  .section-nav { gap: 0 18px; font-size: 13px; }
+  .route-link { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .route-link span { margin-bottom: 8px; }
   .introduction { padding-block: 22px; }
   .lead { margin-top: 10px; }
   .chapter { padding-block: 24px; }

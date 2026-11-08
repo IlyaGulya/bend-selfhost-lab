@@ -12,16 +12,16 @@ colors:
 typography:
   display:
     fontFamily: "Archivo, system-ui, sans-serif"
-    fontSize: "clamp(1.875rem, 3.2vw, 2.5rem)"
+    fontSize: "28px"
     fontWeight: 650
     lineHeight: 1.2
-    letterSpacing: "-0.025em"
+    letterSpacing: "-0.02em"
   headline:
     fontFamily: "Archivo, system-ui, sans-serif"
-    fontSize: "clamp(1.375rem, 2.1vw, 1.75rem)"
+    fontSize: "22px"
     fontWeight: 600
     lineHeight: 1.2
-    letterSpacing: "-0.02em"
+    letterSpacing: "-0.01em"
   title:
     fontFamily: "Archivo, system-ui, sans-serif"
     fontSize: "17px"
@@ -90,7 +90,7 @@ Paper `#f2f4f3`, ink `#1c2826`, muted `#53675e`, line `#bac5bf`, neutral cell su
 
 Yellow means selection or emphasis, not faster or correct. The slower compiler's time ratio is highlighted yellow; its bars use ink. Official bars use sage. Memory and time use separate scales. Native phase segments use sage, line and ink, with text labels; color never carries the category alone.
 
-Archivo carries prose and control labels. Fragment Mono is reserved for source, operations, hashes and measured values. Body is 16px/24px with a 70ch measure. The lead may reach 86ch as a compact definition. Main headings cap at 40px; chapter headings cap at 28px; mobile uses 30px and 24px respectively. Subheadings use 17px, diagram node names 14–15px, notes 13px. Source, ranges and stage samples stay at least 12px. Measured table values are 22px desktop and 18px mobile.
+Archivo carries prose and labels. Fragment Mono carries code, operations, hashes and values. Body text is 16px/24px with a 70ch measure. Main headings use 28px desktop and 24px mobile. Chapter headings use 22px desktop and 21px mobile. Subheadings use 17px. Diagram labels use 14–15px; notes use 13px; code uses at least 12px. Table values use 22px desktop and 18px mobile. Do not enlarge headings to satisfy a generic hierarchy detector.
 
 SVG labels use 16px coordinates, 17px on mobile where necessary to preserve readable rendered sizes. Diagrams adapt to the available width; they do not introduce page overflow. All fonts are local, unmodified licensed assets.
 
@@ -113,6 +113,8 @@ The comparison remains a native three-column table with fixed 26/38/36 percent t
 - **Measurements:** HTML supplies values and widths; JavaScript does not fetch primary facts or animate them. Absolute medians, observed ranges, relative time and sampled-memory units stay together. The native sample-3 split is not an official/native phase comparison.
 - **Self-compilation:** each arrow compiles the same compiler source. The two output images have the same full byte count/hash. The 95-case by 3-image equation denotes 285 executions, not distinct tests.
 - **Disclosures:** native `details` and a 44px summary with 12px vertical padding. Source links, full hashes and qualifications remain available without JavaScript. Closed expert detail is the main way prose is reduced.
+- **Page navigation:** identical Overview / IR and lowering links on both routes. The current page uses a surface fill, bold label and underline. Local section links form a separate row. The overview links directly to lowering rules and operations.
+- **IR reference:** static input → operation → result diagrams, before/decision/after lowering rows, compact record tables and grouped primitive rows. All primary explanations are visible without clicks or JavaScript. Desktop operation diagrams use two columns; below 1000px they use one. Mobile lowering rows place the decision above a before/after pair.
 - **Copy:** square 44px button; yellow hover; text feedback and selectable hash remain available if clipboard access fails.
 
 ## Accessibility and browser surfaces

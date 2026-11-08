@@ -2,44 +2,44 @@ const stages = {
   source: {
     title: "Bend source",
     description:
-      "adder(5) returns a function that remembers k. The later call supplies x. This describes the program’s meaning, not a target’s memory layout.",
+      "adder(5) returns a closure with k = 5. A later call supplies x.",
     file: "bend2/selfhost/FIR_LAWS.md",
-    label: "Read the front-end contract",
+    label: "Source contract",
   },
   fir: {
-    title: "Checked program",
+    title: "FIR: checked program",
     description:
-      "The compiler knows which k and x are meant, their U32 types and how they may be used. These facts cross one owned boundary into lowering.",
+      "FIR stores resolved names, types and use limits. Lowering reads this checked data.",
     file: "bend2/selfhost/checked_frontend.bend",
-    label: "Inspect the checked program",
+    label: "FIR source",
   },
   lower: {
-    title: "Shared lowering",
+    title: "Lowering",
     description:
-      "Make the remembered k and the call explicit once. Preserve lexical identity and evaluation order before choosing C or JavaScript.",
+      "Lowering resolves captures, calls and pattern control. Both targets use this pass.",
     file: "bend2/selfhost/backend_lower.bend",
-    label: "Inspect shared lowering",
+    label: "Lowering source",
   },
   bir: {
-    title: "Executable operations",
+    title: "Backend IR",
     description:
-      "Both backends receive operations to bind values, branch, call and return. The checker and its source arena do not cross this boundary.",
+      "Backend IR stores operands, ordered operations and control blocks. It does not store the source arena.",
     file: "bend2/selfhost/backend_ir.bend",
-    label: "Inspect the backend representation",
+    label: "Backend IR source",
   },
   c: {
     title: "C backend",
     description:
-      "Plan physical layouts, sharing and runtime calls, then emit C. This report does not include a compiled C version of the small demo.",
+      "The C backend plans layouts, sharing and runtime calls. It then generates C code.",
     file: "bend2/selfhost/c_backend.bend",
-    label: "Inspect the C backend",
+    label: "C backend source",
   },
   js: {
     title: "JavaScript backend",
     description:
-      "Plan captures and frames, then emit functions and runtime helpers. The button above runs actual output from this backend, not a compiler.",
+      "The JavaScript backend plans captures and frames. It then generates functions and runtime calls.",
     file: "bend2/selfhost/js_backend.bend",
-    label: "Inspect the JavaScript backend",
+    label: "JavaScript backend source",
   },
 };
 const sourceBase =
@@ -71,7 +71,7 @@ if (copy) {
       );
       output.textContent = "SHA-256 copied.";
     } catch {
-      output.textContent = "Clipboard unavailable. Select the checksum to copy it manually.";
+      output.textContent = "Cannot use the clipboard. Select and copy the checksum.";
     }
   });
 }
@@ -86,19 +86,19 @@ if (runExample) {
     runExample.disabled = true;
     runExample.setAttribute("aria-busy", "true");
     result.dataset.state = "loading";
-    result.textContent = "Loading emitted JavaScript for compute(5, 3)…";
+    result.textContent = "Loading compiled JavaScript for compute(5, 3)…";
     let operation = "load";
     try {
       const { default: generated } = await import("/examples/closure.generated.mjs");
       operation = "run";
       const value = generated.compute(5, 3);
       result.dataset.state = "success";
-      result.textContent = `Executed in this browser: compute(5, 3) → ${value}.`;
+      result.textContent = `Result: compute(5, 3) = ${value}.`;
     } catch {
       result.dataset.state = "error";
       result.textContent = operation === "load"
-        ? "Could not load the emitted module. Reload this page and try again. Source and module downloads remain available."
-        : "The emitted compute(5, 3) call failed. Reload this page and try again. Source and module downloads remain available.";
+        ? "Cannot load compiled JavaScript. Reload the page and try again. You can also download the files."
+        : "The compute(5, 3) call failed. Reload the page and try again. You can also download the files.";
     } finally {
       runExample.disabled = false;
       runExample.removeAttribute("aria-busy");

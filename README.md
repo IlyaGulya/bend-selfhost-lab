@@ -19,18 +19,21 @@ python3 -m http.server 4173 --bind 127.0.0.1 --directory public
 
 Open http://127.0.0.1:4173. The HTML contains the complete report, source example, diagrams, phase labels and comparison table. JavaScript enhances stage inspection, checksum copying and an optional precompiled-example run; it does not fetch or populate primary report results. Fonts are served locally. There are no analytics or remote runtime dependencies.
 
-## Detailed IR/FIR walkthrough
+## IR and lowering reference
 
-[`/ir/`](https://bend-selfhost-lab.netlify.app/ir/) is the separate, source-backed deep dive. The homepage links to it without expanding the overview.
+Both pages use the same **Overview / IR and lowering** navigation. The overview also links directly to the lowering rules and operation catalog.
 
-- One real `adder` source excerpt across source/core, checked FIR, lowering and backend IR.
-- Follow captured `k` or later argument `x`; select any diagram node to inspect its fields.
-- Actual carrier declarations, arena/occurrence distinction, positional captures, structured regions, descriptor metadata and ownership.
-- All four representation panels and their explanations remain available without JavaScript; keyboard controls enhance the teaching model.
+[`/ir/`](https://bend-selfhost-lab.netlify.app/ir/) is a static reference. It requires no JavaScript or content controls:
 
-The diagrams use explicitly synthetic IDs and schematic application topology. They are not captured parser/checker/lowering output, and the page runs no compiler or new benchmark. Real declarations and primary source links use snapshot `f63679c31e3219b9fbd119625d35ec03cb2ad224`. The source audit is `.impeccable/review/ir-fir-source-research.md`.
+- Four `CheckedProgram` fields and all six checked occurrence variants.
+- Eleven before/decision/after lowering diagrams: erasure, local values, captures, known and unknown calls, partial calls, over-application, tail calls, fields, patterns and descriptors.
+- All nine `Op` constructors, eight `Block` constructors and ten `Atom` constructors.
+- All 121 primitive names, grouped by purpose, with input/output shapes, meanings and relevant limits.
+- A region diagram shows the shared failure exit and the separate successful return.
 
-Implementation: `public/ir/index.html`, `public/ir/ir.css`, `public/ir/ir.js`. The controller selects authored HTML, highlights relationships and measures node positions for SVG wires; it does not manufacture compilation receipts.
+Implementation: `public/ir/index.html` and `public/ir/ir.css`. The former click-based explorer and its script were removed. Primary source links use revision `f63679c31e3219b9fbd119625d35ec03cb2ad224`. Diagrams use short notation and symbolic names. They are not compiler dumps.
+
+Use Simplified Technical English on both pages, including descriptions, labels, disclosures and dynamic messages. Keep sentences short and direct. Define technical terms. Use one term for one concept. See the [ASD-STE100 writing rules](https://www.asd-ste100.org/assets/files/ASD-STE100_ISSUE9.pdf). The site does not claim formal dictionary certification.
 
 ## Real closure example
 
@@ -112,9 +115,9 @@ This historical evidence belongs to its recorded artifact, not automatically to 
 
 ## Maintaining the report
 
-Keep the authored HTML table and public JSON synchronized from the same admitted measurements. The table's static proportional bars are part of its cells, not a duplicate chart. Preserve operation boundaries, denominators, sample counts and artifact limitations. Keep the default path diagram-led and move expert prose into native disclosures. Do not restore backend toggles, historical timing substitutes, experiment-led navigation or slogans. The title caps at 40px desktop and 30px mobile; body is 16px/24px.
+Keep the HTML comparison and public JSON synchronized. Preserve measurement boundaries, sample counts, hashes and limitations. Use static diagrams for the IR reference. Do not hide primary operation explanations behind clicks. Do not add slogans or experiment-history navigation. Titles are 28px desktop and 24px mobile. Chapter headings are 22px and 21px. Body text is 16px/24px.
 
-Files: `public/index.html` (compact overview), `public/styles.css` (shared Instrument Run Sheet styling), `public/app.js` (overview interactions), `public/ir/` (detailed representation explorer), `public/examples/` (source, unchanged generated module and provenance). Product intent is in `PRODUCT.md`; maintained visual constraints are in `DESIGN.md` and the route briefs in `.impeccable/surfaces/`.
+Files: `public/index.html` (overview), `public/styles.css` (shared styles), `public/app.js` (overview actions), `public/ir/` (static operation and lowering reference), `public/examples/` (unchanged source, generated module and provenance). Product intent is in `PRODUCT.md`. Visual constraints are in `DESIGN.md` and `.impeccable/surfaces/`.
 
 Before publication, inspect the real page at desktop, compact desktop and narrow mobile widths, including keyboard controls, reduced motion, table legibility, disclosure expansion and the no-JavaScript report. Exercise genuine module-load success, loading and failure states; initial text must never claim execution. Verify visible values against JSON and source/excerpts against the actual artifacts. No eval, dynamic Function constructor or CSP relaxation is needed.
 

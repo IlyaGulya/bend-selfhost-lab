@@ -20,7 +20,7 @@ Publish a compact visual guide titled **Self-hosted Bend compiler**. Start with 
 
 The user explicitly rejected slogans and an oversized forced-line title, and requests substantially less empty space and default prose, with more infographics for people new to the project. Historical experiment identifiers, acceptance timelines and rejected optimization stories are not the primary reading path.
 
-The separate `/ir/` route supplies the detailed, more engaging explanation: follow one real function across representation views, select nodes and trace bindings, then inspect actual carrier records, lifetime and control-flow mechanisms. It inherits the visual system; it must not make the compact overview a long reference page again.
+The `/ir/` route is a static operation and lowering reference. Shared **Overview / IR and lowering** navigation connects both pages. The overview links directly to the operation catalog and lowering diagrams. Readers must not select a view or node to find a primary explanation. Use Simplified Technical English throughout both routes, including labels, diagrams, disclosures and dynamic messages.
 
 ## Positioning
 
@@ -32,7 +32,7 @@ Independent compiler engineering report, not an official Bend release announceme
 - Live report: `https://bend-selfhost-lab.netlify.app`.
 - Compiler source: `https://github.com/IlyaGulya/bend`, integration branch `selfhost/integration`.
 - Architecture permalink snapshot: `f63679c31e3219b9fbd119625d35ec03cb2ad224`.
-- Report files: `public/index.html`, `public/styles.css`, `public/app.js`; detailed walkthrough: `public/ir/index.html`, `public/ir/ir.css`, `public/ir/ir.js`.
+- Report files: `public/index.html`, `public/styles.css`, `public/app.js`; IR reference: `public/ir/index.html`, `public/ir/ir.css`.
 - Public evidence: `public/data/evidence.json`, schema version 2.
 - Retained measurement adapters/protocol: `measurement/`.
 - Source research: `.impeccable/review/engineering-architecture-research.md`, `.impeccable/review/official-comparison-research.md`, `.impeccable/review/ir-fir-source-research.md`.
@@ -53,11 +53,11 @@ Publish only `public/`, not development notes or private timing outputs. Keep co
 9. Explain source pools, numeric handles, start/count slices and scratch reuse with labelled conceptual geometry—not compiler dumps or heap profiles. Keep the official/selfhost responsibility comparison and ownership qualifications in architecture details.
 10. Plot native sample 3 only: parse 6.198936 s, expand 1.834936 s, check 19.672753 s; total 27.706625 s. The 71.00% check share identifies recorded cost, not causality. Parser-fuel setup is 1.318933 s inside parse, not another phase. No isolated official/native phase comparisons.
 11. Use native disclosures for detailed contracts, protocol and provenance. Loading, actual runtime success and failure are distinct demo states; source and module downloads remain available without running anything. No eval, dynamic Function construction or weakened CSP.
-12. The detailed IR page is a source-backed teaching model, not a browser compiler or recorded compiler trace. Distinguish synthetic IDs and schematic application structure from actual declarations. Keep source arena, contextual occurrences, lexical identities, BIR capture values/use contracts and descriptors separate. Preserve useful no-JavaScript content and keyboard interaction.
+12. The IR reference covers all nine Ops, eight Blocks, ten Atoms, 121 primitives and six FIR occurrence variants. Show inputs, action and result, exact field names, and source links. Eleven static before/decision/after diagrams explain lowering. Keep descriptors, runtime values, lexical identity and capture metadata separate. Diagrams are symbolic models, not observed dumps. The complete reference requires no JavaScript.
 
 ## Brand Commitments
 
-Preserve the quiet Instrument Run Sheet palette, self-hosted Archivo and Fragment Mono, open ruled sections and square controls. Use a natural-wrapping title capped at 40px desktop and 30px mobile, 16px/24px body text, 30px desktop chapter padding, compact visual rows and native disclosure for expert prose. No marketing slogan, forced display lines, experiment-status banner or backend comparison toggle.
+Preserve the Instrument Run Sheet palette, local Archivo and Fragment Mono, open ruled sections and square controls. Use 28px desktop and 24px mobile titles, 22px/21px chapter headings and 16px/24px body text. Keep the existing compact overview spacing; IR chapters use 24px/20px. No slogan, forced display lines, experiment-status banner or backend comparison toggle.
 
 ## Product Principles
 
