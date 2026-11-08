@@ -1,6 +1,6 @@
 # Self-hosted Bend compiler
 
-An independent engineering report explaining a compiler written in Bend through a real closure program, its unchanged emitted JavaScript, and concrete semantic and storage boundaries. It includes a matched checking comparison with the official TypeScript implementation, one native run’s phase costs, and separately labeled historical self-compilation evidence.
+An independent, infographic-first engineering guide for readers new to Bend: a real program and captured-value diagram, a source-to-target pipeline, indexed storage and scratch reuse, measured checking time/memory, and historical self-compilation. Full contracts, caveats, hashes and protocol remain in native disclosures.
 
 - Website: https://bend-selfhost-lab.netlify.app
 - Website source: https://github.com/IlyaGulya/bend-selfhost-lab
@@ -21,7 +21,7 @@ Open http://127.0.0.1:4173. The HTML contains the complete report, source exampl
 
 ## Real closure example
 
-The first viewport pairs the literal title with [`public/examples/closure.bend`](public/examples/closure.bend): `adder(k)` returns a function that captures `k`, and `compute(k, x)` calls that function once. “Run emitted JavaScript” dynamically imports the unchanged [`closure.generated.mjs`](public/examples/closure.generated.mjs), then calls its real synchronous `default.compute(5, 3)` export. Both arguments and the returned U32 use ordinary JavaScript numbers; there is no adapter or replacement arithmetic.
+Below the literal title and short definition, [`public/examples/closure.bend`](public/examples/closure.bend) sits beside a capture/addition diagram: `adder(k)` returns a function remembering `k`, and `compute(k, x)` calls it once. “Run emitted JavaScript” dynamically imports the unchanged [`closure.generated.mjs`](public/examples/closure.generated.mjs), then calls its real synchronous `default.compute(5, 3)` export. Both arguments and the returned U32 use ordinary JavaScript numbers; there is no adapter or replacement arithmetic.
 
 - Initial state: explicitly not run in this browser, with a labelled expected result of `8`. The control is disabled until enhancement is ready.
 - Loading: the button is disabled and the polite status region names the module load and exact arguments. Keyboard activation restores focus if disabling the button left focus on the document body; it does not replace another focused control.
@@ -99,11 +99,11 @@ This historical evidence belongs to its recorded artifact, not automatically to 
 
 ## Maintaining the report
 
-Keep the authored HTML table and public JSON synchronized from the same fresh, admitted measurements. Preserve operation boundaries, denominators, sample counts and artifact limitations. Do not restore the old backend toggle, historical timing substitutes, experiment-led navigation or slogan heading. The title naturally wraps at a maximum of about 52px desktop and 32–38px mobile.
+Keep the authored HTML table and public JSON synchronized from the same admitted measurements. The table's static proportional bars are part of its cells, not a duplicate chart. Preserve operation boundaries, denominators, sample counts and artifact limitations. Keep the default path diagram-led and move expert prose into native disclosures. Do not restore backend toggles, historical timing substitutes, experiment-led navigation or slogans. The title caps at 40px desktop and 30px mobile; body is 16px/24px.
 
-Files: `public/index.html` (authored report and diagrams), `public/styles.css` (Instrument run sheet styling), `public/app.js` (stage, copy and genuine emitted-module execution controls), `public/examples/` (source, unchanged generated module and provenance). Product intent is in `PRODUCT.md`; the surface brief is `.impeccable/surfaces/public-index-html.md`; `DESIGN.md` and `.impeccable/design.json` describe the integrated design.
+Files: `public/index.html` (authored report and diagrams), `public/styles.css` (compact Instrument Run Sheet layout), `public/app.js` (stage, copy and genuine emitted-module execution controls), `public/examples/` (source, unchanged generated module and provenance). Product intent is in `PRODUCT.md`; maintained visual constraints are in `DESIGN.md` and `.impeccable/surfaces/public-index-html.md`.
 
-Before publication, inspect the real page at desktop, compact desktop and 390px mobile, including keyboard controls, reduced motion, readable table overflow, disclosure expansion and the no-JavaScript report. Exercise genuine module-load success, loading and failure states; initial text must never claim execution. Verify visible values against JSON and the source/excerpt against the actual artifacts. No eval, dynamic Function constructor or CSP relaxation is needed. Parent integration owns these checks; this editorial slice does not run browser or heavy verification.
+Before publication, inspect the real page at desktop, compact desktop and narrow mobile widths, including keyboard controls, reduced motion, table legibility, disclosure expansion and the no-JavaScript report. Exercise genuine module-load success, loading and failure states; initial text must never claim execution. Verify visible values against JSON and source/excerpts against the actual artifacts. No eval, dynamic Function constructor or CSP relaxation is needed.
 
 ## Deploy
 
@@ -115,7 +115,7 @@ npm exec --yes --package=netlify-cli@24.0.1 -- netlify deploy --dir public --no-
 npm exec --yes --package=netlify-cli@24.0.1 -- netlify deploy --dir public --no-build --prod
 ```
 
-Publish **`public/`**, never the repository root. `netlify.toml` sets the publish directory and browser-security headers. This project does not change or deploy an existing Bend website.
+Publish **`public/`**, never the repository root. `netlify.toml` sets the publish directory and browser-security headers. Deploy only this linked report project, not an official Bend website.
 
 ## Typography
 

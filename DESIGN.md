@@ -1,37 +1,38 @@
 ---
 name: Bend Compiler Lab
-description: A plain engineering report with explicit compiler boundaries and comparable measurements.
+description: A compact visual engineering guide to compiler architecture and scoped measurements.
 colors:
   paper: "#f2f4f3"
   ink: "#1c2826"
   muted: "#53675e"
   line: "#bac5bf"
+  surface: "#e2e8e3"
   yellow: "#d9ef57"
   positive: "#23543c"
 typography:
   display:
     fontFamily: "Archivo, system-ui, sans-serif"
-    fontSize: "clamp(2.25rem, 4.2vw, 3.25rem)"
+    fontSize: "clamp(1.875rem, 3.2vw, 2.5rem)"
     fontWeight: 650
-    lineHeight: 1.12
+    lineHeight: 1.2
     letterSpacing: "-0.025em"
   headline:
     fontFamily: "Archivo, system-ui, sans-serif"
-    fontSize: "clamp(1.75rem, 2.8vw, 2.25rem)"
+    fontSize: "clamp(1.375rem, 2.1vw, 1.75rem)"
     fontWeight: 600
-    lineHeight: 1.25
-    letterSpacing: "-0.025em"
+    lineHeight: 1.2
+    letterSpacing: "-0.02em"
   title:
     fontFamily: "Archivo, system-ui, sans-serif"
-    fontSize: "1.3rem"
+    fontSize: "17px"
     fontWeight: 600
-    lineHeight: 1.25
-    letterSpacing: "-0.015em"
+    lineHeight: 1.2
+    letterSpacing: "-0.01em"
   body:
     fontFamily: "Archivo, system-ui, sans-serif"
-    fontSize: "17px"
+    fontSize: "16px"
     fontWeight: 400
-    lineHeight: 1.65
+    lineHeight: 1.5
     letterSpacing: "normal"
   label:
     fontFamily: "Archivo, system-ui, sans-serif"
@@ -41,213 +42,87 @@ typography:
     letterSpacing: "normal"
   data:
     fontFamily: "Fragment Mono, monospace"
-    fontSize: "13px"
+    fontSize: "22px"
     fontWeight: 400
-    lineHeight: 1.6
+    lineHeight: 1.3
     letterSpacing: "normal"
   code:
     fontFamily: "Fragment Mono, monospace"
     fontSize: "12px"
     fontWeight: 400
-    lineHeight: 1.7
+    lineHeight: 1.55
     letterSpacing: "normal"
 rounded:
   square: "0"
 spacing:
-  tight: "12px"
-  compact: "16px"
+  tight: "8px"
+  compact: "12px"
   diagram: "20px"
   base: "24px"
-  loose: "40px"
-  chapter: "64px"
-components:
-  action-primary:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.paper}"
-    rounded: "{rounded.square}"
-    padding: "12px 19px"
-  action-primary-hover:
-    backgroundColor: "{colors.positive}"
-    textColor: "{colors.paper}"
-  comparison-summary:
-    backgroundColor: "{colors.yellow}"
-    textColor: "{colors.ink}"
-    padding: "20px 24px"
-  stage:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.square}"
-    padding: "12px 15px"
-  stage-selected:
-    backgroundColor: "{colors.yellow}"
-    textColor: "{colors.ink}"
-  comparison-value:
-    textColor: "{colors.ink}"
-    typography: "{typography.data}"
-  copy-control:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.square}"
-    height: "44px"
-  program-source:
-    textColor: "{colors.ink}"
-    typography: "{typography.code}"
-    padding: "16px 0"
-  storage-owner:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.square}"
-    padding: "20px"
-  native-phase-ribbon:
-    height: "34px"
-  phase-parse:
-    backgroundColor: "{colors.muted}"
-  phase-expand:
-    backgroundColor: "{colors.line}"
-  phase-check:
-    backgroundColor: "{colors.ink}"
+  chapter: "30px"
 ---
 
 # Design System: Bend Compiler Lab
 
-## Overview
+## Visual authority
 
-**Creative North Star: "The Instrument Run Sheet"**
+Preserve the **Instrument Run Sheet**: cool paper, green-black ink, sage annotations, hairline rules, square controls, self-hosted Archivo and Fragment Mono. This is a density and information-architecture refinement of that world, not a new brand.
 
-The system is an artifact-led engineering report: cool off-white paper, green-black ink, hairline rules, real source code, and diagrams that expose boundaries and ownership. The heading names the subject rather than making a slogan. A compiled program, not a promotional metric, shares the opening with the introduction.
+Mode: **Read**. The visitor may never have encountered Bend, self-hosting or an intermediate representation. The page must explain a real program and the compiler through labelled geometry before asking the visitor to read detailed contracts.
 
-Archivo carries prose and interface labels. Fragment Mono is reserved for source, emitted code, checksums, actual execution results, and numerical data. Code regions and diagram nodes use square rules to describe real artifacts or conceptual structure; they are not decorative content cards.
+The title names the subject: **Self-hosted Bend compiler**. No slogan, decorative eyebrow, giant hero number, experiment timeline, shadow, gradient, rounding or decorative illustration. Borders identify actual code, compiler stages, storage and data—not arbitrary prose cards.
 
-Motion only acknowledges interaction: architecture nodes change fill and border over 180ms. Reduced motion removes transitions and smooth scrolling. Rules and spacing carry hierarchy; there are no shadows.
+## Reading path
 
-**Key Characteristics:**
-- Literal headings with a 52px desktop title cap and natural wrapping.
-- Open ruled sections, square controls, and no decorative containers.
-- Archivo for reading; Fragment Mono for code and measured values.
-- One visible comparison table with explicit units, sample ranges, and measurement scope.
-- Keyboard-visible focus and progressive enhancement of the architecture trace.
-- A recomposed mobile reading column, with wide data isolated in a scrollable region.
+1. One sentence defines Bend, compiler outputs and self-hosting.
+2. Actual Bend source sits beside a capture/addition diagram and a genuine precompiled-JavaScript run action. The diagram labels its result **expected**; only execution creates an observed result in the status region.
+3. A single source-to-target graph exposes checked meaning, shared lowering, executable operations and the C/JavaScript fork. Clicking a stage adds a short explanation and a pinned source link.
+4. Two concrete storage diagrams explain numeric indexing, start/count slices and declaration-local scratch rewind. Indices and cells are symbolic, not allocation measurements.
+5. A semantic comparison table incorporates static proportional bars inside its time/memory cells. There is no duplicate standalone comparison chart. A separate phase ribbon decomposes one native run.
+6. A self-compilation chain connects the native seed and successive JavaScript images. The byte-equality bracket is separate from the valid/error case split and case-count equation.
+7. Native disclosures retain emitted code, architecture contracts, official comparison, measurement limitations, checksums and protocol. Evidence downloads and source remain ordinary links.
 
-## Colors
+Internal FIR/BIR names, generation identifiers and experiment histories do not drive the default reading path. Do not hide the operation boundary, historical-artifact qualification or measurement units with the expert detail.
 
-The palette stays neutral except for the measurement summary, source capture highlight, selected architecture node, and explicit runtime-success feedback.
+## Palette and typography
 
-### Primary
-- **Evidence Acid:** highlights the comparison summary, selected architecture node, captured source identifier, text selection, skip link, and copy-button hover. It denotes emphasis or selection, never a favorable performance verdict.
+Paper `#f2f4f3`, ink `#1c2826`, muted `#53675e`, line `#bac5bf`, neutral cell surface `#e2e8e3`, evidence yellow `#d9ef57`, runtime-success green `#23543c`.
 
-### Secondary
-- **Pass Green:** primary-action hover, explanatory operation shapes, and an actual successful demo result. It is not a compiler-performance verdict.
+Yellow means selection or emphasis, not faster or correct. The slower compiler's time ratio is highlighted yellow; its bars use ink. Official bars use sage. Memory and time use separate scales. Native phase segments use sage, line and ink, with text labels; color never carries the category alone.
 
-### Neutral
-- **Cool Folio Paper:** page field and scrollbar track.
-- **Green-Black Ink:** text, primary action, rules requiring emphasis, and keyboard focus.
-- **Sage Annotation:** secondary prose, source links, captions, and scrollbar thumb.
-- **Hairline Lead:** chapter, table, node, and disclosure borders.
+Archivo carries prose and control labels. Fragment Mono is reserved for source, operations, hashes and measured values. Body is 16px/24px with a 70ch measure. The lead may reach 86ch as a compact definition. Main headings cap at 40px; chapter headings cap at 28px; mobile uses 30px and 24px respectively. Subheadings use 17px, diagram node names 14–15px, notes 13px. Source, ranges and stage samples stay at least 12px. Measured table values are 22px desktop and 18px mobile.
 
-### Named Rules
-**The One Signal Rule.** Yellow highlights evidence or selection; it does not mean faster, accepted, or correct. Keep the result and its scope explicit in words.
+SVG labels use 16px coordinates, 17px on mobile where necessary to preserve readable rendered sizes. Diagrams adapt to the available width; they do not introduce page overflow. All fonts are local, unmodified licensed assets.
 
-## Typography
+## Layout and density
 
-**Display Font:** Archivo (with system-ui, sans-serif)
-**Body Font:** Archivo (with system-ui, sans-serif)
-**Code/Value Font:** Fragment Mono (with monospace)
+The report is `min(calc(100% - 64px), 1280px)` wide; at 760px and below it uses `calc(100% - 32px)`. The header is 64px high before mobile recomposition. The introduction has 28px vertical padding and chapters 30px; mobile uses 22px and 24px. This replaces the former 56–64px section padding rather than making text tiny.
 
-**Character:** A restrained reading hierarchy, not a display composition. The title naturally wraps; no forced slogan lines. Both faces are self-hosted under the SIL Open Font License 1.1.
+The title and short definition span the top. Below, source and its capture/execution figure share a 0.9/1.1 desktop row with a 28px gutter and one separating rule. Architecture is a horizontal graph, followed by two open storage figures. Comparison and phase cost share a 1.3/0.9 row. Historical compilation and case coverage share a 1.4/1 row. Typical figure gutters are 24–40px, not percentage-based empty columns.
 
-### Hierarchy
-- **Display:** the literal report title, capped at 52px on desktop. Mobile uses `clamp(2rem, 6vw, 2.375rem)`, retaining the 1.12 line-height and natural wrapping.
-- **Headline:** chapter headings, capped at 36px; mobile uses 28px. They have a 28px bottom margin, reduced to 24px on mobile.
-- **Title:** subsection headings. Trace and checksum headings use a local 16px size.
-- **Body:** running text at 17px/1.65, capped at 68ch. The introduction's lead uses 21px/1.55, reduced to 19px on mobile.
-- **Label:** source links use 13px/1.5 Archivo; captions use 13px and table headings and stage notes use 12px.
-- **Data:** numerical table cells and demo status use 13px/1.6 Fragment Mono; table ranges and checksums use 12px. Inline code uses `max(12px, 0.8em)`, preserving a readable floor in small notes.
-- **Code:** actual source and emitted excerpts use 12px/1.7 Fragment Mono, preserving whitespace with wrapping rather than shrinking below 12px. A captured identifier may be highlighted in yellow.
+At 1050px, node gutters tighten and tall labels can wrap. At 760px, explanatory rows stack, the stage graph turns downward, and C/JavaScript remain a two-column fork. Mobile stage labels and operation samples form two tracks inside each node. Navigation occupies a second row.
 
-### Named Rules
-**The Two-Register Rule.** Archivo carries prose and interface labels. Fragment Mono carries code, identifiers, checksums, and measured table values; do not set prose paragraphs in it.
+The comparison remains a native three-column table with fixed 26/38/36 percent tracks. Units live in the headers, ranges below values. Even narrow phones can compare both metrics without a forced 680px table. Its labelled focusable wrapper remains an overflow safety boundary. Source wraps instead of shrinking.
 
-**The Literal Title Rule.** Name the subject directly. Keep the implemented title scale and natural wrapping; do not reintroduce an oversized slogan or forced display lines.
+## Components and interaction
 
-## Layout
+- **Primary run action:** ink/paper, square, 44px minimum height; pass-green hover. Loading disables it and exposes `aria-busy`. Actual loading, success and failure are described by a polite live region. Keyboard completion restores lost focus, not a different focused control.
+- **Stage graph:** square bordered nodes, at least 44px targets, with yellow/ink selection. Only one `aria-pressed` stage at a time. Straight authored SVG arrows carry flow; snippets are explicitly conceptual rather than an IR dump. Source and checker are not passed into the target backend.
+- **Capture diagram:** the remembered value joins the later argument at the addition operation. Box text has real inset, not a label touching its outline. The real source and generated module are not modified to match the illustration.
+- **Storage figures:** array slots and highlighted indices/slices, followed by work/rewind views of identical capacity. No byte sizes, zero-allocation promise, GC causality or claim that RSS falls after rewind.
+- **Measurements:** HTML supplies values and widths; JavaScript does not fetch primary facts or animate them. Absolute medians, observed ranges, relative time and sampled-memory units stay together. The native sample-3 split is not an official/native phase comparison.
+- **Self-compilation:** each arrow compiles the same compiler source. The two output images have the same full byte count/hash. The 95-case by 3-image equation denotes 285 executions, not distinct tests.
+- **Disclosures:** native `details` and a 44px summary with 12px vertical padding. Source links, full hashes and qualifications remain available without JavaScript. Closed expert detail is the main way prose is reduced.
+- **Copy:** square 44px button; yellow hover; text feedback and selectable hash remain available if clipboard access fails.
 
-The centered report is `min(calc(100% - 96px), 1184px)` wide. It becomes `calc(100% - 64px)` at 1050px and `calc(100% - 40px)` at 760px. The introduction pairs equal-width prose and compiled-program tracks with a 7% gutter. Architecture and validation use a roughly 1.5/1 split; backend and official/selfhost comparisons use two equal columns.
+## Accessibility and browser surfaces
 
-Chapter padding is 64px vertically; the opening uses 56px. Mobile chapters use 44px and the opening uses 40px above and 44px below. Subsections begin after a hairline rule with 38px margin and 32px padding, reduced to 32px and 28px on mobile. Reading text caps at 68ch; source uses its own compact mono measure.
+Semantic headings, figure descriptions, table headers and native disclosures. Body contrast at least 4.5:1. Actions and stage controls at least 44px high; ordinary source links at least 24px. Focus is an ink 2px outline at 4px offset. Selection, caret, scrollbars, underlines and tabular numerals use the same palette.
 
-- **1050px and below:** hide the brand description, tighten navigation gaps, and narrow the architecture split to 1.4/1 with a 5% gutter.
-- **760px and below:** use one reading column. Header navigation moves onto a second row; the introduction, architecture, validation, backend notes, and implementation comparison stack. Ownership transfers turn downward, scratch steps become rows, and phase labels wrap. The trace caps at 440px while its C/JavaScript fork remains two columns. Code remains at least 12px.
-- **Wide tables:** use a focusable, labelled horizontal-scrolling region. On mobile the comparison table has a 680px minimum width; the document itself must not overflow.
+Only stage selection has a short 180ms acknowledgement; no perpetual motion, load-hidden sections or reveal animations. Reduced motion disables smooth scrolling and transitions. Forced-colors mode preserves control and bar boundaries. Initial HTML never claims the demo has run.
 
-**The Reading Column Rule.** Recompose content for mobile instead of shrinking the desktop page. Keep prose readable and contain wide data in its own scroll region.
+## Evidence boundaries
 
-## Elevation & Depth
+Keep three scopes distinct: current linked source architecture, the matched check-only measurements of a historical diagnostic native artifact, and historical self-compilation validation. The static page and public JSON must agree. Never replace unchanged generated output with a handwritten adapter, relax the CSP, add telemetry, or publish private paths/logs.
 
-The system is flat: no shadow, gradient, blur, texture, or hover lift. Hairline rules separate sections and rows; an ink border and yellow fill identify a selected node. Stage fill and border transitions last 180ms; reduced motion disables them and smooth scrolling.
-
-**The Ruled-Not-Lifted Rule.** Separate with a rule, a fill, or spacing. Focus is a 2px ink outline at 5px offset, never a glow.
-
-## Shapes
-
-Controls and data regions are square, with 0 radius and 1px borders. Trace symbols sit in 25px outlined squares, connected by straight rules and a two-target fork. Source disclosures use their native disclosure marker rather than a custom plus.
-
-**The Square-End Rule.** Keep square edges. Do not introduce pills, rounded cards, circular icon buttons, or decorative enclosures.
-
-## Components
-
-### Buttons
-- **Primary run action:** ink fill and paper text, 14px/600 Archivo at inherited 1.65 line-height, 12px 19px padding, an ink border, and 44px minimum height. Hover uses Pass Green. Loading disables the control; disabled uses transparent paper with muted text and a hairline border.
-- **Keyboard completion:** restore the run action's focus if disabling it during a keyboard-triggered load left focus on the document body. Do not replace a different focused control.
-- **Secondary source action:** 15px/600 text and 44px minimum height, with an ink bottom rule and no fill.
-- **Focus:** the shared 2px ink outline at 5px offset. Arrow icons are 18px with a 1.7 stroke.
-
-### Navigation
-A rule-separated header with a 90px minimum height, a 31px/800 wordmark, a 13px brand description, and 14px section links with 24px gaps. The description disappears at 1050px. At 760px navigation occupies its own row and uses 13px text. Navigation and source links have 24px minimum heights; they are not filled actions.
-
-### Architecture Trace
-Square nodes have a 52px minimum height, 12px 15px padding, 16px/550 names, and optional 12px notes below the name. The selected node has a yellow fill and ink border. Hover changes the paper and border, but not position. A polite live region updates the description and source link. Without JavaScript the trace remains a labelled diagram and the explanatory report remains readable.
-
-### Comparison Summary
-The single yellow prose band uses 20px 24px padding and a 75ch measure; mobile padding is 18px 20px. It states the measured conclusion and its scope, not an acceptance label.
-
-### Measurement Table
-The table uses 14px reading text, 12px headers, 13px mono values, and 12px ranges. Cells have 16px vertical padding and hairline bottom rules; header rules use ink. Results are visible together rather than hidden behind runtime tabs or repeated as animated bars. The surrounding region supports keyboard and touch scrolling.
-
-### Compiled Program Artifact
-A top ink rule, a compact 16px title, and a 12px source filename lead into a 12px/1.7 mono source region with 16px vertical padding and hairline rules. The real captured identifier has a yellow mark. Below it, one primary action runs the precompiled module; a 13px mono status line distinguishes not-run, loading, actual success, and error in words. A native disclosure exposes an exact emitted excerpt. Source, module, provenance, and license remain ordinary links. No simulated terminal, fake compilation progress, or fabricated output is shown.
-
-### Native Phase-Cost Figure
-A static 34px ribbon with an ink border and 2px gaps encodes one observed native run's phase shares. Parse uses Sage Annotation, expansion Hairline Lead, and checking Green-Black Ink. A wrapping key uses 14px reading labels and 13px mono seconds/percentages. This is a decomposition of one run, not a second official/native comparison or an animated status bar.
-
-### Ownership and Scratch Diagram
-Three desktop tracks connect a source-pool node, an owner handoff, and a backend-program node with 24px gaps. Storage nodes use 20px padding, 1px hairline borders, 16px headings, and 14px descriptions. Symbolic pool labels use 12px mono. A separate three-step scratch row describes mark, work, and rewind. At 760px the tracks and scratch steps stack; captions explicitly distinguish conceptual lifetime from measured memory.
-
-
-### Copy Control
-A square control beside a wrapping checksum: 44px minimum width, 44px height, a hairline border, and yellow hover fill. Its icon has an accessible action name. Feedback reserves a 24px line below the checksum; failure leaves the source text available for manual copying.
-
-### Source Disclosure
-Native `<details>` with a top rule and a 15px/600 summary padded 20px vertically, with a 44px minimum height. Hover underlines the summary; keyboard focus uses the shared outline. Exact hashes and provenance are secondary to the report's plain labels.
-
-### Containers and Fields
-Sections and definition lists open on the page. Bordered source/storage regions exist only to identify code artifacts or diagram nodes, not to decorate prose. Definition-list rows use hairline separators and a 210px label track on desktop, stacking at 760px. No forms, text-entry fields, status chips, runtime tabs, or animated comparison bars ship.
-
-## Do's and Don'ts
-
-### Do:
-- **Do** use literal headings and preserve the modest title scale and natural wrapping.
-- **Do** distinguish architecture, comparable measurements, and historical validation with explicit scope.
-- **Do** keep running prose at 17px/1.65 and a 68ch measure.
-- **Do** keep cross-implementation measurements together in one table, and distinguish a single-run phase decomposition from that comparison.
-- **Do** use yellow only for evidence, selection, and interaction emphasis—not as a favorable verdict.
-- **Do** retain visible keyboard focus and progressive enhancement.
-- **Do** contain wide tables in labelled, focusable scroll regions.
-
-### Don't:
-- **Don't** introduce slogans, forced display lines, or a giant promotional hero.
-- **Don't** require internal experiment or generation names to understand the report.
-- **Don't** add cards, shadows, gradients, blur, texture, or rounding.
-- **Don't** treat lower memory or successful validation as evidence of faster compilation.
-- **Don't** bring back runtime tabs, animated comparison bars, or status badges that no longer exist.
-- **Don't** set prose paragraphs in Fragment Mono or hide the primary results behind JavaScript.
-
+All full measurement metadata and source links survive progressive disclosure. A shorter page does not justify removing limits on what a measurement or fixed point establishes.

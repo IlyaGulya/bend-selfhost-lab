@@ -2,42 +2,42 @@ const stages = {
   source: {
     title: "Bend source",
     description:
-      "adder receives k now and returns a function receiving x later. The body uses both values, so the returned function must retain k from its enclosing scope. This is the source-level closure, before target representation choices.",
+      "adder(5) returns a function that remembers k. The later call supplies x. This describes the program’s meaning, not a target’s memory layout.",
     file: "bend2/selfhost/FIR_LAWS.md",
     label: "Read the front-end contract",
   },
   fir: {
     title: "Checked program",
     description:
-      "For adder, checking retains the U32 types, the resolved k and x bindings, and permitted uses. These facts travel with one owned source arena into lowering.",
+      "The compiler knows which k and x are meant, their U32 types and how they may be used. These facts cross one owned boundary into lowering.",
     file: "bend2/selfhost/checked_frontend.bend",
     label: "Inspect the checked program",
   },
   lower: {
     title: "Shared lowering",
     description:
-      "In this example, lowering makes the captured k and the closure application explicit. It preserves lexical identity and evaluation order. This shared semantic work happens once, before the driver selects C or JavaScript.",
+      "Make the remembered k and the call explicit once. Preserve lexical identity and evaluation order before choosing C or JavaScript.",
     file: "bend2/selfhost/backend_lower.bend",
     label: "Inspect shared lowering",
   },
   bir: {
-    title: "Executable program",
+    title: "Executable operations",
     description:
-      "Think of code for adding x to captured k, a closure carrying k, and a call using x. This is an explanatory operation shape, not a dump of this program’s IR. Actual backend blocks express bindings, branches, returns, tail calls and lexical regions.",
+      "Both backends receive operations to bind values, branch, call and return. The checker and its source arena do not cross this boundary.",
     file: "bend2/selfhost/backend_ir.bend",
     label: "Inspect the backend representation",
   },
   c: {
     title: "C backend",
     description:
-      "For a closure like adder, C still needs physical representations, sharing plans and its runtime calling convention. The C backend computes those plans, runtime tables, executable segments and continuations. This page does not include a compiled C example.",
+      "Plan physical layouts, sharing and runtime calls, then emit C. This report does not include a compiled C version of the small demo.",
     file: "bend2/selfhost/c_backend.bend",
     label: "Inspect the C backend",
   },
   js: {
     title: "JavaScript backend",
     description:
-      "The downloaded JavaScript module is actual compiler output for the closure example. This backend plans captures and region frames, emits functions and runtime helpers, and adapts host values. The browser runs that precompiled artifact; it never runs the Bend compiler.",
+      "Plan captures and frames, then emit functions and runtime helpers. The button above runs actual output from this backend, not a compiler.",
     file: "bend2/selfhost/js_backend.bend",
     label: "Inspect the JavaScript backend",
   },
